@@ -1,0 +1,49 @@
+.bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 6px;
+}
+
+.chip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'icon label'
+    'amount amount'
+    'rate rate';
+  align-items: center;
+  column-gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 10%);
+  color: var(--state-on-primary);
+  min-width: 0;
+}
+
+.chip > svg {
+  grid-area: icon;
+  filter: brightness(1.6);
+}
+
+.label {
+  grid-area: label;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.amount {
+  grid-area: amount;
+  font-size: 1.05rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rate {
+  grid-area: rate;
+  font-size: 0.72rem;
+  opacity: 0.75;
+  white-space: nowrap;
+}

@@ -1,0 +1,88 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 45%);
+  animation: fade-in var(--dur) var(--ease);
+}
+
+.panel {
+  position: relative;
+  max-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 8px 16px calc(16px + var(--safe-bottom));
+  padding-left: calc(16px + var(--safe-left));
+  padding-right: calc(16px + var(--safe-right));
+  box-shadow: 0 -8px 24px rgb(0 0 0 / 20%);
+  animation: slide-up 260ms var(--ease);
+  outline: none;
+}
+
+.handle {
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+  margin: 0 auto 8px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: var(--tap);
+}
+
+.title {
+  font-size: 1.25rem;
+}
+
+.close {
+  width: var(--tap);
+  height: var(--tap);
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  margin-right: -8px;
+}
+
+.body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

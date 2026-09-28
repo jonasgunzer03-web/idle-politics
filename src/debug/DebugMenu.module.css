@@ -1,0 +1,33 @@
+.fab {
+  position: fixed;
+  right: calc(12px + var(--safe-right));
+  bottom: calc(66px + var(--safe-bottom));
+  z-index: 40;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+  opacity: 0.85;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.stageRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.note {
+  color: var(--text-muted);
+}

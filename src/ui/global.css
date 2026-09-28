@@ -1,0 +1,177 @@
+/* ------------------------------------------------------------------
+   Design-Tokens. Farben nur über diese Variablen verwenden.
+   Die Staatsfarben (--state-*) setzt die App je nach gewähltem Staat.
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: light dark;
+
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Grundfarben (hell) */
+  --bg: #f4f2ed;
+  --surface: #ffffff;
+  --surface-2: #ebe8e1;
+  --text: #1c1f24;
+  --text-muted: #5b6069;
+  --border: #d6d2c8;
+  --shadow: 0 1px 2px rgb(0 0 0 / 8%), 0 4px 12px rgb(0 0 0 / 6%);
+
+  /* Staatsfarben (Standard: Rhenanien) */
+  --state-primary: #2b2f36;
+  --state-secondary: #c9a227;
+  --state-on-primary: #ffffff;
+
+  /* Signalfarben */
+  --good: #2e7d4f;
+  --warn: #b7791f;
+  --bad: #b3261e;
+  --on-signal: #ffffff;
+
+  /* Ressourcenfarben (Icons, Balken) */
+  --res-money: #2e7d4f;
+  --res-influence: #6a3d9a;
+  --res-followers: #1f5fa8;
+  --res-loyalty: #8a5a14;
+  --res-diplomacy: #12848a;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --tap: 44px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 200ms;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121418;
+    --surface: #1c1f25;
+    --surface-2: #262a31;
+    --text: #eceae4;
+    --text-muted: #a3a8b1;
+    --border: #353a42;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 12px rgb(0 0 0 / 30%);
+    --state-primary: #1a1d22;
+    --good: #5cbf85;
+    --warn: #e0a84a;
+    --bad: #ef6f66;
+    --on-signal: #121418;
+    --res-money: #5cbf85;
+    --res-influence: #b08ad8;
+    --res-followers: #6fa8e8;
+    --res-loyalty: #d9a650;
+    --res-diplomacy: #4fc4ca;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Grundlagen und iOS-Eigenheiten
+   ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.4;
+  /* Kein Gummiband, kein Pull-to-Refresh */
+  overscroll-behavior: none;
+  /* Kein Zoom bei Doppeltipp */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+/* Eingabefelder mindestens 16 px, sonst zoomt iOS beim Antippen */
+input,
+textarea,
+select {
+  font: inherit;
+  font-size: max(16px, 1rem);
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--state-secondary);
+  outline-offset: 2px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Animationen pausieren, solange die App im Hintergrund ist */
+html[data-app-hidden='true'] *,
+html[data-app-hidden='true'] *::before,
+html[data-app-hidden='true'] *::after {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

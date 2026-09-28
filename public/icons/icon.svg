@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- App-Icon „Idle Politics“: Rednerpult mit aufsteigenden Balken. Inhalt liegt in der
+       sicheren Zone (80 %), damit das Icon auch als maskierbares Icon funktioniert. -->
+  <rect width="512" height="512" fill="#2b2f36"/>
+  <circle cx="256" cy="256" r="200" fill="#343941"/>
+  <!-- aufsteigende Balken -->
+  <rect x="150" y="238" width="44" height="62" rx="6" fill="#8d7424"/>
+  <rect x="210" y="196" width="44" height="104" rx="6" fill="#ad8f25"/>
+  <rect x="270" y="150" width="44" height="150" rx="6" fill="#c9a227"/>
+  <!-- Stern über dem höchsten Balken -->
+  <path d="M292 104 l8.2 16.6 18.3 2.7 -13.2 12.9 3.1 18.2 -16.4 -8.6 -16.4 8.6 3.1 -18.2 -13.2 -12.9 18.3 -2.7z" fill="#e9e4d8"/>
+  <!-- Rednerpult -->
+  <path d="M132 312 h248 l-14 34 h-220z" fill="#e9e4d8"/>
+  <path d="M184 346 h144 l-12 86 h-120z" fill="#d6d0c1"/>
+  <rect x="236" y="364" width="40" height="40" rx="20" fill="#c9a227"/>
+</svg>

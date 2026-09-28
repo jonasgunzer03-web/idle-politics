@@ -1,0 +1,30 @@
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: calc(24px + var(--safe-top)) 24px calc(24px + var(--safe-bottom));
+  text-align: center;
+  background: var(--bg);
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.text {
+  color: var(--text-muted);
+  max-width: 32ch;
+}
+
+.button {
+  min-height: var(--tap);
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  font-weight: 600;
+}

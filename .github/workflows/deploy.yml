@@ -1,0 +1,50 @@
+# Baut, prüft und veröffentlicht das Spiel auf GitHub Pages bei jedem Push auf main.
+# Einmalig nötig: im Repository unter Settings → Pages als Quelle „GitHub Actions“ wählen.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Die App liegt unter https://<name>.github.io/<repo>/
+      BASE_PATH: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps webkit
+      # Tests laufen mit Pfad „/“, der Pages-Build danach mit BASE_PATH
+      - run: npm run check
+        env:
+          BASE_PATH: /
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

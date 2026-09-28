@@ -1,0 +1,43 @@
+.app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.splash {
+  height: 100dvh;
+  background: var(--bg);
+}
+
+.header {
+  flex-shrink: 0;
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  padding: calc(8px + var(--safe-top)) calc(12px + var(--safe-right)) 10px
+    calc(12px + var(--safe-left));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brand {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Platz für den Debug-Knopf, damit er keine Inhalte verdeckt */
+.app[data-debug='true'] .content {
+  padding-bottom: 56px;
+}
