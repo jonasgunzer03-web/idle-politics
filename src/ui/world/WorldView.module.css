@@ -1,0 +1,125 @@
+.view {
+  position: relative;
+  height: clamp(210px, 38dvh, 380px);
+  flex-shrink: 0;
+  overflow: hidden;
+  contain: strict;
+  /* Horizontales Wischen gehört der Welt, vertikales Scrollen der Seite */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.skylineLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  opacity: 0.9;
+  will-change: transform;
+  transition: transform 120ms linear;
+}
+
+.worldLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  will-change: transform;
+  transition: transform 120ms linear;
+}
+
+.noTransition {
+  transition: none !important;
+}
+
+.hit {
+  position: absolute;
+  top: 12%;
+  bottom: 14%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.hit:focus-visible {
+  outline: 3px solid var(--state-secondary);
+  outline-offset: -3px;
+}
+
+.figure {
+  position: absolute;
+  left: 0;
+  will-change: transform;
+  transition: transform 120ms linear;
+  pointer-events: none;
+}
+
+.passerby {
+  position: absolute;
+  pointer-events: none;
+  animation-name: stroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.protester,
+.soldier {
+  position: absolute;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+@keyframes stroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--walk, 200px));
+  }
+}
+
+.placeTag {
+  position: absolute;
+  left: calc(10px + var(--safe-left));
+  bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(28 31 36 / 72%);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.recenter {
+  position: absolute;
+  right: calc(10px + var(--safe-right));
+  bottom: 8px;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  border: none;
+  background: rgb(28 31 36 / 72%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.staff {
+  position: absolute;
+  left: 6%;
+  display: flex;
+  gap: 2%;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.insideFigure {
+  position: absolute;
+  right: 10%;
+  pointer-events: none;
+}

@@ -52,3 +52,9 @@ export function randomSeed(): number {
     return Date.now() >>> 0;
   }
 }
+
+/** Zufallszahl aus dem Spielstand ziehen: liefert den Wert und den weitergeschalteten Zustand. */
+export function drawRandom<T extends { rngState: number }>(game: T): { value: number; game: T } {
+  const step = nextRandom(game.rngState);
+  return { value: step.value, game: { ...game, rngState: step.state } };
+}

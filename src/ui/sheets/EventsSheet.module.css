@@ -1,0 +1,80 @@
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 0 4px;
+}
+
+.card {
+  position: relative;
+  min-height: 230px;
+  padding: 26px 18px 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 18%);
+  touch-action: pan-y;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.speaker {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.title {
+  font-size: 1.3rem;
+}
+
+.text {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.stamp {
+  position: absolute;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.stampYes {
+  right: 12px;
+  color: var(--good);
+  border: 2px solid var(--good);
+}
+
+.stampNo {
+  left: 12px;
+  color: var(--bad);
+  border: 2px solid var(--bad);
+}
+
+.affects {
+  display: inline-flex;
+  gap: 3px;
+  opacity: 0.85;
+}
+
+.hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}

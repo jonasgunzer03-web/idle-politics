@@ -1,6 +1,6 @@
 import { defaultConfig } from '../config';
 import { createNewGame, startRun } from '../engine/game';
-import type { Character, GameState } from '../engine/schema';
+import type { Character, GameState, RunState } from '../engine/schema';
 
 export const cfg = defaultConfig;
 
@@ -14,16 +14,39 @@ export const testCharacter: Character = {
   beard: 0,
   glasses: 0,
   party: { name: 'Bürgerliste', color: 1, symbol: 0 },
+  accessories: [],
 };
 
-/** Laufender Durchlauf in Rhenanien, Beruf Facharbeiter, Zeitpunkt t = 1.000.000 ms. */
-export function playingGame(overrides: Partial<NonNullable<GameState['run']>> = {}): GameState {
+/**
+ * Laufender Durchlauf (Standard: Rhenanien, Facharbeiter) zum Zeitpunkt t = 1.000.000 ms.
+ * Die Figur steht im Werk. Ereigniskarten sind abgeschaltet (nextAt = ∞), damit Tests
+ * nicht zufällig eine Karte ziehen.
+ */
+export function playingGame(
+  overrides: Partial<RunState> = {},
+  setup: Partial<{ stateId: RunState['stateId']; profession: RunState['profession'] }> = {},
+): GameState {
   const base = startRun(
     createNewGame(1_000_000, 42),
-    { character: testCharacter, stateId: 'rhenania', profession: 'skilled' },
+    {
+      character: testCharacter,
+      stateId: setup.stateId ?? 'rhenania',
+      profession: setup.profession ?? 'skilled',
+    },
     1_000_000,
     cfg,
   );
   if (!base.run) throw new Error('fixture: run missing');
-  return { ...base, run: { ...base.run, ...overrides } };
+  const run: RunState = {
+    ...base.run,
+    events: { ...base.run.events, nextAt: Number.MAX_SAFE_INTEGER },
+    ...overrides,
+  };
+  return { ...base, run };
+}
+
+/** Kurzform: Durchlauf eines Spielstands, der sicher existiert. */
+export function runOf(game: GameState): RunState {
+  if (!game.run) throw new Error('kein Durchlauf');
+  return game.run;
 }

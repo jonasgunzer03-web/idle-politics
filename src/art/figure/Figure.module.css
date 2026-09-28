@@ -48,3 +48,45 @@
     transform: scaleY(0.1);
   }
 }
+
+/* Blickrichtung */
+.left {
+  transform: scaleX(-1);
+}
+
+.legL,
+.legR {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+
+/* Laufen: Beine schwingen gegeneinander */
+.walking .legL {
+  animation: stride 0.5s ease-in-out infinite alternate;
+}
+
+.walking .legR {
+  animation: stride 0.5s ease-in-out infinite alternate-reverse;
+}
+
+.walking .upper {
+  animation: bob 0.25s ease-in-out infinite alternate;
+}
+
+@keyframes stride {
+  from {
+    transform: rotate(-12deg);
+  }
+  to {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}

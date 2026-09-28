@@ -1,0 +1,84 @@
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#bcd6e6, #eef1ea 75%);
+  overflow: hidden;
+}
+
+/* Autokratischer Pfad: entsättigter, grauer Himmel */
+.grey {
+  background: linear-gradient(#aab2b8, #d7d8d4 75%);
+}
+
+.sun {
+  position: absolute;
+  right: 14%;
+  top: 10%;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f4d58a;
+}
+
+.cloud {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  animation: drift linear infinite;
+  will-change: transform;
+}
+
+.cloudSvg {
+  width: 90px;
+  height: auto;
+  display: block;
+}
+
+.cloudFill {
+  fill: rgb(255 255 255 / 85%);
+}
+
+.cloud0 {
+  top: 6%;
+  animation-duration: 70s;
+  animation-delay: -20s;
+}
+
+.cloud1 {
+  top: 18%;
+  animation-duration: 95s;
+  animation-delay: -60s;
+  opacity: 0.8;
+}
+
+.cloud2 {
+  top: 2%;
+  animation-duration: 120s;
+  animation-delay: -100s;
+  opacity: 0.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sky,
+  .grey {
+    background: linear-gradient(#141c26, #2d3a47 80%);
+  }
+
+  .sun {
+    background: #d9dde3;
+    box-shadow: 0 0 24px rgb(217 221 227 / 40%);
+  }
+
+  .cloudFill {
+    fill: rgb(210 220 230 / 22%);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(-25%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}

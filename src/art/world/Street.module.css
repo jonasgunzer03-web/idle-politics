@@ -1,0 +1,108 @@
+.street,
+.skyline {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
+.street :global(.signText) {
+  font-family: var(--font-sans);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.street :global(.win) {
+  fill: #dbe8ef;
+}
+
+.street :global(.lamp) {
+  fill: #f6e7b0;
+}
+
+.street :global(.water) {
+  fill: #8fc4dc;
+}
+
+.street :global(.spray) {
+  stroke: #cfe8f2;
+  animation: spray 1.6s ease-in-out infinite alternate;
+}
+
+.street :global(.blink) {
+  animation: blink-cam 1.2s steps(2) infinite;
+}
+
+.street :global(.flagWave) {
+  animation: wave 2.4s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+
+.road {
+  fill: #5a5f66;
+}
+
+.curb {
+  fill: #8f8a80;
+}
+
+.lane {
+  fill: rgb(255 255 255 / 55%);
+}
+
+.far {
+  fill: #b3c2cb;
+}
+
+.fog {
+  fill: rgb(244 242 237 / 72%);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Nacht: Gebäude dunkler, Fenster und Laternen leuchten */
+  .built {
+    filter: brightness(0.6) saturate(0.85);
+  }
+
+  .street :global(.win) {
+    fill: #ffe08a;
+  }
+
+  .street :global(.lamp) {
+    fill: #fff3c4;
+  }
+
+  .far {
+    fill: #2b3540;
+  }
+
+  .fog {
+    fill: rgb(18 20 24 / 70%);
+  }
+}
+
+@keyframes wave {
+  from {
+    transform: skewY(-4deg) scaleX(0.94);
+  }
+  to {
+    transform: skewY(4deg) scaleX(1);
+  }
+}
+
+@keyframes spray {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes blink-cam {
+  to {
+    opacity: 0.2;
+  }
+}

@@ -1,7 +1,10 @@
 // Alle Spieltexte auf Deutsch. Für eine englische Version wird eine Datei en.ts mit
 // demselben Aufbau ergänzt (der Typ `Strings` erzwingt Vollständigkeit).
 
-import type { GeneratorId, ProfessionId, ResourceId, StateId, TapActionId } from '../engine/ids';
+import type { GeneratorId, ProfessionId, ResourceId, StateId } from '../engine/ids';
+import { eventTexts } from './de-events';
+import { politicsTexts } from './de-politics';
+import { worldTexts } from './de-world';
 
 export const de = {
   appName: 'Idle Politics',
@@ -58,13 +61,13 @@ export const de = {
     money: 'Geld',
     influence: 'Einfluss',
     followers: 'Anhänger',
-    loyalty: 'Loyalität',
     diplomacy: 'Diplomatie',
   } satisfies Record<ResourceId, string>,
 
   bars: {
     approval: 'Zustimmung',
     unrest: 'Unruhe',
+    loyalty: 'Loyalität',
   },
 
   title: {
@@ -89,12 +92,28 @@ export const de = {
       random: 'Zufall',
       option: '{label} {n}',
       hairStyles: ['Glatze', 'Kurz', 'Seitenscheitel', 'Stoppeln', 'Lang', 'Dutt', 'Locken', 'Bob'],
+      build: 'Körperbau',
+      builds: ['Schmal', 'Mittel', 'Kräftig'],
+      faceShape: 'Gesichtsform',
+      faceShapes: ['Rund', 'Oval', 'Kantig'],
+      beard: 'Bart',
+      beards: ['Keiner', 'Stoppeln', 'Schnurrbart', 'Kinnbart', 'Vollbart'],
+      glasses: 'Brille',
+      glassesOptions: ['Keine', 'Rund', 'Eckig', 'Halbrand'],
+      party: 'Partei',
+      partyName: 'Name der Partei',
+      partyColor: 'Parteifarbe',
+      partySymbol: 'Symbol',
+      partySymbols: ['Stern', 'Rose', 'Eiche', 'Faust', 'Taube', 'Sonne', 'Anker', 'Ähre'],
+      sections: { person: 'Person', looks: 'Aussehen', partyTitle: 'Partei' },
     },
+    restartTitle: 'Neuer Durchlauf',
     state: {
       title: 'Wähle deinen Staat',
       tempo: 'Aufstiegstempo',
       risk: 'Risiko',
       soon: 'Bald verfügbar',
+      current: 'Aktuell',
       pros: 'Vorteile',
       cons: 'Nachteile',
       rating: '{value} von 5',
@@ -245,15 +264,7 @@ export const de = {
 
   career: {
     stage: 'Stufe {stage} von {max}',
-    actions: 'Arbeiten',
-    upgrades: 'Lohnende Investitionen',
-    allUpgrades: 'Alle Investitionen',
   },
-
-  tapActions: {
-    work: 'Schicht arbeiten',
-    network: 'Mit Kollegen reden',
-  } satisfies Record<TapActionId, string>,
 
   invest: {
     title: 'Investieren',
@@ -267,12 +278,18 @@ export const de = {
     missing: 'Fehlt: {amount}',
     unlockAt: 'Ab Stufe {stage}',
     groupLocked: 'Wird ab Stufe {stage} freigeschaltet.',
+    vehiclesTitle: 'Fortbewegung',
+    vehicleOwned: 'Aktuell',
+    vehicleSpeed: '{speed}× so schnell wie zu Fuß',
+    vehicleBuy: 'Kaufen',
+    staffTitle: 'Mitarbeiter',
+    staffText: 'Mitarbeiter stellst du in den Gebäuden ein. Sie erledigen die Tätigkeit dort automatisch.',
+    staffEntry: '{action}: {count} Mitarbeiter',
     groups: {
       money: 'Geld verdienen',
       influence: 'Einfluss gewinnen',
       followers: 'Anhänger werben',
-      loyalty: 'Loyalität sichern',
-      diplomacy: 'Diplomatie',
+      diplomacy: 'Diplomatie pflegen',
     } satisfies Record<ResourceId, string>,
   },
 
@@ -283,15 +300,25 @@ export const de = {
     rentals: { name: 'Vermietung', text: 'Zwei Wohnungen in der Altstadt.' },
     company: { name: 'Mittelständische Firma', text: 'Hundert Beschäftigte, solide Aufträge.' },
     holding: { name: 'Holding', text: 'Beteiligungen in mehreren Branchen.' },
+    conglomerate: { name: 'Konzern', text: 'Ein Imperium aus Industrie und Handel.' },
+    donorCircle: { name: 'Spenderkreis', text: 'Wohlhabende Unterstützer mit Scheckbuch.' },
+    lobbyFirm: { name: 'Lobby-Agentur', text: 'Profis, die Türen öffnen und Geld einsammeln.' },
+    rawMaterials: { name: 'Rohstoffeinnahmen', text: 'Anteile an Öl- und Gasförderung.' },
+    stateEnterprise: { name: 'Staatsbetrieb', text: 'Ein Werk unter Parteiaufsicht.' },
     regularsTable: { name: 'Stammtisch', text: 'Jeden Donnerstag in der Eckkneipe.' },
     clubWork: { name: 'Vereinsarbeit', text: 'Kassenwart im Sportverein.' },
     localBranch: { name: 'Ortsverband', text: 'Ein eigener Ortsverband der Partei.' },
     pressContacts: { name: 'Pressekontakte', text: 'Journalisten, die zurückrufen.' },
     thinkTank: { name: 'Denkfabrik', text: 'Studien, die deine Positionen stützen.' },
+    foundation: { name: 'Stiftung', text: 'Einfluss auf Wissenschaft, Kultur und Eliten.' },
     flyers: { name: 'Flyer', text: 'Handzettel in Briefkästen und am Werkstor.' },
     infoStand: { name: 'Infostand', text: 'Samstags auf dem Marktplatz.' },
     socialMediaTeam: { name: 'Social-Media-Team', text: 'Drei Leute, die rund um die Uhr posten.' },
     campaignOffice: { name: 'Kampagnenbüro', text: 'Hauptamtliche Kräfte für den Wahlkampf.' },
+    mediaGroup: { name: 'Mediengruppe', text: 'Zeitungen und Radiosender auf deiner Seite.' },
+    tvNetwork: { name: 'Fernsehsender', text: 'Ein eigener Sender mit landesweiter Reichweite.' },
+    embassyStaff: { name: 'Botschaftsstab', text: 'Diplomaten, die Beziehungen pflegen.' },
+    summitOffice: { name: 'Gipfelbüro', text: 'Organisiert Treffen der Staatschefs.' },
   } satisfies Record<GeneratorId, { name: string; text: string }>,
 
   scene: {
@@ -304,17 +331,6 @@ export const de = {
     close: 'Schließen',
     perSecond: '/s',
     locked: 'Gesperrt',
-  },
-
-  placeholders: {
-    network: {
-      title: 'Netzwerk',
-      text: 'Hier knüpfst du später Allianzen mit Gewerkschaften, Wirtschaft, Medien und weiteren Gruppen.',
-    },
-    world: {
-      title: 'Außenpolitik',
-      text: 'Die Außenpolitik wird ab Stufe 8 freigeschaltet.',
-    },
   },
 
   offline: {
@@ -331,24 +347,17 @@ export const de = {
     cards: [
       {
         title: 'Ganz unten anfangen',
-        text: 'Du beginnst als einfacher Arbeiter. Tippe auf „Schicht arbeiten“ für Geld und auf „Mit Kollegen reden“ für Einfluss.',
+        text: 'Du stehst in deinem Werk bzw. Büro. Tippe auf „Schicht arbeiten“, um Geld zu verdienen.',
       },
       {
-        title: 'Für dich arbeiten lassen',
-        text: 'Im Tab „Investieren“ kaufst du Generatoren. Sie bringen dir auch dann Erträge, wenn du nicht tippst – sogar bis zu acht Stunden, während die App geschlossen ist.',
+        title: 'Durch die Stadt',
+        text: 'Tippe auf ein Gebäude in der Straße oder auf ein Ziel in der Liste, dann läuft deine Figur hin. In der Kneipe knüpfst du Kontakte, im Parteibüro beginnt deine Karriere.',
       },
       {
-        title: 'Aufsteigen',
-        text: 'Mit genug Geld, Einfluss und Anhängern steigst du Stufe für Stufe auf. Behalte Zustimmung und Unruhe im Blick.',
+        title: 'Arbeiten lassen',
+        text: 'Stelle in den Gebäuden Mitarbeiter ein und kaufe im Tab „Investieren“ Generatoren. Sie bringen dir Erträge, auch bis zu acht Stunden, während die App geschlossen ist.',
       },
     ],
-  },
-
-  hints: {
-    followersUnlocked: {
-      title: 'Neu: Anhänger',
-      text: 'Ab jetzt sammelst du Anhänger. Du brauchst sie für Wahlen. Flyer und Infostände findest du im Tab „Investieren“.',
-    },
   },
 
   recovered: {
@@ -380,6 +389,28 @@ export const de = {
 
   profile: {
     title: 'Profil',
+    sections: {
+      character: 'Figur',
+      legacy: 'Vermächtnis',
+      achievements: 'Erfolge',
+      stats: 'Statistik',
+      settings: 'Speicher',
+    },
+    editCharacter: 'Figur bearbeiten',
+    save: 'Speichern',
+    accessories: 'Accessoires',
+    accessoriesLocked: 'Accessoires schaltest du über Erfolge frei.',
+    emigrate: 'Auswandern',
+    stats: {
+      runs: 'Durchläufe',
+      highest: 'Höchste Stufe',
+      statesRuled: 'Regierte Staaten',
+      taps: 'Tätigkeiten ausgeführt',
+      playtime: 'Spielzeit',
+      events: 'Entscheidungen',
+      emigrations: 'Auswanderungen',
+      overthrows: 'Stürze',
+    },
     backupTitle: 'Backup-Code',
     backupText:
       'Mit diesem Code kannst du deinen Spielstand sichern oder auf ein anderes Gerät übertragen.',
@@ -404,6 +435,10 @@ export const de = {
     version: 'Version {version}',
   },
 
+  ...worldTexts,
+  ...politicsTexts,
+  events: eventTexts,
+
   debug: {
     title: 'Debug',
     open: 'Debug-Menü öffnen',
@@ -413,6 +448,11 @@ export const de = {
     jump8h: 'Zeitsprung +8 Std.',
     stage: 'Stufe',
     setStage: 'Zu Stufe springen',
+    meters: 'Werte setzen',
+    triggerEvent: 'Ereignis auslösen',
+    triggerOverthrow: 'Sturz auslösen',
+    forceElection: 'Wahl gewinnen (nächste Stufe)',
+    switchState: 'Staat wechseln',
     reset: 'Spielstand zurücksetzen',
     resetConfirm: 'Spielstand wirklich löschen? Das lässt sich nicht rückgängig machen.',
   },

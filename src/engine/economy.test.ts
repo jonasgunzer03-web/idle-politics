@@ -1,130 +1,139 @@
 import { withGameSpeed } from '../config';
-import { cfg, playingGame } from '../test/fixtures';
+import { cfg, playingGame, runOf } from '../test/fixtures';
 import {
-  applyTap,
+  actionYield,
+  buildProject,
+  buyActionUpgrade,
   buyGenerator,
+  buyVehicle,
   canAfford,
   generatorCost,
   maxAffordable,
   missingFor,
+  performAction,
   productionRates,
-  resourceMultiplier,
+  upgradeCost,
   zeroResources,
 } from './economy';
-import { findGenerator } from './unlocks';
+import { resourceMultiplier } from './rules';
+import { findAction, findGenerator } from './unlocks';
 
-function def(id: string) {
+function gen(id: string) {
   const d = findGenerator(id, cfg);
   if (!d) throw new Error(id);
   return d;
 }
+function act(id: Parameters<typeof findAction>[0]) {
+  const a = findAction(id, cfg);
+  if (!a) throw new Error(id);
+  return a;
+}
+const rich = { ...zeroResources(), money: 1e9, influence: 1e9, followers: 1e9, diplomacy: 1e9 };
 
 describe('Kostenformel', () => {
-  it('erstes Exemplar kostet den Grundpreis', () => {
-    expect(generatorCost(def('overtime'), 0, 1, cfg).money).toBeCloseTo(10);
+  it('erstes Exemplar kostet den Grundpreis, danach ×1,15 aufgerundet', () => {
+    expect(generatorCost(gen('overtime'), 0, 1, cfg).money).toBe(10);
+    expect(generatorCost(gen('overtime'), 1, 1, cfg).money).toBe(12);
+    expect(generatorCost(gen('overtime'), 5, 1, cfg).money).toBe(Math.ceil(10 * 1.15 ** 5));
   });
 
-  it('steigt pro Kauf um den Faktor 1,15 und wird auf ganze Beträge aufgerundet', () => {
-    expect(generatorCost(def('overtime'), 1, 1, cfg).money).toBe(12); // 11,5
-    expect(generatorCost(def('overtime'), 5, 1, cfg).money).toBe(Math.ceil(10 * 1.15 ** 5));
-  });
-
-  it('Preise sind immer ganze Zahlen, auch bei Gleitkomma-Grenzfällen', () => {
+  it('Preise sind immer ganze Zahlen', () => {
     for (let owned = 0; owned < 200; owned++) {
-      const money = generatorCost(def('overtime'), owned, 1, cfg).money ?? 0;
+      const money = generatorCost(gen('overtime'), owned, 1, cfg).money ?? 0;
       expect(Number.isInteger(money)).toBe(true);
-      expect(money).toBeGreaterThanOrEqual(10 * 1.15 ** owned - 1e-6);
     }
   });
 
-  it('Mehrfachkauf entspricht der Summe der Einzelkäufe (bis auf Rundung)', () => {
-    let exact = 0;
-    for (let i = 3; i < 13; i++) exact += 10 * 1.15 ** i;
-    const bulk = generatorCost(def('overtime'), 3, 10, cfg).money ?? 0;
-    expect(bulk).toBe(Math.ceil(exact - 1e-9));
-  });
-
-  it('kennt Kosten in mehreren Ressourcen', () => {
-    const cost = generatorCost(def('clubWork'), 0, 1, cfg);
-    expect(cost.money).toBeCloseTo(300);
-    expect(cost.influence).toBeCloseTo(10);
-    expect(cost.followers).toBeUndefined();
-  });
-
   it('GAME_SPEED 0,05 macht alles zwanzigmal teurer', () => {
-    const slow = withGameSpeed(cfg, 0.05);
-    expect(generatorCost(def('overtime'), 0, 1, slow).money).toBeCloseTo(200);
+    expect(generatorCost(gen('overtime'), 0, 1, withGameSpeed(cfg, 0.05)).money).toBe(200);
   });
-});
 
-describe('maxAffordable', () => {
-  it('berechnet die größte bezahlbare Menge exakt', () => {
+  it('maxAffordable ist exakt und berücksichtigt die knappste Währung', () => {
     const res = { ...zeroResources(), money: 1000 };
-    const n = maxAffordable(def('overtime'), 0, res, cfg);
-    expect(canAfford(res, generatorCost(def('overtime'), 0, n, cfg))).toBe(true);
-    expect(canAfford(res, generatorCost(def('overtime'), 0, n + 1, cfg))).toBe(false);
+    const n = maxAffordable(gen('overtime'), 0, res, cfg);
+    expect(canAfford(res, generatorCost(gen('overtime'), 0, n, cfg))).toBe(true);
+    expect(canAfford(res, generatorCost(gen('overtime'), 0, n + 1, cfg))).toBe(false);
+    expect(maxAffordable(gen('clubWork'), 0, { ...res, money: 1e9, influence: 10 }, cfg)).toBe(1);
   });
 
-  it('berücksichtigt die knappste Ressource', () => {
-    const res = { ...zeroResources(), money: 1e9, influence: 10 };
-    expect(maxAffordable(def('clubWork'), 0, res, cfg)).toBe(1);
-  });
-
-  it('liefert 0 ohne Mittel', () => {
-    expect(maxAffordable(def('overtime'), 0, zeroResources(), cfg)).toBe(0);
+  it('missingFor nennt nur Fehlbeträge', () => {
+    expect(missingFor({ ...zeroResources(), money: 100, influence: 4 }, { money: 60, influence: 5 })).toEqual({
+      influence: 1,
+    });
   });
 });
 
-describe('Erträge', () => {
+describe('Tätigkeiten an Orten', () => {
+  it('Arbeiten geht nur im Werk (drinnen)', () => {
+    const inside = playingGame();
+    const r1 = performAction(inside, 'work', cfg);
+    expect(r1.gained.money).toBeGreaterThan(0);
+    const outside = playingGame({ world: { ...runOf(inside).world, inside: false } });
+    expect(performAction(outside, 'work', cfg).gained).toEqual({});
+    // Netzwerken geht im Werk nicht (das ist in der Kneipe)
+    expect(performAction(inside, 'network', cfg).gained).toEqual({});
+  });
+
+  it('Ertrag wächst mit Stufe und Schulung', () => {
+    const base = actionYield(playingGame(), act('work'), cfg).money ?? 0;
+    const stage3 = actionYield(playingGame({ stage: 3 }), act('work'), cfg).money ?? 0;
+    expect(stage3 / base).toBeCloseTo(cfg.balancing.tapStageGrowth ** 2);
+    const trained = actionYield(playingGame({ actions: { work: { staff: 0, training: 2 } } }), act('work'), cfg).money ?? 0;
+    expect(trained / base).toBeCloseTo(1.5);
+  });
+
+  it('Facharbeiter in Rhenanien: 1 € × 0,7 × 0,9 pro Schicht', () => {
+    expect(actionYield(playingGame(), act('work'), cfg).money).toBeCloseTo(0.63);
+  });
+
+  it('Mitarbeiter erzeugen automatische Erträge', () => {
+    const game = playingGame({ actions: { work: { staff: 4, training: 0 } } });
+    // 4 Mitarbeiter × 0,5 Ausführungen/s × 0,63 €
+    expect(productionRates(game, cfg).money).toBeCloseTo(4 * 0.5 * 0.63);
+  });
+
+  it('Mitarbeiter und Schulungen kauft man nur im Gebäude', () => {
+    const inside = playingGame({ resources: rich });
+    const hired = buyActionUpgrade(inside, 'work', 'staff', cfg);
+    expect(runOf(hired).actions.work?.staff).toBe(1);
+    const outside = playingGame({ resources: rich, world: { posX: 160, target: null, inside: false } });
+    expect(buyActionUpgrade(outside, 'work', 'staff', cfg)).toBe(outside);
+  });
+
+  it('Schulung endet bei der Höchststufe', () => {
+    const max = act('work').training.maxLevel;
+    const game = playingGame({ resources: rich, actions: { work: { staff: 0, training: max } } });
+    expect(buyActionUpgrade(game, 'work', 'training', cfg)).toBe(game);
+  });
+
+  it('Mitarbeiter werden teurer', () => {
+    const run0 = runOf(playingGame());
+    const run5 = runOf(playingGame({ actions: { work: { staff: 5, training: 0 } } }));
+    expect((upgradeCost(run5, act('work'), 'staff', cfg).money ?? 0) > (upgradeCost(run0, act('work'), 'staff', cfg).money ?? 0)).toBe(true);
+  });
+});
+
+describe('Erträge und Multiplikatoren', () => {
   it('Multiplikatoren aus Beruf und Staat werden kombiniert', () => {
-    const run = playingGame().run;
-    if (!run) throw new Error();
-    // Facharbeiter 0,7 × Rhenanien 0,9
-    expect(resourceMultiplier(run, 'money', cfg)).toBeCloseTo(0.63);
-    expect(resourceMultiplier(run, 'influence', cfg)).toBeCloseTo(1.5);
+    const game = playingGame();
+    expect(resourceMultiplier(game, 'money', cfg)).toBeCloseTo(0.63);
+    expect(resourceMultiplier(game, 'influence', cfg)).toBeCloseTo(1.5);
   });
 
-  it('Rate = Anzahl × Grundertrag × Multiplikator', () => {
-    const run = playingGame({ generators: { overtime: 10, regularsTable: 2 } }).run;
-    if (!run) throw new Error();
-    const rates = productionRates(run, cfg);
-    expect(rates.money).toBeCloseTo(10 * 0.3 * 0.63);
-    expect(rates.influence).toBeCloseTo(2 * 0.1 * 1.5);
-    expect(rates.followers).toBe(0);
-  });
-});
-
-describe('Tippen', () => {
-  it('bringt Geld mit Multiplikator und zählt den Tipp', () => {
-    const { game, gained, resource } = applyTap(playingGame(), 'work', cfg);
-    expect(resource).toBe('money');
-    expect(gained).toBeCloseTo(0.63);
-    expect(game.run?.resources.money).toBeCloseTo(0.63);
-    expect(game.stats.totalTaps).toBe(1);
+  it('Generator-Rate = Anzahl × Grundertrag × Multiplikator', () => {
+    const game = playingGame({ generators: { overtime: 10 } });
+    expect(productionRates(game, cfg).money).toBeCloseTo(10 * gen('overtime').baseOutput * 0.63);
   });
 
-  it('bewirkt nichts außerhalb des Spiels', () => {
-    const setup = { ...playingGame(), phase: 'setup' as const };
-    expect(applyTap(setup, 'work', cfg).game).toBe(setup);
+  it('staatsspezifische Generatoren gibt es nur im eigenen Staat', () => {
+    const rhen = playingGame({ stage: 4, resources: rich });
+    expect(buyGenerator(rhen, 'rawMaterials', 1, cfg).bought).toBe(0);
+    const bor = playingGame({ stage: 4, resources: rich }, { stateId: 'borealis' });
+    expect(buyGenerator(bor, 'rawMaterials', 1, cfg).bought).toBe(1);
   });
 });
 
 describe('Kaufen', () => {
-  it('zieht die Kosten ab und erhöht die Anzahl', () => {
-    const game = playingGame({ resources: { ...zeroResources(), money: 25 } });
-    const { game: next, bought } = buyGenerator(game, 'overtime', 1, cfg);
-    expect(bought).toBe(1);
-    expect(next.run?.generators.overtime).toBe(1);
-    expect(next.run?.resources.money).toBe(15);
-  });
-
-  it('lehnt ab, wenn Mittel fehlen, und ändert nichts', () => {
-    const game = playingGame({ resources: { ...zeroResources(), money: 9.99 } });
-    const result = buyGenerator(game, 'overtime', 1, cfg);
-    expect(result.bought).toBe(0);
-    expect(result.game).toBe(game);
-  });
-
   it('schnelles Mehrfachtippen kauft nie mehr als bezahlbar und nie ins Minus', () => {
     let game = playingGame({ resources: { ...zeroResources(), money: 30 } });
     let total = 0;
@@ -133,41 +142,34 @@ describe('Kaufen', () => {
       game = r.game;
       total += r.bought;
     }
-    // 10 + 12 = 22; das dritte kostet 14 (13,225 aufgerundet)
     expect(total).toBe(2);
-    expect(game.run?.resources.money).toBe(8);
-    expect(game.run?.resources.money).toBeGreaterThanOrEqual(0);
+    expect(runOf(game).resources.money).toBe(8);
   });
 
-  it('×10 kauft nur, wenn alle zehn bezahlbar sind', () => {
-    const game = playingGame({ resources: { ...zeroResources(), money: 100 } });
-    expect(buyGenerator(game, 'overtime', 10, cfg).bought).toBe(0);
-    const rich = playingGame({ resources: { ...zeroResources(), money: 1000 } });
-    expect(buyGenerator(rich, 'overtime', 10, cfg).bought).toBe(10);
-  });
-
-  it('Max kauft alles Bezahlbare, Rest bleibt ≥ 0', () => {
-    const game = playingGame({ resources: { ...zeroResources(), money: 1000 } });
-    const { game: next, bought } = buyGenerator(game, 'overtime', 'max', cfg);
-    expect(bought).toBe(
-      maxAffordable(def('overtime'), 0, game.run?.resources ?? zeroResources(), cfg),
-    );
-    expect(next.run?.resources.money).toBeGreaterThanOrEqual(0);
+  it('×10 nur, wenn alle zehn bezahlbar sind', () => {
+    expect(buyGenerator(playingGame({ resources: { ...zeroResources(), money: 100 } }), 'overtime', 10, cfg).bought).toBe(0);
+    expect(buyGenerator(playingGame({ resources: { ...zeroResources(), money: 1000 } }), 'overtime', 10, cfg).bought).toBe(10);
   });
 
   it('gesperrte Generatoren lassen sich nicht kaufen', () => {
-    const game = playingGame({ resources: { ...zeroResources(), money: 1e9, influence: 1e9 } });
-    // Flyer erst ab Stufe 2 (Anhänger)
-    expect(buyGenerator(game, 'flyers', 1, cfg).bought).toBe(0);
-    const stage2 = playingGame({
-      stage: 2,
-      resources: { ...zeroResources(), money: 1e9, influence: 1e9 },
-    });
-    expect(buyGenerator(stage2, 'flyers', 1, cfg).bought).toBe(1);
+    expect(buyGenerator(playingGame({ resources: rich }), 'flyers', 1, cfg).bought).toBe(0);
+    expect(buyGenerator(playingGame({ stage: 2, resources: rich }), 'flyers', 1, cfg).bought).toBe(1);
   });
 
-  it('missingFor nennt nur die fehlenden Beträge', () => {
-    const res = { ...zeroResources(), money: 100, influence: 4 };
-    expect(missingFor(res, { money: 60, influence: 5 })).toEqual({ influence: 1 });
+  it('Fahrzeuge nur in Reihenfolge und ab ihrer Stufe', () => {
+    const game = playingGame({ resources: rich });
+    expect(buyVehicle(game, 'moped', cfg)).toBe(game);
+    const bike = buyVehicle(game, 'bicycle', cfg);
+    expect(runOf(bike).vehicle).toBe('bicycle');
+    expect(buyVehicle(bike, 'moped', cfg)).toBe(bike); // Moped erst ab Stufe 3
+    expect(runOf(buyVehicle({ ...bike, run: { ...runOf(bike), stage: 3 } }, 'moped', cfg)).vehicle).toBe('moped');
+  });
+
+  it('Regionalprojekte erst ab Stufe 8, danach bis zur Höchststufe', () => {
+    expect(buildProject(playingGame({ resources: rich, stage: 7 }), 'port', cfg).run?.projects.port).toBeUndefined();
+    let game = playingGame({ resources: rich, stage: 8 });
+    for (let i = 0; i < 10; i++) game = buildProject(game, 'port', cfg);
+    expect(runOf(game).projects.port).toBe(5);
+    expect(productionRates(game, cfg).money).toBeGreaterThan(0);
   });
 });

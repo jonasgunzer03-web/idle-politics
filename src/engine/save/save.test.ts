@@ -2,7 +2,7 @@ import { cfg, playingGame } from '../../test/fixtures';
 import { zeroResources } from '../economy';
 import { createNewGame } from '../game';
 import { createRng, nextRandom } from '../rng';
-import { applyTap } from '../economy';
+import { performAction } from '../economy';
 import { exportBackup, importBackup } from './backup';
 import { checksum } from './checksum';
 import { migrate, type Migration } from './migrations';
@@ -231,9 +231,70 @@ describe('Ganzer Kreislauf', () => {
   it('tippen, speichern, laden ergibt denselben Stand', () => {
     const { storage, manager } = setup();
     let game = playingGame();
-    for (let i = 0; i < 10; i++) game = applyTap(game, 'work', cfg).game;
+    for (let i = 0; i < 10; i++) game = performAction(game, 'work', cfg).game;
     manager.save(game, 9);
     const loaded = new SaveManager(storage).load();
     expect(loaded.status === 'loaded' && loaded.game).toEqual(game);
+  });
+});
+
+describe('Migration v1 → v2 (Spielstand aus Phase 1)', () => {
+  const v1 = {
+    saveVersion: 1,
+    phase: 'playing',
+    createdAt: 1000,
+    lastActiveAt: 5000,
+    rngState: 99,
+    character: {
+      name: 'Ida Brandt',
+      build: 1,
+      skinTone: 3,
+      faceShape: 2,
+      hairStyle: 4,
+      hairColor: 5,
+      beard: 0,
+      glasses: 0,
+      party: { name: 'Bürgerliste', color: 2, symbol: 1 },
+    },
+    run: {
+      stateId: 'rhenania',
+      profession: 'skilled',
+      path: 'democratic',
+      stage: 2,
+      resources: { money: 123.4, influence: 56, followers: 7, loyalty: 0, diplomacy: 0 },
+      earned: { money: 500, influence: 80, followers: 9, loyalty: 0, diplomacy: 0 },
+      approval: 50,
+      unrest: 5,
+      generators: { overtime: 3, regularsTable: 1 },
+      startedAt: 1000,
+      playMs: 42_000,
+    },
+    flags: { introSeen: true, hintsSeen: ['followersUnlocked'] },
+    stats: { totalTaps: 77, totalPlayMs: 42_000, runsStarted: 1 },
+  };
+
+  it('ein alter Spielstand wird gültig übernommen', () => {
+    const game = parseGame(v1);
+    expect(game).not.toBeNull();
+    if (!game?.run) return;
+    expect(game.saveVersion).toBe(2);
+    expect(game.character?.accessories).toEqual([]);
+    expect(game.run.resources).toEqual({ money: 123.4, influence: 56, followers: 7, diplomacy: 0 });
+    expect(game.run.generators).toEqual({ overtime: 3, regularsTable: 1 });
+    expect(game.run.world.inside).toBe(true);
+    expect(game.meta.totalTaps).toBe(77);
+    expect(game.flags.introSeen).toBe(true);
+  });
+
+  it('auch über den Backup-Code und den Speicher', () => {
+    const { storage } = setup();
+    storage.write(SLOT_KEYS[0], JSON.stringify({ seq: 1, savedAt: 1, game: v1 }));
+    const loaded = new SaveManager(storage).load();
+    expect(loaded.status).toBe('loaded');
+  });
+
+  it('ein alter Stand im Startablauf bleibt im Startablauf', () => {
+    const game = parseGame({ ...v1, phase: 'setup', run: null, character: null });
+    expect(game?.phase).toBe('setup');
   });
 });

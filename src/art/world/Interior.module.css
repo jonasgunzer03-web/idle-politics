@@ -1,0 +1,36 @@
+.interior {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.interior :global(.sky) {
+  fill: #bcd6e6;
+}
+
+.interior :global(.screen) {
+  fill: #8fc4dc;
+}
+
+.interior :global(.gear) {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: gear-spin 3s linear infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .interior {
+    filter: brightness(0.78);
+  }
+
+  .interior :global(.sky) {
+    fill: #1d2733;
+  }
+}
+
+@keyframes gear-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

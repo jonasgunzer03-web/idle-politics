@@ -1,0 +1,43 @@
+.ticker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 calc(10px + var(--safe-right)) 0 calc(10px + var(--safe-left));
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.ticker[data-tense='true'] {
+  background: color-mix(in srgb, var(--bad) 18%, var(--surface-2));
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.window {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.track {
+  display: inline-flex;
+  gap: 48px;
+  animation: ticker 70s linear infinite;
+  will-change: transform;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

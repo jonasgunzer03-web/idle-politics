@@ -1,21 +1,72 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import type { GameConfig } from '../config';
-import { applyTap, buyGenerator, type BuyMode } from '../engine/economy';
-import { debugAddResources, debugSetStage, debugShiftTime } from '../engine/debug';
+import { investInGroup } from '../engine/alliances';
+import { autocracyAction } from '../engine/autocracy';
 import {
+  finishCeremony,
+  promote,
+  runForElection,
+  turnAutocratic,
+  type ElectionOutcome,
+} from '../engine/career';
+import {
+  debugAddResources,
+  debugOverthrow,
+  debugSetMeters,
+  debugSetStage,
+  debugShiftTime,
+  debugSwitchState,
+  debugTriggerEvent,
+} from '../engine/debug';
+import {
+  buildProject,
+  buyActionUpgrade,
+  buyGenerator,
+  buyVehicle,
+  performAction,
+  type BuyMode,
+  type UpgradeKind,
+} from '../engine/economy';
+import { resolveEvent } from '../engine/events';
+import { foreignAction } from '../engine/foreign';
+import {
+  beginNewRunSetup,
+  buyLegacy,
+  checkAchievements,
+  completeEmigration,
+  continueRuling,
   createNewGame,
   markHintSeen,
   markIntroSeen,
   pendingHints,
+  retire,
+  startEmigration,
   startRun,
+  updateCharacter,
   type RunSetup,
 } from '../engine/game';
-import type { GeneratorId, ResourceId, TapActionId } from '../engine/ids';
+import type {
+  AchievementId,
+  ActionId,
+  AutocracyActionId,
+  ForeignActionId,
+  ForeignId,
+  GeneratorId,
+  GroupId,
+  LegacyId,
+  LocationId,
+  ProfessionId,
+  ProjectId,
+  ResourceMap,
+  StateId,
+  VehicleId,
+} from '../engine/ids';
 import { exportBackup, importBackup, type ImportResult } from '../engine/save/backup';
 import type { SaveManager } from '../engine/save/saveSystem';
 import type { StorageErrorKind } from '../engine/save/storage';
-import type { GameState, HintId } from '../engine/schema';
+import type { Character, GameState, HintId } from '../engine/schema';
 import { advance, type OfflineReport } from '../engine/tick';
+import { enterBuilding, leaveBuilding, stopWalking, walkTo } from '../engine/world';
 
 // Der Store ist eine dünne Hülle um die Engine: Jede Aktion ruft genau eine reine
 // Engine-Funktion auf und schreibt das Ergebnis in einem einzigen `set` zurück.
@@ -25,14 +76,31 @@ export type Overlay =
   | { kind: 'offline'; report: OfflineReport }
   | { kind: 'recovered' }
   | { kind: 'intro' }
-  | { kind: 'hint'; hint: HintId };
+  | { kind: 'hint'; hint: HintId }
+  | { kind: 'election'; outcome: ElectionOutcome }
+  | { kind: 'resigned'; stage: number };
 
 export type StorageStatus = 'ok' | StorageErrorKind | 'invalid';
+
+/** Bottom Sheets, die der Spieler selbst öffnet. Immer nur eines, nie gleichzeitig mit einem Dialog. */
+export type Sheet =
+  | { kind: 'events' }
+  | { kind: 'career' }
+  | { kind: 'autocracy' }
+  | { kind: 'group'; id: GroupId }
+  | { kind: 'country'; id: ForeignId }
+  | { kind: 'region'; id: string }
+  | { kind: 'emigration' }
+  | { kind: 'editor' };
 
 export interface GameStoreState {
   game: GameState;
   /** Warteschlange für Dialoge. Angezeigt wird immer nur der erste Eintrag. */
   overlays: Overlay[];
+  /** Vom Spieler geöffnetes Fenster (null = keines). */
+  sheet: Sheet | null;
+  /** Kurze Einblendungen für neue Erfolge (blockieren nichts). */
+  toasts: AchievementId[];
   storageStatus: StorageStatus;
   hydrated: boolean;
   debug: boolean;
@@ -41,10 +109,37 @@ export interface GameStoreState {
   advanceTo: (now: number) => void;
   save: (now: number) => void;
   dismissOverlay: () => void;
+  dismissToast: () => void;
+  openSheet: (sheet: Sheet) => boolean;
+  closeSheet: () => void;
 
   beginRun: (setup: RunSetup, now: number) => void;
-  tap: (action: TapActionId) => { resource: ResourceId; gained: number };
+  perform: (action: ActionId) => Partial<ResourceMap>;
   buy: (id: GeneratorId, mode: BuyMode) => number;
+  buyUpgrade: (action: ActionId, kind: UpgradeKind) => void;
+  buyVehicle: (id: VehicleId) => void;
+  walkTo: (id: LocationId) => void;
+  stopWalking: () => void;
+  enter: () => void;
+  leave: () => void;
+
+  runElection: (campaign: number) => ElectionOutcome | null;
+  promote: () => void;
+  finishCeremony: () => void;
+  turnAutocratic: () => void;
+  autocracy: (id: AutocracyActionId) => void;
+  resolveEvent: (index: number, choice: 'yes' | 'no') => void;
+  investGroup: (id: GroupId) => void;
+  foreign: (target: ForeignId, action: ForeignActionId) => void;
+  buildProject: (id: ProjectId) => void;
+
+  buyLegacy: (id: LegacyId) => void;
+  updateCharacter: (character: Character) => void;
+  retire: () => void;
+  continueRuling: () => void;
+  newRunSetup: () => void;
+  startEmigration: (to: StateId) => void;
+  completeEmigration: (profession: ProfessionId, now: number) => void;
 
   exportCode: () => string | null;
   importCode: (code: string, now: number) => ImportResult;
@@ -53,6 +148,10 @@ export interface GameStoreState {
   debugAddResources: (amount: number) => void;
   debugTimeJump: (ms: number, now: number) => void;
   debugSetStage: (stage: number) => void;
+  debugSetMeters: (values: { approval?: number; unrest?: number; loyalty?: number }) => void;
+  debugTriggerEvent: () => void;
+  debugOverthrow: () => void;
+  debugSwitchState: (id: StateId) => void;
 }
 
 export interface GameStoreDeps {
@@ -74,10 +173,6 @@ function enqueue(queue: Overlay[], items: Overlay[]): Overlay[] {
   return additions.length === 0 ? queue : [...queue, ...additions];
 }
 
-function hintOverlays(game: GameState, cfg: GameConfig): Overlay[] {
-  return pendingHints(game, cfg).map((hint) => ({ kind: 'hint', hint }));
-}
-
 export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
   const { saves, config: cfg } = deps;
 
@@ -88,10 +183,41 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
   };
 
   return createStore<GameStoreState>()((set, get) => {
-    /** Zeit verrechnen und ggf. Offline-Dialog einreihen. */
+    /**
+     * Neuen Spielstand übernehmen: Erfolge prüfen, fällige Hinweise einreihen.
+     * Liefert nur die geänderten Felder für `set`.
+     */
+    const commit = (
+      state: GameStoreState,
+      game: GameState,
+      extra: Overlay[] = [],
+    ): Partial<GameStoreState> => {
+      if (game === state.game && extra.length === 0) return {};
+      const checked = checkAchievements(game, cfg);
+      const hints: Overlay[] = pendingHints(checked.game, cfg).map((hint) => ({ kind: 'hint', hint }));
+      // Ein Sheet schließt sich, wenn das Spiel die Phase wechselt (z. B. Zeremonie)
+      const sheet = checked.game.phase === 'playing' ? state.sheet : null;
+      return {
+        game: checked.game,
+        overlays: enqueue(state.overlays, [...extra, ...hints]),
+        toasts: checked.unlocked.length > 0 ? [...state.toasts, ...checked.unlocked] : state.toasts,
+        sheet,
+      };
+    };
+
+    /** Reine Engine-Funktion anwenden (für alle einfachen Aktionen). */
+    const apply = (fn: (game: GameState) => GameState) => {
+      set((state) => {
+        const next = fn(state.game);
+        return next === state.game ? state : commit(state, next);
+      });
+    };
+
+    /** Zeit verrechnen; bei Abwesenheit Rückkehr-Dialog, bei Rücktritt Hinweis. */
     const advanceState = (state: GameStoreState, now: number): Partial<GameStoreState> => {
       const result = advance(state.game, now, cfg);
       logIssues(result.issues);
+      const extra: Overlay[] = [];
       let overlays = state.overlays;
       const report = result.offline;
       if (
@@ -100,15 +226,21 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         Object.values(report.gained).some((v) => v > 0)
       ) {
         // Mehrere Abwesenheiten hintereinander: der neueste Bericht ersetzt den alten
-        overlays = [...overlays.filter((o) => o.kind !== 'offline'), { kind: 'offline', report }];
+        overlays = overlays.filter((o) => o.kind !== 'offline');
+        extra.push({ kind: 'offline', report });
       }
-      overlays = enqueue(overlays, hintOverlays(result.game, cfg));
-      return { game: result.game, overlays };
+      if (result.signal === 'resigned' && result.game.run) {
+        extra.push({ kind: 'resigned', stage: result.game.run.stage });
+      }
+      if (result.game === state.game && extra.length === 0) return {};
+      return commit({ ...state, overlays }, result.game, extra);
     };
 
     return {
       game: createNewGame(Date.now(), deps.seed()),
       overlays: [],
+      sheet: null,
+      toasts: [],
       storageStatus: 'ok',
       hydrated: false,
       debug: deps.debug,
@@ -121,6 +253,7 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
           const advanced = advanceState(base, now);
           set({
             ...advanced,
+            game: advanced.game ?? loaded.game,
             overlays: loaded.recoveredFromBackup
               ? [{ kind: 'recovered' }, ...(advanced.overlays ?? [])]
               : (advanced.overlays ?? []),
@@ -160,28 +293,41 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         });
       },
 
+      dismissToast: () => {
+        set((state) => (state.toasts.length === 0 ? state : { toasts: state.toasts.slice(1) }));
+      },
+
+      openSheet: (sheet) => {
+        const state = get();
+        // Nie zwei Fenster gleichzeitig: nur öffnen, wenn kein Dialog wartet
+        if (state.overlays.length > 0 || state.game.phase !== 'playing') return false;
+        set({ sheet });
+        return true;
+      },
+
+      closeSheet: () => {
+        if (get().sheet !== null) set({ sheet: null });
+      },
+
       beginRun: (setup, now) => {
         set((state) => {
           const game = startRun(state.game, setup, now, cfg);
           if (game === state.game) return state;
           const intro: Overlay[] = game.flags.introSeen ? [] : [{ kind: 'intro' }];
-          return {
-            game,
-            overlays: enqueue(state.overlays, [...intro, ...hintOverlays(game, cfg)]),
-          };
+          return commit({ ...state, overlays: [] }, game, intro);
         });
         get().save(now);
       },
 
-      tap: (action) => {
+      perform: (action) => {
         // Rückgabe über eine lokale Variable, weil `set` selbst nichts zurückgibt
-        let outcome: { resource: ResourceId; gained: number } = { resource: 'money', gained: 0 };
+        let gained: Partial<ResourceMap> = {};
         set((state) => {
-          const result = applyTap(state.game, action, cfg);
-          outcome = { resource: result.resource, gained: result.gained };
-          return result.game === state.game ? state : { game: result.game };
+          const result = performAction(state.game, action, cfg);
+          gained = result.gained;
+          return result.game === state.game ? state : commit(state, result.game);
         });
-        return outcome;
+        return gained;
       },
 
       buy: (id, mode) => {
@@ -189,9 +335,95 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         set((state) => {
           const result = buyGenerator(state.game, id, mode, cfg);
           bought = result.bought;
-          return result.game === state.game ? state : { game: result.game };
+          return result.game === state.game ? state : commit(state, result.game);
         });
         return bought;
+      },
+
+      buyUpgrade: (action, kind) => {
+        apply((g) => buyActionUpgrade(g, action, kind, cfg));
+      },
+      buyVehicle: (id) => {
+        apply((g) => buyVehicle(g, id, cfg));
+      },
+      walkTo: (id) => {
+        apply((g) => walkTo(g, id, cfg));
+      },
+      stopWalking: () => {
+        apply((g) => stopWalking(g));
+      },
+      enter: () => {
+        apply((g) => enterBuilding(g, cfg));
+      },
+      leave: () => {
+        apply((g) => leaveBuilding(g));
+      },
+
+      runElection: (campaign) => {
+        let outcome: ElectionOutcome | null = null;
+        set((state) => {
+          const result = runForElection(state.game, campaign, cfg);
+          outcome = result.outcome;
+          if (!result.outcome) return state;
+          // Sieg führt in die Zeremonie; Niederlage zeigt einen Dialog
+          const extra: Overlay[] = result.outcome.won ? [] : [{ kind: 'election', outcome: result.outcome }];
+          return commit({ ...state, sheet: null }, result.game, extra);
+        });
+        return outcome;
+      },
+
+      promote: () => {
+        set((state) => {
+          const next = promote(state.game, cfg);
+          return next === state.game ? state : commit({ ...state, sheet: null }, next);
+        });
+      },
+      finishCeremony: () => {
+        apply((g) => finishCeremony(g));
+      },
+      turnAutocratic: () => {
+        apply((g) => turnAutocratic(g, cfg));
+      },
+      autocracy: (id) => {
+        apply((g) => autocracyAction(g, id, cfg));
+      },
+      resolveEvent: (index, choice) => {
+        apply((g) => resolveEvent(g, index, choice, cfg));
+      },
+      investGroup: (id) => {
+        apply((g) => investInGroup(g, id, cfg));
+      },
+      foreign: (target, action) => {
+        apply((g) => foreignAction(g, target, action, cfg));
+      },
+      buildProject: (id) => {
+        apply((g) => buildProject(g, id, cfg));
+      },
+
+      buyLegacy: (id) => {
+        apply((g) => buyLegacy(g, id, cfg));
+      },
+      updateCharacter: (character) => {
+        apply((g) => updateCharacter(g, character, cfg));
+      },
+      retire: () => {
+        apply((g) => retire(g, cfg));
+      },
+      continueRuling: () => {
+        apply((g) => continueRuling(g));
+      },
+      newRunSetup: () => {
+        apply((g) => beginNewRunSetup(g));
+      },
+      startEmigration: (to) => {
+        set((state) => {
+          const next = startEmigration(state.game, to, cfg);
+          return next === state.game ? state : commit({ ...state, sheet: null }, next);
+        });
+      },
+      completeEmigration: (profession, now) => {
+        apply((g) => completeEmigration(g, profession, now, cfg));
+        get().save(now);
       },
 
       exportCode: () => exportBackup(get().game),
@@ -201,13 +433,7 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         if (!result.ok) return result;
         // Importierter Stand gilt ab jetzt; keine Offline-Gutschrift für die Zeit im Code
         const game: GameState = { ...result.game, lastActiveAt: now };
-        set((state) => ({
-          game,
-          overlays: enqueue(
-            state.overlays.filter((o) => o.kind !== 'offline'),
-            hintOverlays(game, cfg),
-          ),
-        }));
+        set((state) => commit({ ...state, overlays: [], sheet: null }, game));
         get().save(now);
         return result;
       },
@@ -217,23 +443,32 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         set({
           game: createNewGame(now, deps.seed()),
           overlays: [],
+          sheet: null,
+          toasts: [],
           storageStatus: cleared.ok ? 'ok' : cleared.error,
         });
       },
 
       debugAddResources: (amount) => {
-        set((state) => ({ game: debugAddResources(state.game, amount) }));
+        apply((g) => debugAddResources(g, amount));
       },
-
       debugTimeJump: (ms, now) => {
         set((state) => advanceState({ ...state, game: debugShiftTime(state.game, ms) }, now));
       },
-
       debugSetStage: (stage) => {
-        set((state) => {
-          const game = debugSetStage(state.game, stage);
-          return { game, overlays: enqueue(state.overlays, hintOverlays(game, cfg)) };
-        });
+        apply((g) => debugSetStage(g, stage, cfg));
+      },
+      debugSetMeters: (values) => {
+        apply((g) => debugSetMeters(g, values));
+      },
+      debugTriggerEvent: () => {
+        apply((g) => debugTriggerEvent(g, cfg));
+      },
+      debugOverthrow: () => {
+        apply((g) => debugOverthrow(g, cfg));
+      },
+      debugSwitchState: (id) => {
+        apply((g) => debugSwitchState(g, id, cfg));
       },
     };
   });

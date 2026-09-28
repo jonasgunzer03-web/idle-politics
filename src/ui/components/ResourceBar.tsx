@@ -3,7 +3,7 @@ import { defaultConfig } from '../../config';
 import { productionRates } from '../../engine/economy';
 import { formatNumber } from '../../engine/format';
 import { RESOURCE_IDS, type ResourceId } from '../../engine/ids';
-import { isResourceUnlocked } from '../../engine/unlocks';
+import { isResourceUnlocked } from '../../engine/rules';
 import { de } from '../../i18n/de';
 import { useGame } from '../../store';
 import { ResourceIcon } from './ResourceIcon';
@@ -13,7 +13,7 @@ const cfg = defaultConfig;
 
 const ResourceChip = memo(function ResourceChip({ resource }: { resource: ResourceId }) {
   const amount = useGame((s) => s.game.run?.resources[resource] ?? 0);
-  const rate = useGame((s) => (s.game.run ? productionRates(s.game.run, cfg)[resource] : 0));
+  const rate = useGame((s) => (s.game.run ? productionRates(s.game, cfg)[resource] : 0));
   const currency = useGame((s) =>
     resource === 'money' && s.game.run ? cfg.states[s.game.run.stateId].currency : '',
   );
