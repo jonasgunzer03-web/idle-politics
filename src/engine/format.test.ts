@@ -36,6 +36,13 @@ describe('formatNumber', () => {
     expect(formatNumber(1.25, { smallDecimals: 1 })).toBe('1,2');
   });
 
+  it('rundet auf Wunsch auf (Fehlbeträge)', () => {
+    expect(formatNumber(0.37, { rounding: 'ceil' })).toBe('1');
+    expect(formatNumber(12, { rounding: 'ceil' })).toBe('12');
+    expect(formatNumber(12_401, { rounding: 'ceil' })).toBe('12,5 Tsd.');
+    expect(formatNumber(999_951, { rounding: 'ceil' })).toBe('1,0 Mio.');
+  });
+
   it('zeigt nie „-0“', () => {
     expect(formatNumber(-0)).toBe('0');
     expect(formatNumber(-0.4)).toBe('0');

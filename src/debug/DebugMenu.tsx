@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Bug } from 'lucide-react';
 import { MAX_STAGE } from '../engine/ids';
-import { randomSeed } from '../engine/rng';
 import { de } from '../i18n/de';
 import { gameStore, useGame } from '../store';
 import { BottomSheet } from '../ui/components/BottomSheet';
 import { Button } from '../ui/components/Button';
-import { randomCharacter } from '../ui/characterDefaults';
 import styles from './DebugMenu.module.css';
 
 const HOUR_MS = 3_600_000;
@@ -39,27 +37,6 @@ export function DebugMenu() {
           }}
           testId="debug-menu"
         >
-          {!hasRun && (
-            <>
-              <p className={styles.note}>{de.debug.noRun}</p>
-              <Button
-                block
-                onClick={() => {
-                  actions.beginRun(
-                    {
-                      character: randomCharacter(randomSeed()),
-                      stateId: 'rhenania',
-                      profession: 'office',
-                    },
-                    Date.now(),
-                  );
-                  setOpen(false);
-                }}
-              >
-                {de.debug.quickStart}
-              </Button>
-            </>
-          )}
           {hasRun && (
             <>
               <div className={styles.grid}>
@@ -107,6 +84,8 @@ export function DebugMenu() {
                   disabled={stage <= 1}
                   onClick={() => {
                     actions.debugSetStage(stage - 1);
+                    // Schließen, damit ein ausgelöster Hinweis nie über dem Menü liegt
+                    setOpen(false);
                   }}
                   aria-label={`${de.debug.setStage} ${stage - 1}`}
                 >
@@ -117,6 +96,7 @@ export function DebugMenu() {
                   disabled={stage >= MAX_STAGE}
                   onClick={() => {
                     actions.debugSetStage(stage + 1);
+                    setOpen(false);
                   }}
                   aria-label={`${de.debug.setStage} ${stage + 1}`}
                 >

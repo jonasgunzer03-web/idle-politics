@@ -13,7 +13,10 @@ import { TabBar, type TabId } from './components/TabBar';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { OverlayHost } from './dialogs/OverlayHost';
 import { CareerTab } from './tabs/CareerTab';
-import { InvestTab, NetworkTab, WorldTab } from './tabs/OtherTabs';
+import { InvestTab } from './tabs/InvestTab';
+import { NetworkTab, WorldTab } from './tabs/OtherTabs';
+import { FloatingNumbers } from './effects/FloatingNumbers';
+import { SetupFlow } from './setup/SetupFlow';
 import { ProfileTab } from './tabs/ProfileTab';
 import styles from './App.module.css';
 
@@ -51,6 +54,8 @@ function Shell() {
     '--state-on-primary': palette.onPrimary,
   } as CSSProperties;
 
+  const inSetup = useGame((s) => s.game.phase === 'setup');
+
   if (!hydrated) return <div className={styles.splash} />;
 
   return (
@@ -60,24 +65,35 @@ function Shell() {
       data-state={stateId ?? 'none'}
       data-debug={debug ? 'true' : 'false'}
     >
-      <header className={styles.header}>
-        {stateId ? (
-          <>
-            <ResourceBar />
-            {tab === 'career' && <StatusBars />}
-          </>
-        ) : (
-          <p className={styles.brand}>{de.appName}</p>
-        )}
-      </header>
+      {!inSetup && (
+        <header className={styles.header}>
+          {stateId ? (
+            <>
+              <ResourceBar />
+              {tab === 'career' && <StatusBars />}
+            </>
+          ) : (
+            <p className={styles.brand}>{de.appName}</p>
+          )}
+        </header>
+      )}
       <UpdatePrompt />
       <StorageBanner />
-      <main className={styles.content} key={tab}>
-        <TabContent tab={tab} />
-      </main>
-      <TabBar active={tab} onSelect={setTab} locked={{ world: worldLocked }} />
+      {inSetup ? (
+        <div className={styles.setup}>
+          <SetupFlow />
+        </div>
+      ) : (
+        <>
+          <main className={styles.content} key={tab}>
+            <TabContent tab={tab} />
+          </main>
+          <TabBar active={tab} onSelect={setTab} locked={{ world: worldLocked }} />
+          <FloatingNumbers />
+        </>
+      )}
       <OverlayHost />
-      {debug && <DebugMenu />}
+      {debug && !inSetup && <DebugMenu />}
       <RotateOverlay />
     </div>
   );

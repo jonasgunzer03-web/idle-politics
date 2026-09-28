@@ -1,0 +1,50 @@
+.figure {
+  display: block;
+  height: 100%;
+  width: auto;
+  overflow: visible;
+}
+
+.upper,
+.eyes {
+  transform-box: fill-box;
+}
+
+.upper {
+  transform-origin: 50% 100%;
+}
+
+.eyes {
+  transform-origin: 50% 50%;
+}
+
+/* Atmen: der Oberkörper hebt sich kaum merklich */
+.animated .upper {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* Blinzeln: kurz alle paar Sekunden */
+.animated .eyes {
+  animation: blink 5s linear infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-1px) scaleY(1.008);
+  }
+}
+
+@keyframes blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}

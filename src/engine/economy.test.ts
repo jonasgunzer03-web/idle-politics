@@ -24,15 +24,24 @@ describe('Kostenformel', () => {
     expect(generatorCost(def('overtime'), 0, 1, cfg).money).toBeCloseTo(10);
   });
 
-  it('steigt pro Kauf um den Faktor 1,15', () => {
-    expect(generatorCost(def('overtime'), 1, 1, cfg).money).toBeCloseTo(11.5);
-    expect(generatorCost(def('overtime'), 5, 1, cfg).money).toBeCloseTo(10 * 1.15 ** 5);
+  it('steigt pro Kauf um den Faktor 1,15 und wird auf ganze Beträge aufgerundet', () => {
+    expect(generatorCost(def('overtime'), 1, 1, cfg).money).toBe(12); // 11,5
+    expect(generatorCost(def('overtime'), 5, 1, cfg).money).toBe(Math.ceil(10 * 1.15 ** 5));
   });
 
-  it('Mehrfachkauf entspricht der Summe der Einzelkäufe', () => {
-    let sum = 0;
-    for (let i = 3; i < 13; i++) sum += generatorCost(def('overtime'), i, 1, cfg).money ?? 0;
-    expect(generatorCost(def('overtime'), 3, 10, cfg).money).toBeCloseTo(sum, 6);
+  it('Preise sind immer ganze Zahlen, auch bei Gleitkomma-Grenzfällen', () => {
+    for (let owned = 0; owned < 200; owned++) {
+      const money = generatorCost(def('overtime'), owned, 1, cfg).money ?? 0;
+      expect(Number.isInteger(money)).toBe(true);
+      expect(money).toBeGreaterThanOrEqual(10 * 1.15 ** owned - 1e-6);
+    }
+  });
+
+  it('Mehrfachkauf entspricht der Summe der Einzelkäufe (bis auf Rundung)', () => {
+    let exact = 0;
+    for (let i = 3; i < 13; i++) exact += 10 * 1.15 ** i;
+    const bulk = generatorCost(def('overtime'), 3, 10, cfg).money ?? 0;
+    expect(bulk).toBe(Math.ceil(exact - 1e-9));
   });
 
   it('kennt Kosten in mehreren Ressourcen', () => {
@@ -106,7 +115,7 @@ describe('Kaufen', () => {
     const { game: next, bought } = buyGenerator(game, 'overtime', 1, cfg);
     expect(bought).toBe(1);
     expect(next.run?.generators.overtime).toBe(1);
-    expect(next.run?.resources.money).toBeCloseTo(15);
+    expect(next.run?.resources.money).toBe(15);
   });
 
   it('lehnt ab, wenn Mittel fehlen, und ändert nichts', () => {
@@ -124,9 +133,9 @@ describe('Kaufen', () => {
       game = r.game;
       total += r.bought;
     }
-    // 10 + 11,5 = 21,5; das dritte kostet 13,225
+    // 10 + 12 = 22; das dritte kostet 14 (13,225 aufgerundet)
     expect(total).toBe(2);
-    expect(game.run?.resources.money).toBeCloseTo(8.5);
+    expect(game.run?.resources.money).toBe(8);
     expect(game.run?.resources.money).toBeGreaterThanOrEqual(0);
   });
 

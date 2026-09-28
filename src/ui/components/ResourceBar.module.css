@@ -12,6 +12,7 @@
     'amount amount'
     'rate rate';
   align-items: center;
+  align-content: start;
   column-gap: 6px;
   padding: 6px 10px;
   border-radius: var(--radius-sm);

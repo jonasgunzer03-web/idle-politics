@@ -1,0 +1,227 @@
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  contain: strict;
+
+  --sky-top: #bcd6e6;
+  --sky-bottom: #eef1ea;
+  --sun: #f4d58a;
+  --cloud: rgb(255 255 255 / 85%);
+  --far: #aebdc6;
+  --near: #95a6b1;
+  --brick: #a5563f;
+  --brick-dark: #7f3f2e;
+  --concrete: #c9c4b8;
+  --trim: #6f675c;
+  --window: #dbe8ef;
+  --glass-line: #6f5a4f;
+  --gate: #5c6770;
+  --gate-line: #47515a;
+  --sign: #c9a227;
+  --sign-text: #2b2f36;
+  --street: #5a5f66;
+  --sidewalk: #b7b2a7;
+  --curb: #8f8a80;
+}
+
+@media (prefers-color-scheme: dark) {
+  .scene {
+    --sky-top: #16202c;
+    --sky-bottom: #33404d;
+    --sun: #d9dde3;
+    --cloud: rgb(210 220 230 / 25%);
+    --far: #2b3540;
+    --near: #26303a;
+    --brick: #6e3b2d;
+    --brick-dark: #552c22;
+    --concrete: #4d4a44;
+    --trim: #2f2c28;
+    --window: #e8c774;
+    --glass-line: #3a302a;
+    --gate: #353c43;
+    --gate-line: #2a3036;
+    --sign: #a8861f;
+    --street: #2a2d31;
+    --sidewalk: #4a4740;
+    --curb: #3a3833;
+  }
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.skyTop {
+  stop-color: var(--sky-top);
+}
+.skyBottom {
+  stop-color: var(--sky-bottom);
+}
+.sun {
+  fill: var(--sun);
+}
+.cloudFill {
+  fill: var(--cloud);
+}
+.far {
+  fill: var(--far);
+}
+.near {
+  fill: var(--near);
+}
+.brick {
+  fill: var(--brick);
+}
+.brickDark {
+  fill: var(--brick-dark);
+}
+.concrete {
+  fill: var(--concrete);
+}
+.trim {
+  fill: var(--trim);
+}
+.window {
+  fill: var(--window);
+}
+.glassLine {
+  stroke: var(--glass-line);
+  stroke-width: 2;
+  fill: none;
+}
+.gate {
+  fill: var(--gate);
+}
+.gateLine {
+  stroke: var(--gate-line);
+  stroke-width: 1.5;
+}
+.glassDoor {
+  fill: var(--window);
+  opacity: 0.8;
+}
+.sign {
+  fill: var(--sign);
+}
+.signText {
+  fill: var(--sign-text);
+  font-family: var(--font-sans);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.street {
+  fill: var(--street);
+}
+.sidewalk {
+  fill: var(--sidewalk);
+}
+.curb {
+  fill: var(--curb);
+}
+
+/* Wolken ziehen langsam von links nach rechts (nur transform) */
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cloud {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  animation: drift linear infinite;
+  will-change: transform;
+}
+
+.cloudSvg {
+  width: 90px;
+  height: auto;
+  display: block;
+}
+
+.cloud0 {
+  top: 8%;
+  animation-duration: 70s;
+  animation-delay: -20s;
+}
+.cloud1 {
+  top: 20%;
+  animation-duration: 95s;
+  animation-delay: -60s;
+  opacity: 0.8;
+}
+.cloud2 {
+  top: 4%;
+  animation-duration: 120s;
+  animation-delay: -100s;
+  opacity: 0.6;
+}
+
+@keyframes drift {
+  from {
+    transform: translateX(-25%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}
+
+/* Passant: läuft über die ganze Breite */
+.passerbyTrack {
+  position: absolute;
+  left: 0;
+  bottom: 14%;
+  width: 100%;
+  height: 22%;
+  animation: walk-across 26s linear infinite;
+  animation-delay: -8s;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.passerby {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+
+.walk {
+  animation: step 0.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+
+@keyframes walk-across {
+  from {
+    transform: translateX(-12%);
+  }
+  to {
+    transform: translateX(108%);
+  }
+}
+
+@keyframes step {
+  from {
+    transform: scaleX(0.8);
+  }
+  to {
+    transform: scaleX(1.15);
+  }
+}
+
+.figureSlot {
+  position: absolute;
+  left: 50%;
+  /* Füße auf dem Gehweg (y ≈ 250 von 300) */
+  bottom: 12%;
+  height: 60%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

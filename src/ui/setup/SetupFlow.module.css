@@ -1,0 +1,349 @@
+/* ---------- Titelbildschirm ---------- */
+.title {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
+    calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+}
+
+.titleInner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.emblem {
+  width: 120px;
+  height: 120px;
+  border-radius: 28px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+}
+
+.titleHeading {
+  font-size: 2.4rem;
+  margin-top: 12px;
+}
+
+.subtitle {
+  opacity: 0.8;
+  font-size: 1.05rem;
+}
+
+.titleFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.titleFooter button {
+  background: var(--state-secondary);
+  color: #1c1f24;
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  text-align: center;
+}
+
+/* ---------- Rahmen für die Schritte ---------- */
+.frame {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.frameHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: calc(8px + var(--safe-top)) calc(16px + var(--safe-right)) 8px
+    calc(4px + var(--safe-left));
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+}
+
+.back {
+  width: var(--tap);
+  height: var(--tap);
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.stepOf {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.frameTitle {
+  font-size: 1.35rem;
+}
+
+.frameBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px calc(16px + var(--safe-right)) 24px calc(16px + var(--safe-left));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.frameFooter {
+  padding: 12px calc(16px + var(--safe-right)) calc(12px + var(--safe-bottom))
+    calc(16px + var(--safe-left));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- Charakter-Editor ---------- */
+.preview {
+  position: relative;
+  height: 190px;
+  display: flex;
+  justify-content: center;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 12px 0 6px;
+}
+
+.random {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend {
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.fieldset .legend {
+  margin-bottom: 0;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-top: -8px;
+}
+
+.error {
+  color: var(--bad);
+  font-size: 0.85rem;
+  margin-top: -8px;
+}
+
+.swatches {
+  display: grid;
+  /* Zwei Reihen à vier Felder, jedes mindestens 44 px groß */
+  grid-template-columns: repeat(4, minmax(44px, 54px));
+  gap: 10px 14px;
+}
+
+.swatch {
+  aspect-ratio: 1;
+  min-height: var(--tap);
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  padding: 0;
+}
+
+.swatch[aria-checked='true'] {
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px var(--state-secondary);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.chip {
+  min-height: var(--tap);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0 4px;
+}
+
+.chip[aria-checked='true'] {
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  border-color: var(--state-primary);
+}
+
+/* ---------- Karten (Staat, Beruf) ---------- */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition:
+    border-color var(--dur) var(--ease),
+    transform 120ms var(--ease);
+}
+
+.card[aria-checked='true'] {
+  border-color: var(--card-accent, var(--state-primary));
+  box-shadow:
+    0 0 0 2px var(--state-secondary),
+    var(--shadow);
+}
+
+.card:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.card:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cardTitles {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardName {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.cardSub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.effects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+.pro::before {
+  content: '+ ';
+  color: var(--good);
+  font-weight: 700;
+}
+
+.con::before {
+  content: '− ';
+  color: var(--bad);
+  font-weight: 700;
+}
+
+.ratings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.rating {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+}
+
+.dotOn,
+.dotOff {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dotOn {
+  background: var(--text);
+}
+
+.dotOff {
+  background: var(--border);
+}
+
+.professionCard {
+  flex-direction: row;
+  align-items: center;
+}
+
+.professionFigure {
+  height: 120px;
+  flex-shrink: 0;
+  width: 64px;
+  display: flex;
+  justify-content: center;
+}

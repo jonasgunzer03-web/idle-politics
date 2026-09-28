@@ -1,7 +1,7 @@
 // Alle Spieltexte auf Deutsch. Für eine englische Version wird eine Datei en.ts mit
 // demselben Aufbau ergänzt (der Typ `Strings` erzwingt Vollständigkeit).
 
-import type { ResourceId } from '../engine/ids';
+import type { GeneratorId, ProfessionId, ResourceId, StateId, TapActionId } from '../engine/ids';
 
 export const de = {
   appName: 'Idle Politics',
@@ -67,6 +67,237 @@ export const de = {
     unrest: 'Unruhe',
   },
 
+  title: {
+    subtitle: 'Vom Arbeiter an die Spitze des Staates',
+    newGame: 'Neues Spiel',
+    disclaimer: 'Alle Staaten, Personen und Parteien sind frei erfunden.',
+  },
+
+  setup: {
+    back: 'Zurück',
+    next: 'Weiter',
+    start: 'Karriere beginnen',
+    stepOf: 'Schritt {current} von {total}',
+    character: {
+      title: 'Deine Figur',
+      name: 'Name',
+      namePlaceholder: 'Vor- und Nachname',
+      nameMissing: 'Bitte gib einen Namen ein.',
+      skinTone: 'Hautton',
+      hairStyle: 'Frisur',
+      hairColor: 'Haarfarbe',
+      random: 'Zufall',
+      option: '{label} {n}',
+      hairStyles: ['Glatze', 'Kurz', 'Seitenscheitel', 'Stoppeln', 'Lang', 'Dutt', 'Locken', 'Bob'],
+    },
+    state: {
+      title: 'Wähle deinen Staat',
+      tempo: 'Aufstiegstempo',
+      risk: 'Risiko',
+      soon: 'Bald verfügbar',
+      pros: 'Vorteile',
+      cons: 'Nachteile',
+      rating: '{value} von 5',
+    },
+    profession: {
+      title: 'Wähle deinen Beruf',
+    },
+  },
+
+  states: {
+    novaria: {
+      name: 'Novaria',
+      government: 'Präsidialdemokratie',
+      pros: ['Geld ×1,4', 'Spenden- und Lobby-Generatoren'],
+      cons: ['Wahlkämpfe ×1,5 teurer', 'Zustimmung schwankt stärker'],
+    },
+    rhenania: {
+      name: 'Rhenanien',
+      government: 'Parlamentarische Demokratie',
+      pros: ['Unruhe sinkt schneller', 'Koalitionen günstiger'],
+      cons: ['Aufstiegsanforderungen ×1,2', 'Geld ×0,9'],
+    },
+    borealis: {
+      name: 'Borealis',
+      government: 'Autoritäres Präsidialsystem mit Scheinwahlen',
+      pros: ['Schneller Aufstieg', 'Rohstoffeinnahmen', 'Loyalität kaufbar'],
+      cons: ['Hohe Grund-Unruhe', 'Oligarchen als Rivalen', 'Schlechte Beziehungen im Ausland'],
+    },
+    zentralia: {
+      name: 'Zentralia',
+      government: 'Einparteienstaat',
+      pros: [
+        'Hohe Wirtschaftsleistung',
+        'Starker Apparat',
+        'Unruhe steigt langsam bei hoher Loyalität',
+      ],
+      cons: [
+        'Anhänger fast wertlos',
+        'Aufstieg nur über Loyalität und Einfluss',
+        'Säuberungen bei niedriger Loyalität',
+      ],
+    },
+  } satisfies Record<StateId, { name: string; government: string; pros: string[]; cons: string[] }>,
+
+  professions: {
+    office: {
+      name: 'Büroangestellter',
+      pros: ['Geld ×1,5'],
+      cons: ['Einfluss ×0,7'],
+      text: 'Solides Gehalt, aber wenig Kontakt zur Basis.',
+    },
+    skilled: {
+      name: 'Facharbeiter',
+      pros: ['Einfluss ×1,5', 'Anhänger ×1,2'],
+      cons: ['Geld ×0,7'],
+      text: 'Weniger Lohn, dafür bestens vernetzt in Werk und Gewerkschaft.',
+    },
+  } satisfies Record<ProfessionId, { name: string; pros: string[]; cons: string[]; text: string }>,
+
+  // Amtstitel je Staat, Stufe 1 bis 12. `autocratic` ersetzt ab Stufe 6 den Titel auf dem
+  // autokratischen Pfad (nur Novaria und Rhenanien).
+  careers: {
+    novaria: {
+      titles: [
+        'Arbeiter',
+        'Vorarbeiter',
+        'Bezirksdelegierter',
+        'Stadtrat',
+        'Bürgermeister',
+        'Abgeordneter im Staatsparlament',
+        'Gouverneur',
+        'Kongressabgeordneter',
+        'Senator',
+        'Minister',
+        'Vizepräsident',
+        'Präsident',
+      ],
+      autocratic: {
+        6: 'Parteikommissar im Staatsparlament',
+        7: 'Militärgouverneur',
+        8: 'Mitglied des Notstandsrats',
+        9: 'Senator auf Lebenszeit',
+        10: 'Minister mit Sondervollmachten',
+        11: 'Stellvertreter des Staatschefs',
+        12: 'Diktator',
+      },
+    },
+    rhenania: {
+      titles: [
+        'Arbeiter',
+        'Betriebsrat',
+        'Ortsvereinsvorsitzender',
+        'Stadtrat',
+        'Bürgermeister',
+        'Landtagsabgeordneter',
+        'Landesminister',
+        'Ministerpräsident',
+        'Bundestagsabgeordneter',
+        'Bundesminister',
+        'Bundeskanzler',
+        'Präsident',
+      ],
+      autocratic: {
+        6: 'Landesbevollmächtigter',
+        7: 'Landeskommissar',
+        8: 'Statthalter',
+        9: 'Mitglied des Staatsrats',
+        10: 'Sonderminister',
+        11: 'Kanzler mit Notstandsvollmacht',
+        12: 'Diktator',
+      },
+    },
+    borealis: {
+      titles: [
+        'Arbeiter',
+        'Brigadeleiter',
+        'Parteisekretär im Betrieb',
+        'Stadtdumaabgeordneter',
+        'Bürgermeister',
+        'Gebietsgouverneur',
+        'Dumaabgeordneter',
+        'Vizeminister',
+        'Minister',
+        'Premierminister',
+        'Präsident',
+        'Präsident auf Lebenszeit',
+      ],
+      autocratic: {},
+    },
+    zentralia: {
+      titles: [
+        'Arbeiter',
+        'Gruppenleiter',
+        'Sekretär der Parteizelle',
+        'Kreiskader',
+        'Bürgermeister',
+        'Provinzkader',
+        'Provinzgouverneur',
+        'Provinzparteisekretär',
+        'Zentralkomitee',
+        'Politbüro',
+        'Ständiger Ausschuss',
+        'Generalsekretär auf Lebenszeit',
+      ],
+      autocratic: {},
+    },
+  } satisfies Record<StateId, { titles: string[]; autocratic: Partial<Record<number, string>> }>,
+
+  career: {
+    stage: 'Stufe {stage} von {max}',
+    actions: 'Arbeiten',
+    upgrades: 'Lohnende Investitionen',
+    allUpgrades: 'Alle Investitionen',
+  },
+
+  tapActions: {
+    work: 'Schicht arbeiten',
+    network: 'Mit Kollegen reden',
+  } satisfies Record<TapActionId, string>,
+
+  invest: {
+    title: 'Investieren',
+    buyMode: 'Kaufmenge',
+    modes: { one: '×1', ten: '×10', max: 'Max' },
+    owned: 'Besitz: {count}',
+    perUnit: '{amount} je Stück',
+    total: '· gesamt {amount}',
+    buy: 'Kaufen',
+    buyCount: '{count} kaufen',
+    missing: 'Fehlt: {amount}',
+    unlockAt: 'Ab Stufe {stage}',
+    groupLocked: 'Wird ab Stufe {stage} freigeschaltet.',
+    groups: {
+      money: 'Geld verdienen',
+      influence: 'Einfluss gewinnen',
+      followers: 'Anhänger werben',
+      loyalty: 'Loyalität sichern',
+      diplomacy: 'Diplomatie',
+    } satisfies Record<ResourceId, string>,
+  },
+
+  generators: {
+    overtime: { name: 'Überstunden', text: 'Ein paar Stunden mehr in der Woche.' },
+    sideJob: { name: 'Nebenjob', text: 'Am Wochenende Regale einräumen.' },
+    smallBusiness: { name: 'Kleinunternehmen', text: 'Ein eigener Handwerksbetrieb.' },
+    rentals: { name: 'Vermietung', text: 'Zwei Wohnungen in der Altstadt.' },
+    company: { name: 'Mittelständische Firma', text: 'Hundert Beschäftigte, solide Aufträge.' },
+    holding: { name: 'Holding', text: 'Beteiligungen in mehreren Branchen.' },
+    regularsTable: { name: 'Stammtisch', text: 'Jeden Donnerstag in der Eckkneipe.' },
+    clubWork: { name: 'Vereinsarbeit', text: 'Kassenwart im Sportverein.' },
+    localBranch: { name: 'Ortsverband', text: 'Ein eigener Ortsverband der Partei.' },
+    pressContacts: { name: 'Pressekontakte', text: 'Journalisten, die zurückrufen.' },
+    thinkTank: { name: 'Denkfabrik', text: 'Studien, die deine Positionen stützen.' },
+    flyers: { name: 'Flyer', text: 'Handzettel in Briefkästen und am Werkstor.' },
+    infoStand: { name: 'Infostand', text: 'Samstags auf dem Marktplatz.' },
+    socialMediaTeam: { name: 'Social-Media-Team', text: 'Drei Leute, die rund um die Uhr posten.' },
+    campaignOffice: { name: 'Kampagnenbüro', text: 'Hauptamtliche Kräfte für den Wahlkampf.' },
+  } satisfies Record<GeneratorId, { name: string; text: string }>,
+
+  scene: {
+    label: '{name} als {title}',
+  },
+
   common: {
     ok: 'OK',
     cancel: 'Abbrechen',
@@ -76,15 +307,9 @@ export const de = {
   },
 
   placeholders: {
-    careerEmpty: 'Noch kein Durchlauf gestartet.',
-    careerRunning: 'Hier entsteht dein Arbeitsplatz.',
     network: {
       title: 'Netzwerk',
       text: 'Hier knüpfst du später Allianzen mit Gewerkschaften, Wirtschaft, Medien und weiteren Gruppen.',
-    },
-    invest: {
-      title: 'Investieren',
-      text: 'Hier kaufst du bald Generatoren, die automatisch Geld, Einfluss und Anhänger einbringen.',
     },
     world: {
       title: 'Außenpolitik',
@@ -182,7 +407,6 @@ export const de = {
   debug: {
     title: 'Debug',
     open: 'Debug-Menü öffnen',
-    quickStart: 'Testlauf starten (Rhenanien)',
     addResources: '+1.000 von allem',
     addResourcesBig: '+1 Mio. von allem',
     jump1h: 'Zeitsprung +1 Std.',
@@ -191,7 +415,6 @@ export const de = {
     setStage: 'Zu Stufe springen',
     reset: 'Spielstand zurücksetzen',
     resetConfirm: 'Spielstand wirklich löschen? Das lässt sich nicht rückgängig machen.',
-    noRun: 'Kein laufender Durchlauf.',
   },
 };
 

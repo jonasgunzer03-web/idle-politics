@@ -1,0 +1,125 @@
+.row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.locked {
+  grid-template-columns: 44px 1fr;
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.count {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--surface);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  /* Eine Zeile, auf schmalen Geräten mit „…“ gekürzt */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 6px;
+}
+
+.buy {
+  min-width: 86px;
+  min-height: 52px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--state-primary);
+  color: var(--state-on-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  transition:
+    transform 120ms var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+@media (prefers-color-scheme: dark) {
+  .buy {
+    background: var(--state-secondary);
+    color: #1c1f24;
+  }
+}
+
+.buy:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.buy:disabled {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.buyLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.cost {
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.missing {
+  font-size: 0.68rem;
+  white-space: nowrap;
+  color: var(--bad);
+}

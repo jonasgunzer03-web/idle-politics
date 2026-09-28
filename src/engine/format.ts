@@ -17,20 +17,24 @@ const COMPACT_FROM = 10_000;
 export interface FormatOptions {
   /**
    * 'floor' (Standard) rundet ab: Man sieht nie mehr, als man hat.
-   * 'round' rundet kaufmännisch, sinnvoll für Raten und Kosten.
+   * 'round' rundet kaufmännisch, sinnvoll für Raten.
+   * 'ceil' rundet auf, sinnvoll für Fehlbeträge (nie „Fehlt: 0“).
    */
-  rounding?: 'floor' | 'round';
+  rounding?: 'floor' | 'round' | 'ceil';
   /** Nachkommastellen für Werte unter 10 (z. B. Raten wie 0,3/s). Standard: 0. */
   smallDecimals?: number;
   /** Vorzeichen „+“ bei positiven Werten anzeigen. */
   signed?: boolean;
 }
 
-function roundTo(value: number, decimals: number, mode: 'floor' | 'round'): number {
+function roundTo(value: number, decimals: number, mode: 'floor' | 'round' | 'ceil'): number {
   const f = Math.pow(10, decimals);
-  // Kleiner Zuschlag gegen Gleitkommafehler wie 1,1 · 10 = 10,999999
+  // Kleine Toleranz gegen Gleitkommafehler wie 1,1 · 10 = 10,999999
   const scaled = value * f;
-  const r = mode === 'floor' ? Math.floor(scaled + 1e-9) : Math.round(scaled);
+  let r: number;
+  if (mode === 'floor') r = Math.floor(scaled + 1e-9);
+  else if (mode === 'ceil') r = Math.ceil(scaled - 1e-9);
+  else r = Math.round(scaled);
   return r / f;
 }
 

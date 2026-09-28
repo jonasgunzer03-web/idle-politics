@@ -19,6 +19,15 @@ export function zeroResources(): ResourceMap {
   return { money: 0, influence: 0, followers: 0, loyalty: 0, diplomacy: 0 };
 }
 
+/**
+ * Preise werden auf ganze Beträge aufgerundet, damit angezeigter und abgezogener Preis
+ * identisch sind. Der kleine Abzug fängt Gleitkommafehler ab (10,000000000000002 → 10).
+ */
+function wholeAmount(value: number): number {
+  if (value >= 1e15) return value;
+  return Math.ceil(value - 1e-9);
+}
+
 /** Kosten skalieren mit 1 / GAME_SPEED. */
 function costScale(cfg: GameConfig): number {
   return 1 / cfg.balancing.gameSpeed;
@@ -39,7 +48,7 @@ export function generatorCost(
   const result: Partial<ResourceMap> = {};
   for (const id of RESOURCE_IDS) {
     const base = def.baseCost[id];
-    if (base !== undefined && base > 0) result[id] = base * costScale(cfg) * factor;
+    if (base !== undefined && base > 0) result[id] = wholeAmount(base * costScale(cfg) * factor);
   }
   return result;
 }

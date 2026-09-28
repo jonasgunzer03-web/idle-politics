@@ -41,3 +41,9 @@
 .app[data-debug='true'] .content {
   padding-bottom: 56px;
 }
+
+.setup {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
