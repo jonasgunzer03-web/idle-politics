@@ -169,7 +169,11 @@ export const actions: ActionDef[] = [
     location: 'embassy',
     unlockStage: 8,
     yields: { diplomacy: 0.02 },
-    staff: { baseCost: { money: 2_000_000, influence: 100_000 }, costGrowth: 1.3, ratePerStaff: 0.5 },
+    staff: {
+      baseCost: { money: 2_000_000, influence: 100_000 },
+      costGrowth: 1.3,
+      ratePerStaff: 0.5,
+    },
     training: { baseCost: { money: 1_500_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
   // Regierungssitz: Rede an die Nation → Anhänger und Einfluss
@@ -178,7 +182,11 @@ export const actions: ActionDef[] = [
     location: 'palace',
     unlockStage: 10,
     yields: { followers: 1.2, influence: 0.6 },
-    staff: { baseCost: { money: 60_000_000, influence: 4_000_000 }, costGrowth: 1.3, ratePerStaff: 0.5 },
+    staff: {
+      baseCost: { money: 60_000_000, influence: 4_000_000 },
+      costGrowth: 1.3,
+      ratePerStaff: 0.5,
+    },
     training: { baseCost: { money: 40_000_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
 ];
@@ -196,7 +204,12 @@ export const vehicles: VehicleDef[] = [
   // Chauffeur
   { id: 'chauffeur', speed: 1_600, cost: { money: 2_500_000, influence: 150_000 }, unlockStage: 8 },
   // Hubschrauber
-  { id: 'helicopter', speed: 4_000, cost: { money: 80_000_000, influence: 5_000_000 }, unlockStage: 10 },
+  {
+    id: 'helicopter',
+    speed: 4_000,
+    cost: { money: 80_000_000, influence: 5_000_000 },
+    unlockStage: 10,
+  },
 ];
 
 /** Kurzform: die Welt-Konfiguration als Ganzes. */

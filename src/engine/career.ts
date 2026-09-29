@@ -88,8 +88,7 @@ export function careerStatus(game: GameState, cfg: GameConfig): CareerStatus | n
   const canAffordCost = canAfford(run.resources, cost);
   const autocratic = run.path === 'autocratic';
   const loyaltyNeed = Math.max(requirement.loyalty, cfg.balancing.autocracy.powerLoyaltyCost);
-  const loyaltyOk =
-    !autocratic || !isLoyaltyUnlocked(run, cfg) || run.loyalty >= loyaltyNeed;
+  const loyaltyOk = !autocratic || !isLoyaltyUnlocked(run, cfg) || run.loyalty >= loyaltyNeed;
   const election = isElectionStage(run, cfg);
   return {
     nextStage: top ? null : run.stage + 1,
@@ -116,7 +115,12 @@ function stageUp(game: GameState, run: RunState): GameState {
     ...game,
     phase: 'ceremony',
     pending: { ...game.pending, ceremony: { stage } },
-    run: { ...run, stage, highestStage: Math.max(run.highestStage, stage), world: { ...run.world } },
+    run: {
+      ...run,
+      stage,
+      highestStage: Math.max(run.highestStage, stage),
+      world: { ...run.world },
+    },
     meta: {
       ...game.meta,
       highestStageEver: Math.max(game.meta.highestStageEver, stage),
@@ -158,7 +162,10 @@ export function runForElection(
   const won = draw.value * 100 < chance;
   const paid: RunState = { ...run, resources: pay(run.resources, total) };
   if (won) {
-    const withStats = { ...paid, stats: { ...paid.stats, electionsWon: paid.stats.electionsWon + 1 } };
+    const withStats = {
+      ...paid,
+      stats: { ...paid.stats, electionsWon: paid.stats.electionsWon + 1 },
+    };
     return {
       game: stageUp({ ...draw.game }, withStats),
       outcome: { won: true, chance, stage: run.stage + 1 },
@@ -190,7 +197,9 @@ export function promote(game: GameState, cfg: GameConfig): GameState {
     const a = cfg.balancing.autocracy;
     next = {
       ...next,
-      loyalty: isLoyaltyUnlocked(run, cfg) ? Math.max(0, next.loyalty - a.powerLoyaltyCost) : next.loyalty,
+      loyalty: isLoyaltyUnlocked(run, cfg)
+        ? Math.max(0, next.loyalty - a.powerLoyaltyCost)
+        : next.loyalty,
       unrest: Math.min(100, next.unrest + a.powerUnrest),
       fixElectionBonus: false,
     };

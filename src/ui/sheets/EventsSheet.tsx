@@ -1,5 +1,4 @@
-import { useEffect, useRef } from 'react';
-import { motion, useMotionValue, useTransform, type PanInfo } from 'motion/react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import {
   Coins,
   Globe,
@@ -54,11 +53,19 @@ function Affects({ effect }: { effect: EventEffect }) {
   );
 }
 
-function SwipeCard({ id, target, onDecide }: { id: string; target: string | null; onDecide: (c: 'yes' | 'no') => void }) {
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 200], [-12, 12]);
-  const yesOpacity = useTransform(x, [20, SWIPE_THRESHOLD], [0, 1]);
-  const noOpacity = useTransform(x, [-SWIPE_THRESHOLD, -20], [1, 0]);
+function SwipeCard({
+  id,
+  target,
+  onDecide,
+}: {
+  id: string;
+  target: string | null;
+  onDecide: (c: 'yes' | 'no') => void;
+}) {
+  // Eigene Wischgeste mit Pointer-Events (funktioniert mit Finger und Maus gleich)
+  const [dx, setDx] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const start = useRef<{ x: number; y: number; axis: 'x' | 'y' | null } | null>(null);
   const decided = useRef(false);
   const def = findEvent(id, cfg);
   const text = (de.events as Record<string, (typeof de.events)[string] | undefined>)[id];
@@ -73,42 +80,85 @@ function SwipeCard({ id, target, onDecide }: { id: string; target: string | null
     onDecide(choice);
   };
 
-  const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x > SWIPE_THRESHOLD) decide('yes');
-    else if (info.offset.x < -SWIPE_THRESHOLD) decide('no');
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    start.current = { x: e.clientX, y: e.clientY, axis: null };
+    e.currentTarget.setPointerCapture(e.pointerId);
   };
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const s0 = start.current;
+    if (!s0) return;
+    const mx = e.clientX - s0.x;
+    const my = e.clientY - s0.y;
+    // Erst nach klarer Bewegung entscheiden, ob gewischt (x) oder gescrollt (y) wird
+    if (s0.axis === null) {
+      if (Math.abs(mx) < 8 && Math.abs(my) < 8) return;
+      s0.axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      if (s0.axis === 'x') setDragging(true);
+    }
+    if (s0.axis === 'x') setDx(mx);
+  };
+  const onPointerUp = () => {
+    const s0 = start.current;
+    start.current = null;
+    setDragging(false);
+    if (s0?.axis === 'x') {
+      if (dx > SWIPE_THRESHOLD) {
+        decide('yes');
+        return;
+      }
+      if (dx < -SWIPE_THRESHOLD) {
+        decide('no');
+        return;
+      }
+    }
+    setDx(0);
+  };
+
+  const yesOpacity = Math.min(1, Math.max(0, (dx - 20) / (SWIPE_THRESHOLD - 20)));
+  const noOpacity = Math.min(1, Math.max(0, (-dx - 20) / (SWIPE_THRESHOLD - 20)));
 
   return (
     <div className={styles.stage}>
-      <motion.div
-        className={styles.card}
-        style={{ x, rotate }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.9}
-        onDragEnd={onDragEnd}
+      <div
+        className={`${styles.card} ${dragging ? styles.dragging : ''}`}
+        style={{ transform: `translateX(${dx}px) rotate(${(dx / 200) * 12}deg)` }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
         data-testid="event-card"
         data-event={id}
       >
-        <motion.span className={`${styles.stamp} ${styles.stampYes}`} style={{ opacity: yesOpacity }}>
+        <span className={`${styles.stamp} ${styles.stampYes}`} style={{ opacity: yesOpacity }}>
           {t(text.yes)}
           <Affects effect={def.yes} />
-        </motion.span>
-        <motion.span className={`${styles.stamp} ${styles.stampNo}`} style={{ opacity: noOpacity }}>
+        </span>
+        <span className={`${styles.stamp} ${styles.stampNo}`} style={{ opacity: noOpacity }}>
           {t(text.no)}
           <Affects effect={def.no} />
-        </motion.span>
+        </span>
         <p className={styles.speaker}>{t(text.speaker)}</p>
         <h3 className={styles.title}>{t(text.title)}</h3>
         <p className={styles.text}>{t(text.text)}</p>
-      </motion.div>
+      </div>
       <p className={styles.hint}>{de.eventUi.swipeHint}</p>
       <div className={styles.buttons}>
-        <Button variant="secondary" onClick={() => { decide('no'); }} data-testid="event-no">
+        <Button
+          variant="secondary"
+          onClick={() => {
+            decide('no');
+          }}
+          data-testid="event-no"
+        >
           {t(text.no)}
           <Affects effect={def.no} />
         </Button>
-        <Button onClick={() => { decide('yes'); }} data-testid="event-yes">
+        <Button
+          onClick={() => {
+            decide('yes');
+          }}
+          data-testid="event-yes"
+        >
           {t(text.yes)}
           <Affects effect={def.yes} />
         </Button>
@@ -122,7 +172,11 @@ export function EventsSheet() {
   const top = useGame(
     useShallow((s) => {
       const card = s.game.run?.events.open[0];
-      return { id: card?.id ?? null, target: card?.target ?? null, count: s.game.run?.events.open.length ?? 0 };
+      return {
+        id: card?.id ?? null,
+        target: card?.target ?? null,
+        count: s.game.run?.events.open.length ?? 0,
+      };
     }),
   );
   const store = gameStore.getState();
@@ -135,7 +189,11 @@ export function EventsSheet() {
   }, [top.id]);
   if (!top.id) return null;
   return (
-    <BottomSheet title={fill(de.eventUi.badge, { count: top.count })} onClose={close} testId="events-sheet">
+    <BottomSheet
+      title={fill(de.eventUi.badge, { count: top.count })}
+      onClose={close}
+      testId="events-sheet"
+    >
       <SwipeCard
         // Neuer Schlüssel je Karte: frischer Zustand, keine doppelte Entscheidung
         key={`${top.id}-${top.count}`}

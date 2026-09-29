@@ -24,7 +24,7 @@ function main() {
       const result = simulate(scenario, cfg, stepSeconds);
       const factor = targetFactor(cfg.states[scenario.stateId].tempo, scenario.autocratic);
       const rows = result.times.map((t) => {
-        const target = (cfg.targetMinutes[t.stage - 2] ?? 7) * factor / speed;
+        const target = ((cfg.targetMinutes[t.stage - 2] ?? 7) * factor) / speed;
         const ratio = t.minutes / target;
         // Nach einer verlorenen Wahl (zwei Stufen zurück) zählt die Überschreitung nicht als Fehler
         const flag = t.afterLoss

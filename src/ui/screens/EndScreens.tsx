@@ -43,10 +43,16 @@ export function RunEndScreen() {
         )}
         <h2 className={styles.sub}>{de.runEnd.stats}</h2>
         <div className={styles.stats}>
-          <Stat label={de.runEnd.highest} value={careerTitle({ stateId: end.stateId, stage: end.highestStage, path: end.path })} />
+          <Stat
+            label={de.runEnd.highest}
+            value={careerTitle({ stateId: end.stateId, stage: end.highestStage, path: end.path })}
+          />
           <Stat label={de.runEnd.path} value={de.runEnd.paths[end.path]} />
           <Stat label={de.runEnd.time} value={formatDuration(end.playMs)} />
-          <Stat label={de.runEnd.earned} value={`${formatNumber(end.earnedMoney)} ${cfg.states[end.stateId].currency}`} />
+          <Stat
+            label={de.runEnd.earned}
+            value={`${formatNumber(end.earnedMoney)} ${cfg.states[end.stateId].currency}`}
+          />
           <Stat label={de.runEnd.points} value={`+${end.points}`} />
         </div>
         <p className={styles.hint}>{de.runEnd.hint}</p>
@@ -70,7 +76,13 @@ export function VictoryScreen() {
     useShallow((s) => {
       const run = s.game.run;
       return run
-        ? { stateId: run.stateId, path: run.path, stage: run.stage, playMs: run.playMs, profession: run.profession }
+        ? {
+            stateId: run.stateId,
+            path: run.path,
+            stage: run.stage,
+            playMs: run.playMs,
+            profession: run.profession,
+          }
         : null;
     }),
   );
@@ -84,20 +96,40 @@ export function VictoryScreen() {
         <h1 className={styles.title}>{de.victory.title}</h1>
         <p className={styles.text}>{de.victory.text}</p>
         <div className={styles.figure}>
-          <Figure character={character} outfit={outfitFor({ profession: v.profession, stage: 12, path: v.path })} />
+          <Figure
+            character={character}
+            outfit={outfitFor({ profession: v.profession, stage: 12, path: v.path })}
+          />
         </div>
         <div className={styles.stats}>
           <Stat label={de.runEnd.state} value={de.states[v.stateId].name} />
-          <Stat label={de.runEnd.highest} value={careerTitle({ stateId: v.stateId, stage: 12, path: v.path })} />
+          <Stat
+            label={de.runEnd.highest}
+            value={careerTitle({ stateId: v.stateId, stage: 12, path: v.path })}
+          />
           <Stat label={de.runEnd.path} value={de.runEnd.paths[v.path]} />
           <Stat label={de.runEnd.time} value={formatDuration(v.playMs)} />
         </div>
-        <button type="button" className={styles.choice} onClick={() => { store.retire(); }} data-testid="retire">
+        <button
+          type="button"
+          className={styles.choice}
+          onClick={() => {
+            store.retire();
+          }}
+          data-testid="retire"
+        >
           <ScrollText size={22} aria-hidden="true" />
           <span className={styles.choiceTitle}>{de.victory.retire}</span>
           <span className={styles.choiceText}>{de.victory.retireText}</span>
         </button>
-        <button type="button" className={styles.choice} onClick={() => { store.continueRuling(); }} data-testid="continue-ruling">
+        <button
+          type="button"
+          className={styles.choice}
+          onClick={() => {
+            store.continueRuling();
+          }}
+          data-testid="continue-ruling"
+        >
           <Crown size={22} aria-hidden="true" />
           <span className={styles.choiceTitle}>{de.victory.continue}</span>
           <span className={styles.choiceText}>{de.victory.continueText}</span>
@@ -111,11 +143,15 @@ export function VictoryScreen() {
 export function EmigrationScreen() {
   const pending = useGame((s) => s.game.pending.emigration);
   const [landed, setLanded] = useState(false);
-  const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced =
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   useEffect(() => {
-    const id = window.setTimeout(() => {
-      setLanded(true);
-    }, reduced ? 600 : 3000);
+    const id = window.setTimeout(
+      () => {
+        setLanded(true);
+      },
+      reduced ? 600 : 3000,
+    );
     return () => {
       window.clearTimeout(id);
     };
@@ -124,7 +160,13 @@ export function EmigrationScreen() {
   const to = de.states[pending.to].name;
   if (!landed) {
     return (
-      <div className={`${styles.screen} ${styles.flight}`} data-testid="emigration-flight" onClick={() => { setLanded(true); }}>
+      <div
+        className={`${styles.screen} ${styles.flight}`}
+        data-testid="emigration-flight"
+        onClick={() => {
+          setLanded(true);
+        }}
+      >
         <p className={styles.kicker}>{fill(de.emigration.flying, { country: to })}</p>
         <div className={styles.map}>
           <div className={styles.from}>
@@ -132,14 +174,25 @@ export function EmigrationScreen() {
             <Luggage size={26} className={styles.suitcase} aria-hidden="true" />
           </div>
           <svg viewBox="0 0 300 120" className={styles.route} aria-hidden="true">
-            <path d="M20 100 Q150 -20 280 100" fill="none" stroke="rgb(255 255 255 / 45%)" strokeWidth="2" strokeDasharray="6 6" />
+            <path
+              d="M20 100 Q150 -20 280 100"
+              fill="none"
+              stroke="rgb(255 255 255 / 45%)"
+              strokeWidth="2"
+              strokeDasharray="6 6"
+            />
           </svg>
           <Plane size={30} className={styles.planeIcon} aria-hidden="true" />
           <div className={styles.to}>
             <Flag flag={cfg.states[pending.to].flag} width={64} />
           </div>
         </div>
-        <Button variant="secondary" onClick={() => { setLanded(true); }}>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setLanded(true);
+          }}
+        >
           {de.emigration.skip}
         </Button>
       </div>
@@ -160,7 +213,9 @@ export function EmigrationScreen() {
             data-testid={`emigration-profession-${id}`}
           >
             <span className={styles.choiceTitle}>{de.professions[id].name}</span>
-            <span className={styles.choiceText}>{[...de.professions[id].pros, ...de.professions[id].cons].join(' · ')}</span>
+            <span className={styles.choiceText}>
+              {[...de.professions[id].pros, ...de.professions[id].cons].join(' · ')}
+            </span>
           </button>
         ))}
       </div>

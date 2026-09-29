@@ -1,16 +1,16 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronLeft, Shuffle } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Figure } from '../../art/figure/Figure';
 import { outfitFor } from '../../art/figure/outfit';
 import { Flag } from '../../art/flag/Flag';
 import { defaultConfig } from '../../config';
-import { appearanceCounts, hairColors, nameLimits, skinTones } from '../../config/appearance';
 import { PROFESSION_IDS, STATE_IDS, type ProfessionId, type StateId } from '../../engine/ids';
 import { randomSeed } from '../../engine/rng';
 import { characterSchema, type Character } from '../../engine/schema';
 import { de, fill } from '../../i18n/de';
 import { gameStore } from '../../store';
 import { Button } from '../components/Button';
+import { CharacterEditor } from '../components/CharacterEditor';
 import { randomCharacter } from '../characterDefaults';
 import styles from './SetupFlow.module.css';
 
@@ -27,16 +27,21 @@ function StepFrame({
 }: {
   step: Step;
   title: string;
-  onBack: () => void;
+  /** Fehlt beim Neustart nach einem Durchlauf (kein Schritt davor). */
+  onBack?: () => void;
   children: ReactNode;
   action: ReactNode;
 }) {
   return (
     <div className={styles.frame}>
       <header className={styles.frameHeader}>
-        <button type="button" className={styles.back} onClick={onBack} aria-label={de.setup.back}>
-          <ChevronLeft size={24} aria-hidden="true" />
-        </button>
+        {onBack ? (
+          <button type="button" className={styles.back} onClick={onBack} aria-label={de.setup.back}>
+            <ChevronLeft size={24} aria-hidden="true" />
+          </button>
+        ) : (
+          <span className={styles.back} aria-hidden="true" />
+        )}
         <div>
           <p className={styles.stepOf}>
             {fill(de.setup.stepOf, { current: STEPS.indexOf(step) + 1, total: STEPS.length })}
@@ -68,40 +73,6 @@ function TitleScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
-function Swatches({
-  label,
-  colors,
-  value,
-  onChange,
-}: {
-  label: string;
-  colors: readonly string[];
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <fieldset className={styles.fieldset}>
-      <legend className={styles.legend}>{label}</legend>
-      <div className={styles.swatches} role="radiogroup" aria-label={label}>
-        {colors.map((color, i) => (
-          <button
-            key={color}
-            type="button"
-            role="radio"
-            aria-checked={value === i}
-            aria-label={fill(de.setup.character.option, { label, n: i + 1 })}
-            className={styles.swatch}
-            style={{ background: color }}
-            onClick={() => {
-              onChange(i);
-            }}
-          />
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
 function CharacterStep({
   draft,
   onChange,
@@ -114,7 +85,6 @@ function CharacterStep({
   onNext: () => void;
 }) {
   const valid = characterSchema.safeParse(draft).success;
-  const hairStyles = de.setup.character.hairStyles.slice(0, appearanceCounts.hairStyle);
   return (
     <StepFrame
       step="character"
@@ -126,79 +96,7 @@ function CharacterStep({
         </Button>
       }
     >
-      <div className={styles.preview}>
-        <Figure character={draft} outfit="overalls" />
-        <Button
-          variant="secondary"
-          className={styles.random}
-          onClick={() => {
-            onChange(randomCharacter(randomSeed()));
-          }}
-        >
-          <Shuffle size={18} aria-hidden="true" />
-          {de.setup.character.random}
-        </Button>
-      </div>
-
-      <label className={styles.legend} htmlFor="character-name">
-        {de.setup.character.name}
-      </label>
-      <input
-        id="character-name"
-        className={styles.input}
-        value={draft.name}
-        maxLength={nameLimits.character}
-        placeholder={de.setup.character.namePlaceholder}
-        autoComplete="off"
-        autoCorrect="off"
-        spellCheck={false}
-        enterKeyHint="done"
-        onChange={(e) => {
-          onChange({ ...draft, name: e.target.value });
-        }}
-        data-testid="character-name"
-      />
-      {draft.name.trim().length === 0 && (
-        <p className={styles.error}>{de.setup.character.nameMissing}</p>
-      )}
-
-      <Swatches
-        label={de.setup.character.skinTone}
-        colors={skinTones}
-        value={draft.skinTone}
-        onChange={(skinTone) => {
-          onChange({ ...draft, skinTone });
-        }}
-      />
-
-      <fieldset className={styles.fieldset}>
-        <legend className={styles.legend}>{de.setup.character.hairStyle}</legend>
-        <div className={styles.chips} role="radiogroup" aria-label={de.setup.character.hairStyle}>
-          {hairStyles.map((name, i) => (
-            <button
-              key={name}
-              type="button"
-              role="radio"
-              aria-checked={draft.hairStyle === i}
-              className={styles.chip}
-              onClick={() => {
-                onChange({ ...draft, hairStyle: i });
-              }}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
-      <Swatches
-        label={de.setup.character.hairColor}
-        colors={hairColors}
-        value={draft.hairColor}
-        onChange={(hairColor) => {
-          onChange({ ...draft, hairColor });
-        }}
-      />
+      <CharacterEditor draft={draft} onChange={onChange} outfit="overalls" full />
     </StepFrame>
   );
 }
@@ -224,7 +122,7 @@ function StateStep({
 }: {
   value: StateId;
   onChange: (s: StateId) => void;
-  onBack: () => void;
+  onBack?: () => void;
   onNext: () => void;
 }) {
   return (
@@ -366,7 +264,9 @@ function ProfessionStep({
 /** Startablauf: Titel → Figur → Staat → Beruf. Danach beginnt der Durchlauf. */
 export function SetupFlow() {
   const existing = gameStore.getState().game.character;
-  const [step, setStep] = useState<Step>('title');
+  // Nach einem Sturz oder Ruhestand: Charakter bleibt, es geht direkt zur Staatswahl
+  const restart = existing !== null;
+  const [step, setStep] = useState<Step>(restart ? 'state' : 'title');
   const [draft, setDraft] = useState<Character>(() => existing ?? randomCharacter(randomSeed()));
   const [stateId, setStateId] = useState<StateId>('rhenania');
   const [profession, setProfession] = useState<ProfessionId | null>(null);
@@ -378,7 +278,12 @@ export function SetupFlow() {
       setStep('character');
       return;
     }
-    gameStore.getState().beginRun({ character: character.data, stateId, profession }, Date.now());
+    gameStore
+      .getState()
+      .beginRun(
+        restart ? { stateId, profession } : { character: character.data, stateId, profession },
+        Date.now(),
+      );
   };
 
   switch (step) {
@@ -408,9 +313,13 @@ export function SetupFlow() {
         <StateStep
           value={stateId}
           onChange={setStateId}
-          onBack={() => {
-            setStep('character');
-          }}
+          onBack={
+            restart
+              ? undefined
+              : () => {
+                  setStep('character');
+                }
+          }
           onNext={() => {
             setStep('profession');
           }}

@@ -37,8 +37,18 @@ describe('Start eines Durchlaufs', () => {
 
   it('Vermächtnis: Startvorsprung und Startgeld', () => {
     const base = createNewGame(0, 1);
-    const withLegacy = { ...base, meta: { ...base.meta, legacy: { headStart: 2, startCapital: 1 } } };
-    const run = runOf(startRun(withLegacy, { character: testCharacter, stateId: 'novaria', profession: 'office' }, 0, cfg));
+    const withLegacy = {
+      ...base,
+      meta: { ...base.meta, legacy: { headStart: 2, startCapital: 1 } },
+    };
+    const run = runOf(
+      startRun(
+        withLegacy,
+        { character: testCharacter, stateId: 'novaria', profession: 'office' },
+        0,
+        cfg,
+      ),
+    );
     expect(run.generators.overtime).toBe(10);
     expect(run.resources.money).toBe(500);
   });
@@ -51,7 +61,11 @@ describe('Start eines Durchlaufs', () => {
 
 describe('Sturz und Neustart (keine Sackgassen)', () => {
   it('Sturz beendet den Durchlauf mit Vermächtnis-Punkten', () => {
-    const game = playingGame({ stage: 6, highestStage: 7, earned: { ...zeroResources(), money: 1e6 } });
+    const game = playingGame({
+      stage: 6,
+      highestStage: 7,
+      earned: { ...zeroResources(), money: 1e6 },
+    });
     const ended = endRun(game, 'coup', cfg);
     expect(ended.phase).toBe('runEnded');
     expect(ended.run).toBeNull();
@@ -63,7 +77,11 @@ describe('Sturz und Neustart (keine Sackgassen)', () => {
   });
 
   it('danach Neustart mit freier Staatswahl; Charakter, Vermächtnis, Erfolge bleiben', () => {
-    const ended = endRun({ ...playingGame(), meta: { ...playingGame().meta, achievements: ['firstShift'] } }, 'revolution', cfg);
+    const ended = endRun(
+      { ...playingGame(), meta: { ...playingGame().meta, achievements: ['firstShift'] } },
+      'revolution',
+      cfg,
+    );
     const setup = beginNewRunSetup(ended);
     expect(setup.phase).toBe('setup');
     const restarted = startRun(setup, { stateId: 'borealis', profession: 'skilled' }, 5, cfg);
@@ -100,7 +118,10 @@ describe('Sturz und Neustart (keine Sackgassen)', () => {
 });
 
 describe('Sieg, Ruhestand und Weiterregieren', () => {
-  const victory = () => ({ ...playingGame({ stage: 12, highestStage: 12 }), phase: 'victory' as const });
+  const victory = () => ({
+    ...playingGame({ stage: 12, highestStage: 12 }),
+    phase: 'victory' as const,
+  });
 
   it('Ruhestand: doppelte Vermächtnis-Punkte, Durchlauf endet', () => {
     const game = victory();
@@ -124,7 +145,11 @@ describe('Auswandern', () => {
     const cost = emigrationCost(playingGame(), cfg);
     const low = playingGame({ stage: 4, resources: rich });
     expect(startEmigration(low, 'novaria', cfg)).toBe(low);
-    const game = playingGame({ stage: 7, resources: { ...rich, money: cost + 1000 }, groups: { unions: 90 } });
+    const game = playingGame({
+      stage: 7,
+      resources: { ...rich, money: cost + 1000 },
+      groups: { unions: 90 },
+    });
     const leaving = startEmigration(game, 'novaria', cfg);
     expect(leaving.phase).toBe('emigrating');
     const arrived = completeEmigration(leaving, 'office', 10, cfg);
@@ -176,7 +201,11 @@ describe('Erfolge und Accessoires', () => {
     expect(unlockedAccessories(game, cfg)).toEqual([]);
     const withPin = { ...game, meta: { ...game.meta, achievements: ['firstElection' as const] } };
     expect(unlockedAccessories(withPin, cfg)).toEqual(['partyPin']);
-    const updated = updateCharacter(withPin, { ...testCharacter, accessories: ['partyPin', 'medal'] }, cfg);
+    const updated = updateCharacter(
+      withPin,
+      { ...testCharacter, accessories: ['partyPin', 'medal'] },
+      cfg,
+    );
     expect(updated.character?.accessories).toEqual(['partyPin']);
   });
 });
@@ -184,9 +213,18 @@ describe('Erfolge und Accessoires', () => {
 describe('Hinweise', () => {
   it('bei Freischaltungen, jeweils einmal', () => {
     expect(pendingHints(playingGame({ stage: 1 }), cfg)).toEqual([]);
-    expect(pendingHints(playingGame({ stage: 2 }), cfg)).toEqual(['followersUnlocked', 'networkUnlocked']);
+    expect(pendingHints(playingGame({ stage: 2 }), cfg)).toEqual([
+      'followersUnlocked',
+      'networkUnlocked',
+    ]);
     const seen = playingGame({ stage: 2 });
-    const marked = { ...seen, flags: { ...seen.flags, hintsSeen: ['followersUnlocked' as const, 'networkUnlocked' as const] } };
+    const marked = {
+      ...seen,
+      flags: {
+        ...seen.flags,
+        hintsSeen: ['followersUnlocked' as const, 'networkUnlocked' as const],
+      },
+    };
     expect(pendingHints(marked, cfg)).toEqual([]);
   });
 });

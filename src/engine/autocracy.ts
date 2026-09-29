@@ -2,21 +2,36 @@ import type { GameConfig } from '../config';
 import type { AutocracyActionDef } from '../config/balancing';
 import { canAfford, pay } from './economy';
 import type { AutocracyActionId, ResourceMap } from './ids';
-import { foreignPartners, isLoyaltyUnlocked, isWorldUnlocked, nextRequirement, relation } from './rules';
+import {
+  foreignPartners,
+  isLoyaltyUnlocked,
+  isWorldUnlocked,
+  nextRequirement,
+  relation,
+} from './rules';
 import type { GameState, RunState } from './schema';
 
 // Autokratische Aktionen. Jede zeigt vorher ihre Folgen (siehe autocracyPreview).
 
-export function findAutocracyAction(id: AutocracyActionId, cfg: GameConfig): AutocracyActionDef | undefined {
+export function findAutocracyAction(
+  id: AutocracyActionId,
+  cfg: GameConfig,
+): AutocracyActionDef | undefined {
   return cfg.balancing.autocracy.actions.find((a) => a.id === id);
 }
 
-export function autocracyCost(run: RunState, def: AutocracyActionDef, cfg: GameConfig): Partial<ResourceMap> {
+export function autocracyCost(
+  run: RunState,
+  def: AutocracyActionDef,
+  cfg: GameConfig,
+): Partial<ResourceMap> {
   const req = nextRequirement(run, cfg);
   const loyaltyFactor = def.id === 'buyLoyalty' ? cfg.states[run.stateId].loyaltyCostFactor : 1;
   const cost: Partial<ResourceMap> = {};
-  if (def.costFraction.money) cost.money = Math.ceil(req.money * def.costFraction.money * loyaltyFactor);
-  if (def.costFraction.influence) cost.influence = Math.ceil(req.influence * def.costFraction.influence);
+  if (def.costFraction.money)
+    cost.money = Math.ceil(req.money * def.costFraction.money * loyaltyFactor);
+  if (def.costFraction.influence)
+    cost.influence = Math.ceil(req.influence * def.costFraction.influence);
   return cost;
 }
 
@@ -28,7 +43,11 @@ export function isAutocracyAvailable(run: RunState, cfg: GameConfig): boolean {
   return run.path === 'autocratic' && isLoyaltyUnlocked(run, cfg);
 }
 
-export function autocracyAction(game: GameState, id: AutocracyActionId, cfg: GameConfig): GameState {
+export function autocracyAction(
+  game: GameState,
+  id: AutocracyActionId,
+  cfg: GameConfig,
+): GameState {
   const run = game.run;
   const def = findAutocracyAction(id, cfg);
   if (game.phase !== 'playing' || !run || !def || !isAutocracyAvailable(run, cfg)) return game;
@@ -50,7 +69,10 @@ export function autocracyAction(game: GameState, id: AutocracyActionId, cfg: Gam
     loyalty: clamp(run.loyalty + def.loyalty),
     relations,
     fixElectionBonus: id === 'fixElection' ? true : run.fixElectionBonus,
-    cooldowns: { ...run.cooldowns, [autocracyCooldownKey(id)]: run.playMs + def.cooldownSeconds * 1000 },
+    cooldowns: {
+      ...run.cooldowns,
+      [autocracyCooldownKey(id)]: run.playMs + def.cooldownSeconds * 1000,
+    },
   };
   return { ...game, run: next };
 }

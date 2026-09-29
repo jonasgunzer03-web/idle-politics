@@ -4,8 +4,8 @@
   z-index: 55;
   overflow-y: auto;
   background: var(--bg);
-  padding: calc(20px + var(--safe-top)) calc(18px + var(--safe-right)) calc(20px + var(--safe-bottom))
-    calc(18px + var(--safe-left));
+  padding: calc(20px + var(--safe-top)) calc(18px + var(--safe-right))
+    calc(20px + var(--safe-bottom)) calc(18px + var(--safe-left));
 }
 
 .victory {

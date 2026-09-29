@@ -4,7 +4,6 @@ import {
   generatorCost,
   maxAffordable,
   missingFor,
-  resourceMultiplier,
   type BuyMode,
 } from '../engine/economy';
 import {
@@ -15,6 +14,7 @@ import {
   type StateId,
 } from '../engine/ids';
 import type { GameState } from '../engine/schema';
+import { resourceMultiplier } from '../engine/rules';
 import { findGenerator, isGeneratorUnlocked } from '../engine/unlocks';
 import { de, fill } from '../i18n/de';
 import { formatResource } from './gameText';
@@ -87,7 +87,7 @@ export function generatorRowView(
   const count = mode === 'max' ? Math.max(1, affordableMax) : mode;
   const cost = generatorCost(def, owned, count, cfg);
   const affordable = unlocked && canAfford(run.resources, cost);
-  const unitRate = def.baseOutput * resourceMultiplier(run, def.produces, cfg);
+  const unitRate = def.baseOutput * resourceMultiplier(game, def.produces, cfg);
   return {
     exists: true,
     unlocked,

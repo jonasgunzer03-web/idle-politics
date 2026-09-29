@@ -26,5 +26,6 @@ export function randomCharacter(seed: number): Character {
       color: rng.int(appearanceCounts.partyColor),
       symbol: rng.int(appearanceCounts.partySymbol),
     },
+    accessories: [],
   };
 }

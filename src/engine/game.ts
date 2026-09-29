@@ -120,7 +120,12 @@ function freshRun(
 }
 
 /** Startet einen neuen Durchlauf als Arbeiter (Stufe 1). */
-export function startRun(game: GameState, setup: RunSetup, now: number, cfg: GameConfig): GameState {
+export function startRun(
+  game: GameState,
+  setup: RunSetup,
+  now: number,
+  cfg: GameConfig,
+): GameState {
   if (game.phase !== 'setup') return game;
   const character = setup.character ?? game.character;
   if (!character || !cfg.states[setup.stateId].playable) return game;
@@ -376,7 +381,9 @@ function achievementMet(game: GameState, id: AchievementId, cfg: GameConfig): bo
     case 'emigrant':
       return m.emigrations >= 1;
     case 'coalitionBuilder':
-      return run !== null && groupsFor(run, cfg).filter((g) => groupTier(run, g, cfg) === 2).length >= 3;
+      return (
+        run !== null && groupsFor(run, cfg).filter((g) => groupTier(run, g, cfg) === 2).length >= 3
+      );
     case 'diplomat':
       return run !== null && alliances(run) >= 2;
     case 'regionalDeveloper':
@@ -402,7 +409,10 @@ export function checkAchievements(
     .filter((id) => !game.meta.achievements.includes(id) && achievementMet(game, id, cfg));
   if (unlocked.length === 0) return { game, unlocked };
   return {
-    game: { ...game, meta: { ...game.meta, achievements: [...game.meta.achievements, ...unlocked] } },
+    game: {
+      ...game,
+      meta: { ...game.meta, achievements: [...game.meta.achievements, ...unlocked] },
+    },
     unlocked,
   };
 }

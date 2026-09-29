@@ -32,7 +32,11 @@ function Window({ x, y, w = 50, h = 70 }: { x: number; y: number; w?: number; h?
     <g>
       <rect x={x} y={y} width={w} height={h} className="sky" />
       <rect x={x} y={y} width={w} height={h} fill="none" stroke="#6f675c" strokeWidth={4} />
-      <path d={`M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}`} stroke="#6f675c" strokeWidth={2} />
+      <path
+        d={`M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}`}
+        stroke="#6f675c"
+        strokeWidth={2}
+      />
     </g>
   );
 }
@@ -99,7 +103,15 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
         <Room wall="#6b4a32" floor="#4a3526">
           <rect x={20} y={80} width={150} height={60} fill="#3b2a20" />
           {[0, 1, 2, 3, 4].map((i) => (
-            <rect key={i} x={30 + i * 28} y={90} width={10} height={40} rx={3} fill={['#2e7d4f', '#b5502c', '#c9a227', '#1f5fa8', '#8b1e1e'][i]} />
+            <rect
+              key={i}
+              x={30 + i * 28}
+              y={90}
+              width={10}
+              height={40}
+              rx={3}
+              fill={['#2e7d4f', '#b5502c', '#c9a227', '#1f5fa8', '#8b1e1e'][i]}
+            />
           ))}
           <rect x={10} y={190} width={210} height={16} fill="#8b6b4a" />
           <rect x={10} y={206} width={210} height={44} fill="#5a3b24" />
@@ -114,7 +126,13 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
           <rect x={20} y={170} width={120} height={80} fill="#8b6b4a" />
           <path d="M10 170 L30 130 H130 L150 170 Z" fill="#c0392b" />
           {[0, 1, 2, 3].map((i) => (
-            <circle key={i} cx={40 + i * 26} cy={172} r={9} fill={['#e67e22', '#c0392b', '#2e7d4f', '#f2c14e'][i]} />
+            <circle
+              key={i}
+              cx={40 + i * 26}
+              cy={172}
+              r={9}
+              fill={['#e67e22', '#c0392b', '#2e7d4f', '#f2c14e'][i]}
+            />
           ))}
           <rect x={200} y={160} width={80} height={60} fill="#f4efe2" stroke="#2b2f36" />
           <rect x={205} y={166} width={70} height={16} fill={partyColor} />
@@ -128,7 +146,15 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
         <Room wall="#efe9dd" floor="#8b6b4a">
           <rect x={30} y={40} width={80} height={100} fill={partyColor} />
           <circle cx={70} cy={80} r={20} fill="#f4efe2" />
-          <rect x={140} y={50} width={60} height={80} fill="#f4efe2" stroke={partyColor} strokeWidth={3} />
+          <rect
+            x={140}
+            y={50}
+            width={60}
+            height={80}
+            fill="#f4efe2"
+            stroke={partyColor}
+            strokeWidth={3}
+          />
           <rect x={148} y={60} width={44} height={8} fill={partyColor} />
           <Desk x={110} />
           <rect x={250} y={130} width={110} height={120} fill="#c9b797" />
@@ -159,7 +185,15 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
           <Desk x={230} />
           <Desk x={320} />
           <rect x={200} y={50} width={160} height={50} fill="#1c1f24" />
-          <text x={280} y={82} textAnchor="middle" fontSize="16" fontWeight="700" fill="#f4efe2" fontFamily="serif">
+          <text
+            x={280}
+            y={82}
+            textAnchor="middle"
+            fontSize="16"
+            fontWeight="700"
+            fill="#f4efe2"
+            fontFamily="serif"
+          >
             TAGESBOTE
           </text>
         </Room>
@@ -180,7 +214,13 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
       return (
         <Room wall="#1f3a5f" floor="#6b4a32">
           {[0, 1, 2].map((row) => (
-            <path key={row} d={`M${10 + row * 20} ${170 + row * 25} Q195 ${110 + row * 25} ${380 - row * 20} ${170 + row * 25}`} fill="none" stroke="#3a6ea5" strokeWidth={14} />
+            <path
+              key={row}
+              d={`M${10 + row * 20} ${170 + row * 25} Q195 ${110 + row * 25} ${380 - row * 20} ${170 + row * 25}`}
+              fill="none"
+              stroke="#3a6ea5"
+              strokeWidth={14}
+            />
           ))}
           <rect x={170} y={190} width={50} height={60} fill="#8b6b4a" />
           <rect x={160} y={40} width={70} height={50} fill={p.accent} />
@@ -201,7 +241,12 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
     case 'embassy':
       return (
         <Room wall="#f2ece0" floor="#b9a98f">
-          <path d="M195 20 V50 M175 50 H215 L205 80 H185 Z" stroke="#c9a227" strokeWidth={3} fill="#f6e7b0" />
+          <path
+            d="M195 20 V50 M175 50 H215 L205 80 H185 Z"
+            stroke="#c9a227"
+            strokeWidth={3}
+            fill="#f6e7b0"
+          />
           {[60, 120, 270, 330].map((x, i) => (
             <Flag key={x} x={x} color={['#1f3a5f', '#12848a', '#2e7d4f', '#9e1b1b'][i] ?? '#999'} />
           ))}
@@ -215,7 +260,12 @@ function roomFor(id: LocationId, { p, partyColor, office, grandeur }: RoomProps)
           {[40, 350].map((x) => (
             <rect key={x} x={x - 10} y={20} width={20} height={230} fill="#c9a227" />
           ))}
-          <path d="M195 20 V40 M170 40 H220 L208 70 H182 Z" stroke="#f6e7b0" strokeWidth={3} fill="#f6e7b0" />
+          <path
+            d="M195 20 V40 M170 40 H220 L208 70 H182 Z"
+            stroke="#f6e7b0"
+            strokeWidth={3}
+            fill="#f6e7b0"
+          />
           <rect x={150} y={250} width={90} height={50} fill="#9e1b1b" />
           <rect x={165} y={170} width={60} height={80} fill="#5a3b24" />
           <rect x={160} y={160} width={70} height={12} fill="#c9a227" />
@@ -233,7 +283,12 @@ export interface InteriorArtProps extends RoomProps {
 
 export const InteriorArt = memo(function InteriorArt({ location, ...props }: InteriorArtProps) {
   return (
-    <svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMax slice" className={styles.interior} aria-hidden="true">
+    <svg
+      viewBox="0 0 390 300"
+      preserveAspectRatio="xMidYMax slice"
+      className={styles.interior}
+      aria-hidden="true"
+    >
       {roomFor(location, props)}
     </svg>
   );

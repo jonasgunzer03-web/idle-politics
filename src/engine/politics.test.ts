@@ -16,7 +16,9 @@ describe('Zustimmung und Unruhe', () => {
 
   it('Unruhe sinkt in Rhenanien schneller (×1,5)', () => {
     const rhen = runOf(tickPolitics(playingGame({ unrest: 60 }), MIN, cfg).game);
-    const nov = runOf(tickPolitics(playingGame({ unrest: 60 }, { stateId: 'novaria' }), MIN, cfg).game);
+    const nov = runOf(
+      tickPolitics(playingGame({ unrest: 60 }, { stateId: 'novaria' }), MIN, cfg).game,
+    );
     expect(60 - rhen.unrest).toBeCloseTo(6);
     expect(60 - nov.unrest).toBeCloseTo(4);
   });
@@ -67,7 +69,14 @@ describe('Fairness bei hoher Unruhe', () => {
   });
 
   it('Revolution beendet den Durchlauf über tick', () => {
-    const game = playingGame({ path: 'autocratic', stage: 6, unrest: 100, criticalSince: 0, playMs: 120_000, loyalty: 90 });
+    const game = playingGame({
+      path: 'autocratic',
+      stage: 6,
+      unrest: 100,
+      criticalSince: 0,
+      playMs: 120_000,
+      loyalty: 90,
+    });
     const next = tick(game, 500, cfg);
     expect(next.phase).toBe('runEnded');
     expect(next.pending.runEnd?.reason).toBe('revolution');
@@ -90,18 +99,26 @@ describe('Putsch und Säuberung', () => {
     const auto = { path: 'autocratic' as const, stage: 6 };
     expect(coupRiskPerMinute(playingGame({ ...auto, loyalty: 60, unrest: 99 }), cfg).risk).toBe(0);
     expect(coupRiskPerMinute(playingGame({ ...auto, loyalty: 5, unrest: 30 }), cfg).risk).toBe(0);
-    expect(coupRiskPerMinute(playingGame({ ...auto, loyalty: 5, unrest: 95 }), cfg).risk).toBeGreaterThan(0);
+    expect(
+      coupRiskPerMinute(playingGame({ ...auto, loyalty: 5, unrest: 95 }), cfg).risk,
+    ).toBeGreaterThan(0);
   });
 
   it('Militär-Allianz senkt das Putschrisiko', () => {
     const base = { path: 'autocratic' as const, stage: 7, loyalty: 5, unrest: 95 };
     const plain = coupRiskPerMinute(playingGame(base), cfg).risk;
-    const protectedRisk = coupRiskPerMinute(playingGame({ ...base, groups: { military: 90 } }), cfg).risk;
+    const protectedRisk = coupRiskPerMinute(
+      playingGame({ ...base, groups: { military: 90 } }),
+      cfg,
+    ).risk;
     expect(protectedRisk).toBeCloseTo(plain * 0.2);
   });
 
   it('Zentralia: Säuberung schon bei niedriger Loyalität ohne Unruhe', () => {
-    const r = coupRiskPerMinute(playingGame({ stage: 4, loyalty: 5, unrest: 0 }, { stateId: 'zentralia' }), cfg);
+    const r = coupRiskPerMinute(
+      playingGame({ stage: 4, loyalty: 5, unrest: 0 }, { stateId: 'zentralia' }),
+      cfg,
+    );
     expect(r.kind).toBe('purge');
     expect(r.risk).toBeGreaterThan(0);
   });
@@ -110,7 +127,11 @@ describe('Putsch und Säuberung', () => {
     let game = playingGame({ path: 'autocratic', stage: 6, loyalty: 0, unrest: 99 });
     let signal = null;
     for (let i = 0; i < 600 && signal === null; i++) {
-      const r = tickPolitics({ ...game, run: { ...runOf(game), unrest: 99, loyalty: 0 } }, 1000, cfg);
+      const r = tickPolitics(
+        { ...game, run: { ...runOf(game), unrest: 99, loyalty: 0 } },
+        1000,
+        cfg,
+      );
       signal = r.signal;
       game = r.game;
     }

@@ -28,7 +28,12 @@ export const SAVE_VERSION = 2;
 // z.number() lehnt in zod 4 NaN und Infinity bereits ab.
 const finiteNonNeg = z.number().min(0);
 const count = z.number().int().min(0).max(1_000_000);
-const index = (n: number) => z.number().int().min(0).max(n - 1);
+const index = (n: number) =>
+  z
+    .number()
+    .int()
+    .min(0)
+    .max(n - 1);
 const percent = z.number().min(0).max(100);
 
 export const resourceMapSchema = z.object(

@@ -114,7 +114,14 @@ export const foreignActions: ForeignActionDef[] = [
   // Staatsbesuch: Beziehung verbessern
   { id: 'stateVisit', cost: 20, minRelation: -100, relation: 15, approval: 1, cooldownSeconds: 45 },
   // Handelsabkommen: dauerhafter Geldbonus
-  { id: 'tradeAgreement', cost: 60, minRelation: 25, relation: 10, approval: 2, cooldownSeconds: 30 },
+  {
+    id: 'tradeAgreement',
+    cost: 60,
+    minRelation: 25,
+    relation: 10,
+    approval: 2,
+    cooldownSeconds: 30,
+  },
   // Bündnis: schützt vor Krisen mit Dritten
   { id: 'alliance', cost: 120, minRelation: 50, relation: 15, approval: 3, cooldownSeconds: 30 },
   // Sanktionen: Zustimmung im Inland, Beziehung sinkt, Abkommen enden

@@ -1,7 +1,7 @@
 // Kern der Balancing-Simulation: ein Bot, der das Spiel ohne Oberfläche spielt.
 // Genutzt von simulate.ts (Bericht) und calibrate.ts (Anforderungen einstellen).
 
-import { defaultConfig, withGameSpeed, type GameConfig } from '../src/config';
+import type { GameConfig } from '../src/config';
 import { careerVenue } from '../src/config/careers';
 import { autocracyAction, autocracyCost, isAutocracyAvailable } from '../src/engine/autocracy';
 import {
@@ -30,9 +30,15 @@ import {
 } from '../src/engine/economy';
 import { findEvent, resolveEvent } from '../src/engine/events';
 import { createNewGame, startRun } from '../src/engine/game';
-import { MAX_STAGE, RESOURCE_IDS, VEHICLE_IDS, type ResourceMap, type StateId } from '../src/engine/ids';
+import {
+  MAX_STAGE,
+  RESOURCE_IDS,
+  VEHICLE_IDS,
+  type ResourceMap,
+  type StateId,
+} from '../src/engine/ids';
 import { investCost, investInGroup } from '../src/engine/alliances';
-import { groupsFor, groupLoyalty, isLoyaltyUnlocked, nextRequirement } from '../src/engine/rules';
+import { groupsFor, groupLoyalty, nextRequirement } from '../src/engine/rules';
 import type { GameState } from '../src/engine/schema';
 import { tick } from '../src/engine/tick';
 import { findAction, isActionUnlocked, isGeneratorUnlocked } from '../src/engine/unlocks';
@@ -121,10 +127,17 @@ function investGreedily(game: GameState, cfg: GameConfig, payback: number): Game
     }
     const here = currentLocation(run, cfg);
     for (const action of cfg.world.actions) {
-      if (action.location !== here || !run.world.inside || !isActionUnlocked(run, action, cfg)) continue;
-      options.push({ cost: upgradeCost(run, action, 'staff', cfg), apply: (g) => buyActionUpgrade(g, action.id, 'staff', cfg) });
+      if (action.location !== here || !run.world.inside || !isActionUnlocked(run, action, cfg))
+        continue;
+      options.push({
+        cost: upgradeCost(run, action, 'staff', cfg),
+        apply: (g) => buyActionUpgrade(g, action.id, 'staff', cfg),
+      });
       if (actionProgress(run, action.id).training < action.training.maxLevel) {
-        options.push({ cost: upgradeCost(run, action, 'training', cfg), apply: (g) => buyActionUpgrade(g, action.id, 'training', cfg) });
+        options.push({
+          cost: upgradeCost(run, action, 'training', cfg),
+          apply: (g) => buyActionUpgrade(g, action.id, 'training', cfg),
+        });
       }
     }
     for (const p of cfg.projects) {
@@ -170,10 +183,15 @@ function bestAction(game: GameState, cfg: GameConfig) {
   return best ? findAction(best.id as never, cfg) : undefined;
 }
 
-function goInside(game: GameState, location: ReturnType<typeof careerVenue>, cfg: GameConfig): GameState {
+function goInside(
+  game: GameState,
+  location: ReturnType<typeof careerVenue>,
+  cfg: GameConfig,
+): GameState {
   const run = game.run;
   if (!run) return game;
-  if (currentLocation(run, cfg) === location) return run.world.inside ? game : enterBuilding(game, cfg);
+  if (currentLocation(run, cfg) === location)
+    return run.world.inside ? game : enterBuilding(game, cfg);
   if (run.world.target === location) return game;
   return walkTo(game, location, cfg);
 }
@@ -228,12 +246,18 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
     }
 
     // Autokraten: Loyalität und Unruhe im Griff behalten
+    const buyLoyaltyDef = cfg.balancing.autocracy.actions.find((a) => a.id === 'buyLoyalty');
     if (game.run && isAutocracyAvailable(game.run, cfg)) {
       const r = game.run;
       const status = careerStatus(game, cfg);
-      const need = Math.max(status?.requirement.loyalty ?? 0, cfg.balancing.autocracy.powerLoyaltyCost) + 5;
+      const need =
+        Math.max(status?.requirement.loyalty ?? 0, cfg.balancing.autocracy.powerLoyaltyCost) + 5;
       if (r.unrest > 65) game = autocracyAction(game, 'repression', cfg);
-      else if (r.loyalty < need && canAfford(r.resources, autocracyCost(r, cfg.balancing.autocracy.actions.find((a) => a.id === 'buyLoyalty')!, cfg))) {
+      else if (
+        r.loyalty < need &&
+        buyLoyaltyDef &&
+        canAfford(r.resources, autocracyCost(r, buyLoyaltyDef, cfg))
+      ) {
         game = autocracyAction(game, 'buyLoyalty', cfg);
       }
       if (r.approval < 40) game = autocracyAction(game, 'pressControl', cfg);
@@ -245,7 +269,8 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
       for (const g of groupsFor(r, cfg)) {
         if (groupLoyalty(r, g.id, cfg) >= 55) continue;
         const cost = investCost(r, g.id, cfg);
-        if (value(cost, weights(game, cfg)) < r.resources.money * 0.05) game = investInGroup(game, g.id, cfg);
+        if (value(cost, weights(game, cfg)) < r.resources.money * 0.05)
+          game = investInGroup(game, g.id, cfg);
       }
     }
 
@@ -255,7 +280,10 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
       const nextVehicle = VEHICLE_IDS[VEHICLE_IDS.indexOf(r.vehicle) + 1];
       if (nextVehicle) {
         const cost = vehicleCost(nextVehicle, cfg);
-        if ((cost.money ?? 0) < r.resources.money * 0.15 && (cost.influence ?? 0) < r.resources.influence * 0.15) {
+        if (
+          (cost.money ?? 0) < r.resources.money * 0.15 &&
+          (cost.influence ?? 0) < r.resources.influence * 0.15
+        ) {
           game = buyVehicle(game, nextVehicle, cfg);
         }
       }
@@ -298,7 +326,8 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
         game = goInside(game, action.location, cfg);
         const rr = game.run;
         if (rr && rr.world.inside && currentLocation(rr, cfg) === action.location) {
-          for (let i = 0; i < TAPS_PER_SECOND * stepSeconds; i++) game = performAction(game, action.id, cfg).game;
+          for (let i = 0; i < TAPS_PER_SECOND * stepSeconds; i++)
+            game = performAction(game, action.id, cfg).game;
         }
       }
       game = investGreedily(game, cfg, 150 / cfg.balancing.gameSpeed);
@@ -308,9 +337,12 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
       const rq = nextRequirement(game.run, cfg);
       const res = game.run.resources;
       const since = (elapsed - stageStart) / 60_000;
-      if (satisfied.money === null && res.money >= rq.money) satisfied = { ...satisfied, money: since };
-      if (satisfied.influence === null && res.influence >= rq.influence) satisfied = { ...satisfied, influence: since };
-      if (satisfied.followers === null && res.followers >= rq.followers) satisfied = { ...satisfied, followers: since };
+      if (satisfied.money === null && res.money >= rq.money)
+        satisfied = { ...satisfied, money: since };
+      if (satisfied.influence === null && res.influence >= rq.influence)
+        satisfied = { ...satisfied, influence: since };
+      if (satisfied.followers === null && res.followers >= rq.followers)
+        satisfied = { ...satisfied, followers: since };
     }
     if (process.argv.includes('--trace') && game.run && elapsed % (120 * 60_000) < stepMs) {
       const rr = game.run;
@@ -326,7 +358,11 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
     if (stage > lastStage && process.argv.includes('--verbose') && game.run) {
       const done = finishCeremony(game);
       const rr = done.run ?? game.run;
-      const rates = tick({ ...done, phase: 'playing', run: { ...rr, events: { ...rr.events, nextAt: Infinity } } }, 1000, cfg).run;
+      const rates = tick(
+        { ...done, phase: 'playing', run: { ...rr, events: { ...rr.events, nextAt: Infinity } } },
+        1000,
+        cfg,
+      ).run;
       const req = nextRequirement(rr, cfg);
       const fmt = (n: number) => n.toExponential(1);
       if (rates) {
@@ -340,7 +376,12 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
     }
     if (stage > lastStage) {
       for (let s = lastStage + 1; s <= stage; s++) {
-        times.push({ stage: s, minutes: (elapsed - stageStart) / 60_000, satisfied, afterLoss: lossInPeriod });
+        times.push({
+          stage: s,
+          minutes: (elapsed - stageStart) / 60_000,
+          satisfied,
+          afterLoss: lossInPeriod,
+        });
       }
       stageStart = elapsed;
       lossInPeriod = false;
@@ -351,4 +392,3 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
   }
   return { times, total: elapsed / 60_000, elections, endedBy, finalStage: lastStage };
 }
-

@@ -23,7 +23,14 @@ export function CareerCard() {
         atVenue: v.atVenue,
         ready: v.ready,
         bars: v.bars.map((b) => `${b.key}|${b.label}|${b.ratio.toFixed(3)}|${b.text}`).join('\n'),
-        years: s.game.run?.rulingSince != null ? Math.floor(((s.game.run.playMs - s.game.run.rulingSince) / 1000) / cfg.balancing.ruling.secondsPerYear) : null,
+        years:
+          s.game.run?.rulingSince != null
+            ? Math.floor(
+                (s.game.run.playMs - s.game.run.rulingSince) /
+                  1000 /
+                  cfg.balancing.ruling.secondsPerYear,
+              )
+            : null,
       };
     }),
   );
@@ -32,7 +39,11 @@ export function CareerCard() {
 
   const open = () => gameStore.getState().openSheet({ kind: 'career' });
   const modeLabel =
-    view.mode === 'election' ? de.careerPanel.election : view.mode === 'power' ? de.careerPanel.power : de.careerPanel.appointment;
+    view.mode === 'election'
+      ? de.careerPanel.election
+      : view.mode === 'power'
+        ? de.careerPanel.power
+        : de.careerPanel.appointment;
 
   if (view.top) {
     return (
@@ -40,7 +51,9 @@ export function CareerCard() {
         <Crown size={22} aria-hidden="true" className={styles.crown} />
         <div>
           <p className={styles.title}>{de.careerPanel.top}</p>
-          {view.years !== null && <p className={styles.sub}>{fill(de.careerPanel.ruling, { years: view.years + 1 })}</p>}
+          {view.years !== null && (
+            <p className={styles.sub}>{fill(de.careerPanel.ruling, { years: view.years + 1 })}</p>
+          )}
         </div>
       </section>
     );
@@ -56,10 +69,17 @@ export function CareerCard() {
 
   return (
     <section className={styles.card} data-testid="career-card">
-      <button type="button" className={styles.main} onClick={open} aria-label={de.careerPanel.title}>
+      <button
+        type="button"
+        className={styles.main}
+        onClick={open}
+        aria-label={de.careerPanel.title}
+      >
         <div className={styles.head}>
           <Vote size={18} aria-hidden="true" />
-          <span className={styles.title}>{fill(de.careerPanel.next, { title: view.nextTitle })}</span>
+          <span className={styles.title}>
+            {fill(de.careerPanel.next, { title: view.nextTitle })}
+          </span>
           <span className={styles.badge}>{modeLabel}</span>
           <ChevronRight size={18} aria-hidden="true" className={styles.chev} />
         </div>
@@ -71,7 +91,10 @@ export function CareerCard() {
                 <span className="num">{b.text}</span>
               </div>
               <div className={styles.track}>
-                <div className={`${styles.fill} ${b.ratio >= 1 ? styles.full : ''}`} style={{ transform: `scaleX(${b.ratio})` }} />
+                <div
+                  className={`${styles.fill} ${b.ratio >= 1 ? styles.full : ''}`}
+                  style={{ transform: `scaleX(${b.ratio})` }}
+                />
               </div>
             </div>
           ))}
@@ -91,7 +114,11 @@ export function CareerCard() {
       )}
       {view.ready && view.atVenue && (
         <button type="button" className={styles.go} onClick={open} data-testid="career-open">
-          {view.mode === 'election' ? de.careerPanel.run : view.mode === 'power' ? de.careerPanel.expand : de.careerPanel.promote}
+          {view.mode === 'election'
+            ? de.careerPanel.run
+            : view.mode === 'power'
+              ? de.careerPanel.expand
+              : de.careerPanel.promote}
         </button>
       )}
     </section>

@@ -63,7 +63,10 @@ describe('Wahlen', () => {
     const rhen = playingGame({ stage: 3 });
     const novReq = nextRequirement(runOf(nov), cfg).money;
     const rhenReq = nextRequirement(runOf(rhen), cfg).money;
-    expect(campaignCost(nov, 1, cfg) / novReq).toBeCloseTo((campaignCost(rhen, 1, cfg) / rhenReq) * 1.5, 2);
+    expect(campaignCost(nov, 1, cfg) / novReq).toBeCloseTo(
+      (campaignCost(rhen, 1, cfg) / rhenReq) * 1.5,
+      2,
+    );
   });
 
   it('Kandidieren nur im Parteibüro (bzw. am jeweiligen Wahlort)', () => {
@@ -142,7 +145,11 @@ describe('Ernennung und Macht ausbauen', () => {
 
 describe('Zeremonie und Sieg', () => {
   it('nach der Zeremonie geht das Spiel weiter und die Stufe gilt als gesehen', () => {
-    const game = { ...playingGame({ stage: 4 }), phase: 'ceremony' as const, pending: { ceremony: { stage: 4 }, runEnd: null, emigration: null } };
+    const game = {
+      ...playingGame({ stage: 4 }),
+      phase: 'ceremony' as const,
+      pending: { ceremony: { stage: 4 }, runEnd: null, emigration: null },
+    };
     const next = finishCeremony(game);
     expect(next.phase).toBe('playing');
     expect(next.meta.ceremoniesSeen).toContain(4);

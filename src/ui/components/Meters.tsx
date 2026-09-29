@@ -9,7 +9,12 @@ import styles from './Meters.module.css';
 
 const cfg = defaultConfig;
 
-function Bar({ label, value, tone, testId }: {
+function Bar({
+  label,
+  value,
+  tone,
+  testId,
+}: {
   label: string;
   value: number;
   tone: 'good' | 'warn' | 'bad' | 'neutral' | 'loyal';
@@ -22,8 +27,18 @@ function Bar({ label, value, tone, testId }: {
         <span>{label}</span>
         <span className="num">{pct} %</span>
       </div>
-      <div className={styles.track} role="progressbar" aria-label={label} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <div className={`${styles.fill} ${styles[tone]}`} style={{ transform: `scaleX(${pct / 100})` }} />
+      <div
+        className={styles.track}
+        role="progressbar"
+        aria-label={label}
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div
+          className={`${styles.fill} ${styles[tone]}`}
+          style={{ transform: `scaleX(${pct / 100})` }}
+        />
       </div>
     </div>
   );
@@ -56,7 +71,9 @@ export function Meters() {
       <div className={styles.meters} data-count={v.loyalty === null ? 2 : 3}>
         <Bar label={de.meters.approval} value={v.approval} tone="neutral" testId="bar-approval" />
         <Bar label={de.meters.unrest} value={v.unrest} tone={unrestTone} testId="bar-unrest" />
-        {v.loyalty !== null && <Bar label={de.meters.loyalty} value={v.loyalty} tone="loyal" testId="bar-loyalty" />}
+        {v.loyalty !== null && (
+          <Bar label={de.meters.loyalty} value={v.loyalty} tone="loyal" testId="bar-loyalty" />
+        )}
       </div>
       <button
         type="button"
@@ -89,5 +106,7 @@ export function Meters() {
 /** Roter, pulsierender Bildschirmrand ab 70 % Unruhe. */
 export function UnrestBorder() {
   const show = useGame((s) => (s.game.run?.unrest ?? 0) > cfg.balancing.unrestThresholds.danger);
-  return show ? <div className={styles.border} aria-hidden="true" data-testid="unrest-border" /> : null;
+  return show ? (
+    <div className={styles.border} aria-hidden="true" data-testid="unrest-border" />
+  ) : null;
 }

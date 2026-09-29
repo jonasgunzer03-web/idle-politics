@@ -1,9 +1,4 @@
-import type {
-  AccessoryId,
-  AchievementId,
-  AutocracyActionId,
-  LegacyId,
-} from '../engine/ids';
+import type { AccessoryId, AchievementId, AutocracyActionId, LegacyId } from '../engine/ids';
 import type { HintId, RunEndReason } from '../engine/schema';
 
 // Texte für Karriere, Politik, Zeremonien, Vermächtnis, Erfolge und Nachrichten.
@@ -28,7 +23,8 @@ export const politicsTexts = {
     campaign: 'Wahlkampfbudget',
     campaigns: ['Kein', 'Klein', 'Mittel', 'Groß'],
     campaignCost: '+{amount}',
-    confirmRun: 'Kandidieren mit {chance} % Siegchance? Bei einer Niederlage fällst du zwei Stufen zurück. Die Kosten sind dann verloren.',
+    confirmRun:
+      'Kandidieren mit {chance} % Siegchance? Bei einer Niederlage fällst du zwei Stufen zurück. Die Kosten sind dann verloren.',
     expandWarning: 'Kostet {loyalty} % Loyalität, Unruhe +{unrest} %.',
     fixBonus: 'Wahlergebnis korrigiert: 40 % günstiger',
     ruling: 'Amtsjahr {years}',
@@ -38,7 +34,8 @@ export const politicsTexts = {
     wonTitle: 'Wahl gewonnen',
     wonText: 'Mit {chance} % Siegchance hast du dich durchgesetzt.',
     lostTitle: 'Wahl verloren',
-    lostText: 'Trotz {chance} % Siegchance hat es nicht gereicht. Du fällst auf Stufe {stage} zurück: {title}. Deine Anhänger bleiben dir.',
+    lostText:
+      'Trotz {chance} % Siegchance hat es nicht gereicht. Du fällst auf Stufe {stage} zurück: {title}. Deine Anhänger bleiben dir.',
   },
 
   resigned: {
@@ -86,11 +83,23 @@ export const politicsTexts = {
     cooldown: 'Wieder in {seconds} s',
     actions: {
       pressControl: { name: 'Presse kontrollieren', text: 'Zustimmung steigt, Unruhe auch.' },
-      harassOpposition: { name: 'Opposition schikanieren', text: 'Loyalität steigt, Unruhe deutlich.' },
-      fixElection: { name: 'Wahlergebnis korrigieren', text: 'Nächstes „Macht ausbauen“ 40 % günstiger.' },
-      emergency: { name: 'Notstand ausrufen', text: 'Viel Loyalität, mehr Unruhe, weniger Zustimmung.' },
+      harassOpposition: {
+        name: 'Opposition schikanieren',
+        text: 'Loyalität steigt, Unruhe deutlich.',
+      },
+      fixElection: {
+        name: 'Wahlergebnis korrigieren',
+        text: 'Nächstes „Macht ausbauen“ 40 % günstiger.',
+      },
+      emergency: {
+        name: 'Notstand ausrufen',
+        text: 'Viel Loyalität, mehr Unruhe, weniger Zustimmung.',
+      },
       buyLoyalty: { name: 'Loyalität kaufen', text: 'Geld gegen Loyalität des Apparats.' },
-      repression: { name: 'Repression', text: 'Unruhe sinkt sofort. Kostet Zustimmung und Auslandsbeziehungen.' },
+      repression: {
+        name: 'Repression',
+        text: 'Unruhe sinkt sofort. Kostet Zustimmung und Auslandsbeziehungen.',
+      },
     } satisfies Record<AutocracyActionId, { name: string; text: string }>,
     effect: {
       approval: 'Zustimmung',
@@ -101,7 +110,7 @@ export const politicsTexts = {
   },
 
   eventUi: {
-    badge: '{count} offene Entscheidungen',
+    badge: 'Offene Entscheidungen: {count}',
     open: 'Entscheidungen',
     swipeHint: 'Nach rechts wischen = Ja, nach links = Nein',
     yes: 'Ja',
@@ -109,7 +118,14 @@ export const politicsTexts = {
     affects: 'Betrifft',
   },
 
-  protestSigns: ['Rücktritt!', 'Genug!', 'Freiheit!', 'Wir sind viele', 'Nicht mit uns', 'Hört uns zu'],
+  protestSigns: [
+    'Rücktritt!',
+    'Genug!',
+    'Freiheit!',
+    'Wir sind viele',
+    'Nicht mit uns',
+    'Hört uns zu',
+  ],
 
   ticker: {
     label: 'Nachrichten',
@@ -151,9 +167,18 @@ export const politicsTexts = {
 
   runEnd: {
     reasons: {
-      revolution: { title: 'Revolution', text: 'Das Volk ist auf die Straße gegangen. Deine Herrschaft ist vorbei.' },
-      coup: { title: 'Putsch', text: 'Der Apparat hat sich gegen dich gewandt. Über Nacht wurdest du abgesetzt.' },
-      purge: { title: 'Säuberung', text: 'Die Partei hat dich fallen lassen. Dein Name verschwindet aus den Akten.' },
+      revolution: {
+        title: 'Revolution',
+        text: 'Das Volk ist auf die Straße gegangen. Deine Herrschaft ist vorbei.',
+      },
+      coup: {
+        title: 'Putsch',
+        text: 'Der Apparat hat sich gegen dich gewandt. Über Nacht wurdest du abgesetzt.',
+      },
+      purge: {
+        title: 'Säuberung',
+        text: 'Die Partei hat dich fallen lassen. Dein Name verschwindet aus den Akten.',
+      },
       retired: { title: 'Ruhestand', text: 'Du ziehst dich zurück und schreibst deine Memoiren.' },
     } satisfies Record<RunEndReason, { title: string; text: string }>,
     stats: 'Bilanz',
@@ -224,7 +249,10 @@ export const politicsTexts = {
       newVehicle: { name: 'Mobil', text: 'Ein Fahrzeug gekauft.' },
       mayor: { name: 'Stadtoberhaupt', text: 'Stufe 5 erreicht.' },
       minister: { name: 'Kabinett', text: 'Stufe 10 erreicht.' },
-      blueCollarPresident: { name: 'Vom Blaumann ins Präsidentenamt', text: 'Auf demokratischem Weg an die Spitze.' },
+      blueCollarPresident: {
+        name: 'Vom Blaumann ins Präsidentenamt',
+        text: 'Auf demokratischem Weg an die Spitze.',
+      },
       dictator: { name: 'Alleinherrscher', text: 'Auf autokratischem Weg an die Spitze.' },
       allStates: { name: 'Weltpolitiker', text: 'Alle vier Staaten regiert.' },
       survivedUnrest: { name: 'Am Abgrund', text: 'Bei 99 % Unruhe überlebt.' },

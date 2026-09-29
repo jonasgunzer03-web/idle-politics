@@ -29,7 +29,13 @@ export function EditorSheet() {
   const accessories = unlocked ? unlocked.split(',') : [];
   const outfit = run ? outfitFor(run) : 'officeShirt';
   return (
-    <BottomSheet title={de.profile.editCharacter} onClose={() => { store.closeSheet(); }} testId="editor-sheet">
+    <BottomSheet
+      title={de.profile.editCharacter}
+      onClose={() => {
+        store.closeSheet();
+      }}
+      testId="editor-sheet"
+    >
       <CharacterEditor draft={draft} onChange={setDraft} outfit={outfit} full />
       <h3 className={styles.subTitle}>{de.profile.accessories}</h3>
       {accessories.length === 0 ? (
@@ -48,7 +54,9 @@ export function EditorSheet() {
                 onClick={() => {
                   setDraft({
                     ...draft,
-                    accessories: on ? draft.accessories.filter((x) => x !== a) : [...draft.accessories, a],
+                    accessories: on
+                      ? draft.accessories.filter((x) => x !== a)
+                      : [...draft.accessories, a],
                   });
                 }}
               >
@@ -62,7 +70,11 @@ export function EditorSheet() {
         block
         disabled={!valid}
         onClick={() => {
-          const parsed = characterSchema.safeParse({ ...draft, name: draft.name.trim(), party: { ...draft.party, name: draft.party.name.trim() } });
+          const parsed = characterSchema.safeParse({
+            ...draft,
+            name: draft.name.trim(),
+            party: { ...draft.party, name: draft.party.name.trim() },
+          });
           if (!parsed.success) return;
           store.updateCharacter(parsed.data);
           store.closeSheet();
@@ -85,10 +97,22 @@ export function EmigrationSheet() {
   const cost = emigrationCost(game, cfg);
   const minStage = cfg.balancing.emigration.minStage;
   return (
-    <BottomSheet title={de.emigration.title} onClose={() => { store.closeSheet(); }} testId="emigration-sheet">
+    <BottomSheet
+      title={de.emigration.title}
+      onClose={() => {
+        store.closeSheet();
+      }}
+      testId="emigration-sheet"
+    >
       <p className={styles.muted}>{de.emigration.text}</p>
-      <p className="num">{fill(de.emigration.cost, { amount: formatResource('money', cost, run.stateId, { rounding: 'ceil' }) })}</p>
-      {run.stage < minStage && <p className={styles.note}>{fill(de.emigration.minStage, { stage: minStage })}</p>}
+      <p className="num">
+        {fill(de.emigration.cost, {
+          amount: formatResource('money', cost, run.stateId, { rounding: 'ceil' }),
+        })}
+      </p>
+      {run.stage < minStage && (
+        <p className={styles.note}>{fill(de.emigration.minStage, { stage: minStage })}</p>
+      )}
       <h3 className={styles.subTitle}>{de.emigration.choose}</h3>
       <div className={styles.options}>
         {STATE_IDS.filter((id) => id !== run.stateId).map((id) => (

@@ -220,7 +220,10 @@ export function campaignLegacyBonus(game: GameState, cfg: GameConfig): number {
   return legacyValue(game, 'campaignVeteran', cfg);
 }
 
-export function legacyStartBonus(game: GameState, cfg: GameConfig): { overtime: number; money: number } {
+export function legacyStartBonus(
+  game: GameState,
+  cfg: GameConfig,
+): { overtime: number; money: number } {
   return {
     overtime: legacyValue(game, 'headStart', cfg),
     money: legacyValue(game, 'startCapital', cfg) * costScale(cfg),

@@ -5,7 +5,7 @@ import { REGION_IDS, type ForeignId, type RegionId } from '../../engine/ids';
 import { foreignPartners, isWorldUnlocked, relation } from '../../engine/rules';
 import { de } from '../../i18n/de';
 import { gameStore, useGame } from '../../store';
-import { flagFor } from '../sheets/RelationSheets';
+import { flagFor } from '../../art/flag/flags';
 import { LockedTab } from './LockedTab';
 import styles from './WorldTab.module.css';
 
@@ -37,9 +37,16 @@ export function WorldTab() {
     const run = s.game.run;
     if (!run || !isWorldUnlocked(run, cfg)) return '';
     const partners = foreignPartners(run)
-      .map((id) => `${id}:${Math.round(relation(run, id, cfg))}:${run.treaties[id]?.trade ? 1 : 0}:${run.treaties[id]?.alliance ? 1 : 0}`)
+      .map(
+        (id) =>
+          `${id}:${Math.round(relation(run, id, cfg))}:${run.treaties[id]?.trade ? 1 : 0}:${run.treaties[id]?.alliance ? 1 : 0}`,
+      )
       .join('|');
-    const projects = REGION_IDS.map((r) => cfg.projects.filter((p) => p.region === r).reduce((sum, p) => sum + (run.projects[p.id] ?? 0), 0)).join(',');
+    const projects = REGION_IDS.map((r) =>
+      cfg.projects
+        .filter((p) => p.region === r)
+        .reduce((sum, p) => sum + (run.projects[p.id] ?? 0), 0),
+    ).join(',');
     return `${run.stateId}#${partners}#${projects}`;
   });
   if (!key) return <LockedTab title={de.foreign.title} text={de.foreign.lockedText} />;
@@ -65,7 +72,12 @@ export function WorldTab() {
     <div className={styles.page}>
       <h1 className={styles.title}>{de.foreign.title}</h1>
       <div className={styles.map}>
-        <svg viewBox={`0 0 ${W} ${H}`} className={styles.svg} role="img" aria-label={de.foreign.title}>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className={styles.svg}
+          role="img"
+          aria-label={de.foreign.title}
+        >
           {partners.map((p) => (
             <line
               key={p.id}
@@ -84,8 +96,19 @@ export function WorldTab() {
             const pos = REGION_POS[r];
             return (
               <g key={r}>
-                <circle cx={HOME.x + pos.dx} cy={HOME.y + pos.dy} r={28} className={styles.region} data-level={Math.min(3, Math.ceil((levels[i] ?? 0) / 3))} />
-                <text x={HOME.x + pos.dx} y={HOME.y + pos.dy + 40} textAnchor="middle" className={styles.label}>
+                <circle
+                  cx={HOME.x + pos.dx}
+                  cy={HOME.y + pos.dy}
+                  r={28}
+                  className={styles.region}
+                  data-level={Math.min(3, Math.ceil((levels[i] ?? 0) / 3))}
+                />
+                <text
+                  x={HOME.x + pos.dx}
+                  y={HOME.y + pos.dy + 40}
+                  textAnchor="middle"
+                  className={styles.label}
+                >
                   {de.foreign.regions[own][r]}
                 </text>
               </g>
@@ -97,13 +120,22 @@ export function WorldTab() {
               <text x={p.x} y={p.y + 44} textAnchor="middle" className={styles.label}>
                 {de.foreign.countries[p.id]}
               </text>
-              <text x={p.x} y={p.y + 56} textAnchor="middle" className={styles.rel} fill={relationColor(p.relation)}>
+              <text
+                x={p.x}
+                y={p.y + 56}
+                textAnchor="middle"
+                className={styles.rel}
+                fill={relationColor(p.relation)}
+              >
                 {p.relation > 0 ? `+${p.relation}` : p.relation}
               </text>
             </g>
           ))}
         </svg>
-        <div className={styles.homeFlag} style={{ left: `${(HOME.x / W) * 100}%`, top: `${(HOME.y / H) * 100}%` }}>
+        <div
+          className={styles.homeFlag}
+          style={{ left: `${(HOME.x / W) * 100}%`, top: `${(HOME.y / H) * 100}%` }}
+        >
           <Flag flag={cfg.states[own].flag} width={40} />
         </div>
         {REGION_IDS.map((r) => {
@@ -114,7 +146,10 @@ export function WorldTab() {
               key={r}
               type="button"
               className={styles.hitRegion}
-              style={{ left: `${((HOME.x + pos.dx) / W) * 100}%`, top: `${((HOME.y + pos.dy) / H) * 100}%` }}
+              style={{
+                left: `${((HOME.x + pos.dx) / W) * 100}%`,
+                top: `${((HOME.y + pos.dy) / H) * 100}%`,
+              }}
               onClick={() => store.openSheet({ kind: 'region', id: r })}
               aria-label={de.foreign.regions[own][r]}
               data-testid={`region-${r}`}

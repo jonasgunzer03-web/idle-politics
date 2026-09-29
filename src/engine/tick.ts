@@ -42,7 +42,11 @@ function tickStep(game: GameState, dt: number, cfg: GameConfig): TickResult {
   };
   const politics = tickPolitics(next, dt, cfg);
   next = politics.game;
-  if (politics.signal === 'revolution' || politics.signal === 'coup' || politics.signal === 'purge') {
+  if (
+    politics.signal === 'revolution' ||
+    politics.signal === 'coup' ||
+    politics.signal === 'purge'
+  ) {
     return { game: endRun(next, politics.signal, cfg), signal: politics.signal };
   }
   next = tickEvents(next, cfg);

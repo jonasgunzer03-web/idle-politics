@@ -320,11 +320,29 @@ export const balancing: Balancing = {
       unlockStage: 3,
     },
     // Vermietung
-    { id: 'rentals', produces: 'money', baseCost: { money: 22_000 }, baseOutput: 190, unlockStage: 5 },
+    {
+      id: 'rentals',
+      produces: 'money',
+      baseCost: { money: 22_000 },
+      baseOutput: 190,
+      unlockStage: 5,
+    },
     // Mittelständische Firma
-    { id: 'company', produces: 'money', baseCost: { money: 320_000 }, baseOutput: 1_500, unlockStage: 7 },
+    {
+      id: 'company',
+      produces: 'money',
+      baseCost: { money: 320_000 },
+      baseOutput: 1_500,
+      unlockStage: 7,
+    },
     // Holding
-    { id: 'holding', produces: 'money', baseCost: { money: 5_000_000 }, baseOutput: 12_000, unlockStage: 9 },
+    {
+      id: 'holding',
+      produces: 'money',
+      baseCost: { money: 5_000_000 },
+      baseOutput: 12_000,
+      unlockStage: 9,
+    },
     // Konzern
     {
       id: 'conglomerate',
@@ -372,9 +390,21 @@ export const balancing: Balancing = {
 
     // --- Einfluss ---
     // Stammtisch
-    { id: 'regularsTable', produces: 'influence', baseCost: { money: 25 }, baseOutput: 0.15, unlockStage: 1 },
+    {
+      id: 'regularsTable',
+      produces: 'influence',
+      baseCost: { money: 25 },
+      baseOutput: 0.15,
+      unlockStage: 1,
+    },
     // Vereinsarbeit
-    { id: 'clubWork', produces: 'influence', baseCost: { money: 300, influence: 10 }, baseOutput: 1, unlockStage: 2 },
+    {
+      id: 'clubWork',
+      produces: 'influence',
+      baseCost: { money: 300, influence: 10 },
+      baseOutput: 1,
+      unlockStage: 2,
+    },
     // Ortsverband
     {
       id: 'localBranch',
@@ -411,7 +441,13 @@ export const balancing: Balancing = {
 
     // --- Anhänger ---
     // Flyer
-    { id: 'flyers', produces: 'followers', baseCost: { money: 60, influence: 5 }, baseOutput: 0.4, unlockStage: 2 },
+    {
+      id: 'flyers',
+      produces: 'followers',
+      baseCost: { money: 60, influence: 5 },
+      baseOutput: 0.4,
+      unlockStage: 2,
+    },
     // Infostand
     {
       id: 'infoStand',

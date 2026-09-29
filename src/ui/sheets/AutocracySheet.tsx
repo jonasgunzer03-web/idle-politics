@@ -26,18 +26,31 @@ export function AutocracySheet() {
           const cost = autocracyCost(run, a, cfg);
           const until = run.cooldowns[autocracyCooldownKey(a.id)] ?? 0;
           const wait = Math.max(0, Math.ceil((until - run.playMs) / 1000));
-          return [a.id, formatCost(cost, run.stateId), canAfford(run.resources, cost) ? 1 : 0, wait].join('~');
+          return [
+            a.id,
+            formatCost(cost, run.stateId),
+            canAfford(run.resources, cost) ? 1 : 0,
+            wait,
+          ].join('~');
         })
         .join('\n');
     }),
   );
   const store = gameStore.getState();
-  const byId = new Map(rows.split('\n').map((r) => {
-    const [id = '', cost = '', ok = '0', wait = '0'] = r.split('~');
-    return [id, { cost, ok: ok === '1', wait: Number(wait) }] as const;
-  }));
+  const byId = new Map(
+    rows.split('\n').map((r) => {
+      const [id = '', cost = '', ok = '0', wait = '0'] = r.split('~');
+      return [id, { cost, ok: ok === '1', wait: Number(wait) }] as const;
+    }),
+  );
   return (
-    <BottomSheet title={de.autocracy.title} onClose={() => { store.closeSheet(); }} testId="autocracy-sheet">
+    <BottomSheet
+      title={de.autocracy.title}
+      onClose={() => {
+        store.closeSheet();
+      }}
+      testId="autocracy-sheet"
+    >
       {AUTOCRACY_ACTION_IDS.map((id) => {
         const def = cfg.balancing.autocracy.actions.find((a) => a.id === id);
         const row = byId.get(id);

@@ -21,7 +21,9 @@ export function walkTo(game: GameState, target: LocationId, cfg: GameConfig): Ga
   const loc = findLocation(target, cfg);
   if (game.phase !== 'playing' || !run || !loc || !isLocationReachable(run, loc, cfg)) return game;
   if (currentLocation(run, cfg) === target && run.world.target === null) {
-    return run.world.inside ? { ...game, run: { ...run, world: { ...run.world, inside: false } } } : game;
+    return run.world.inside
+      ? { ...game, run: { ...run, world: { ...run.world, inside: false } } }
+      : game;
   }
   return { ...game, run: { ...run, world: { posX: run.world.posX, target, inside: false } } };
 }
@@ -50,7 +52,12 @@ export function leaveBuilding(game: GameState): GameState {
 }
 
 /** Bewegung für einen Zeitraum. Instant = sofort ankommen (Offline-Zeit). */
-export function moveFigure(game: GameState, deltaMs: number, cfg: GameConfig, instant = false): GameState {
+export function moveFigure(
+  game: GameState,
+  deltaMs: number,
+  cfg: GameConfig,
+  instant = false,
+): GameState {
   const run = game.run;
   if (!run || run.world.target === null || deltaMs <= 0) return game;
   const loc = findLocation(run.world.target, cfg);

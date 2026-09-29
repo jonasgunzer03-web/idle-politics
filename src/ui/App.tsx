@@ -1,23 +1,28 @@
 import { useState, type CSSProperties } from 'react';
 import { defaultConfig } from '../config';
 import { DebugMenu } from '../debug/DebugMenu';
-import { de } from '../i18n/de';
+import { groupsFor, isWorldUnlocked } from '../engine/rules';
 import { useGame } from '../store';
 import { useGameLoop } from '../store/useGameLoop';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Meters, UnrestBorder } from './components/Meters';
 import { ResourceBar } from './components/ResourceBar';
 import { RotateOverlay } from './components/RotateOverlay';
-import { StatusBars } from './components/StatusBars';
 import { StorageBanner } from './components/StorageBanner';
 import { TabBar, type TabId } from './components/TabBar';
+import { Toasts } from './components/Toasts';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { OverlayHost } from './dialogs/OverlayHost';
+import { FloatingNumbers } from './effects/FloatingNumbers';
+import { CeremonyScreen } from './screens/CeremonyScreen';
+import { EmigrationScreen, RunEndScreen, VictoryScreen } from './screens/EndScreens';
+import { SetupFlow } from './setup/SetupFlow';
+import { SheetHost } from './sheets/SheetHost';
 import { CareerTab } from './tabs/CareerTab';
 import { InvestTab } from './tabs/InvestTab';
-import { NetworkTab, WorldTab } from './tabs/OtherTabs';
-import { FloatingNumbers } from './effects/FloatingNumbers';
-import { SetupFlow } from './setup/SetupFlow';
+import { NetworkTab } from './tabs/NetworkTab';
 import { ProfileTab } from './tabs/ProfileTab';
+import { WorldTab } from './tabs/WorldTab';
 import styles from './App.module.css';
 
 const cfg = defaultConfig;
@@ -37,14 +42,42 @@ function TabContent({ tab }: { tab: TabId }) {
   }
 }
 
+/** Normales Spiel: Kopfzeile, Tab-Inhalt, Tab-Leiste, Dialoge und Fenster. */
+function Playing() {
+  const [tab, setTab] = useState<TabId>('career');
+  const networkLocked = useGame((s) =>
+    s.game.run ? groupsFor(s.game.run, cfg).length === 0 : true,
+  );
+  const worldLocked = useGame((s) => (s.game.run ? !isWorldUnlocked(s.game.run, cfg) : true));
+  return (
+    <>
+      <header className={styles.header}>
+        <ResourceBar />
+        <Meters />
+      </header>
+      <StorageBanner />
+      <main className={`${styles.content} ${tab === 'career' ? styles.flush : ''}`} key={tab}>
+        <TabContent tab={tab} />
+      </main>
+      <TabBar
+        active={tab}
+        onSelect={setTab}
+        locked={{ network: networkLocked, world: worldLocked }}
+      />
+      <FloatingNumbers />
+      <OverlayHost />
+      <SheetHost />
+      <UnrestBorder />
+    </>
+  );
+}
+
 function Shell() {
   useGameLoop();
-  const [tab, setTab] = useState<TabId>('career');
   const hydrated = useGame((s) => s.hydrated);
+  const phase = useGame((s) => s.game.phase);
   const stateId = useGame((s) => s.game.run?.stateId ?? null);
-  const worldLocked = useGame(
-    (s) => (s.game.run?.stage ?? 1) < cfg.balancing.resourceUnlockStage.diplomacy,
-  );
+  const autocratic = useGame((s) => s.game.run?.path === 'autocratic');
   const debug = useGame((s) => s.debug);
 
   const palette = cfg.states[stateId ?? 'rhenania'].palette;
@@ -54,8 +87,6 @@ function Shell() {
     '--state-on-primary': palette.onPrimary,
   } as CSSProperties;
 
-  const inSetup = useGame((s) => s.game.phase === 'setup');
-
   if (!hydrated) return <div className={styles.splash} />;
 
   return (
@@ -63,37 +94,23 @@ function Shell() {
       className={styles.app}
       style={themeVars}
       data-state={stateId ?? 'none'}
+      data-path={autocratic ? 'autocratic' : 'democratic'}
       data-debug={debug ? 'true' : 'false'}
     >
-      {!inSetup && (
-        <header className={styles.header}>
-          {stateId ? (
-            <>
-              <ResourceBar />
-              {tab === 'career' && <StatusBars />}
-            </>
-          ) : (
-            <p className={styles.brand}>{de.appName}</p>
-          )}
-        </header>
-      )}
-      <UpdatePrompt />
-      <StorageBanner />
-      {inSetup ? (
+      {phase === 'setup' && (
         <div className={styles.setup}>
           <SetupFlow />
         </div>
-      ) : (
-        <>
-          <main className={styles.content} key={tab}>
-            <TabContent tab={tab} />
-          </main>
-          <TabBar active={tab} onSelect={setTab} locked={{ world: worldLocked }} />
-          <FloatingNumbers />
-        </>
       )}
-      <OverlayHost />
-      {debug && !inSetup && <DebugMenu />}
+      {phase === 'playing' && <Playing />}
+      {phase === 'ceremony' && <CeremonyScreen />}
+      {phase === 'victory' && <VictoryScreen />}
+      {phase === 'runEnded' && <RunEndScreen />}
+      {phase === 'emigrating' && <EmigrationScreen />}
+      {/* Immer eingebunden: registriert den Service Worker schon auf dem Titelbildschirm */}
+      <UpdatePrompt />
+      <Toasts />
+      {debug && phase === 'playing' && <DebugMenu />}
       <RotateOverlay />
     </div>
   );

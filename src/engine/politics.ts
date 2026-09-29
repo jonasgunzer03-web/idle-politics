@@ -27,7 +27,10 @@ function approach(value: number, target: number, maxStep: number): number {
 }
 
 /** Putsch- bzw. Säuberungsrisiko in Prozent pro Minute (0, wenn keines besteht). */
-export function coupRiskPerMinute(game: GameState, cfg: GameConfig): { risk: number; kind: 'coup' | 'purge' } {
+export function coupRiskPerMinute(
+  game: GameState,
+  cfg: GameConfig,
+): { risk: number; kind: 'coup' | 'purge' } {
   const run = game.run;
   const purges = run ? cfg.states[run.stateId].purges : false;
   const kind = purges ? 'purge' : 'coup';
@@ -38,10 +41,14 @@ export function coupRiskPerMinute(game: GameState, cfg: GameConfig): { risk: num
     const factor = (p.purge.loyaltyBelow - run.loyalty) / p.purge.loyaltyBelow;
     return { risk: p.purge.maxPerMinute * factor * coupProtection(run, cfg), kind };
   }
-  if (run.loyalty >= p.coup.loyaltyBelow || run.unrest <= p.coup.unrestAbove) return { risk: 0, kind };
+  if (run.loyalty >= p.coup.loyaltyBelow || run.unrest <= p.coup.unrestAbove)
+    return { risk: 0, kind };
   const loyaltyFactor = (p.coup.loyaltyBelow - run.loyalty) / p.coup.loyaltyBelow;
   const unrestFactor = (run.unrest - p.coup.unrestAbove) / (100 - p.coup.unrestAbove);
-  return { risk: p.coup.maxPerMinute * loyaltyFactor * unrestFactor * coupProtection(run, cfg), kind };
+  return {
+    risk: p.coup.maxPerMinute * loyaltyFactor * unrestFactor * coupProtection(run, cfg),
+    kind,
+  };
 }
 
 /** Sekunden bis zum frühestmöglichen Sturz durch Unruhe (null = keine Frist läuft). */
@@ -66,13 +73,18 @@ export function tickPolitics(
   const state = cfg.states[run.stateId];
 
   // Zustimmung
-  const approval = approach(run.approval, approvalBase(game, cfg), p.approvalDriftPerMinute * minutes);
+  const approval = approach(
+    run.approval,
+    approvalBase(game, cfg),
+    p.approvalDriftPerMinute * minutes,
+  );
 
   // Unruhe: steigt langsamer bei hoher Loyalität (Zentralia), sinkt schneller mit Boni
   const target = unrestTarget(game, cfg);
   let unrestRate = p.unrestDriftPerMinute * minutes;
   if (target < run.unrest) unrestRate *= unrestDecayFactor(game, cfg);
-  else if (state.loyalCalm && run.loyalty > state.loyalCalm.loyaltyAbove) unrestRate *= state.loyalCalm.factor;
+  else if (state.loyalCalm && run.loyalty > state.loyalCalm.loyaltyAbove)
+    unrestRate *= state.loyalCalm.factor;
   let unrest = approach(run.unrest, target, unrestRate);
 
   // Loyalität des Apparats
@@ -142,7 +154,12 @@ export function tickPolitics(
   if (falls) {
     if (next.path === 'democratic') {
       next = demote(
-        { ...next, unrest: p.resignationUnrest, criticalSince: null, stats: { ...next.stats, atBrink: false } },
+        {
+          ...next,
+          unrest: p.resignationUnrest,
+          criticalSince: null,
+          stats: { ...next.stats, atBrink: false },
+        },
         cfg.balancing.elections.lossStages,
         cfg,
       );

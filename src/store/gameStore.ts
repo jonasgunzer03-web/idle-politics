@@ -57,6 +57,7 @@ import type {
   LocationId,
   ProfessionId,
   ProjectId,
+  RegionId,
   ResourceMap,
   StateId,
   VehicleId,
@@ -89,7 +90,7 @@ export type Sheet =
   | { kind: 'autocracy' }
   | { kind: 'group'; id: GroupId }
   | { kind: 'country'; id: ForeignId }
-  | { kind: 'region'; id: string }
+  | { kind: 'region'; id: RegionId }
   | { kind: 'emigration' }
   | { kind: 'editor' };
 
@@ -194,7 +195,10 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
     ): Partial<GameStoreState> => {
       if (game === state.game && extra.length === 0) return {};
       const checked = checkAchievements(game, cfg);
-      const hints: Overlay[] = pendingHints(checked.game, cfg).map((hint) => ({ kind: 'hint', hint }));
+      const hints: Overlay[] = pendingHints(checked.game, cfg).map((hint) => ({
+        kind: 'hint',
+        hint,
+      }));
       // Ein Sheet schließt sich, wenn das Spiel die Phase wechselt (z. B. Zeremonie)
       const sheet = checked.game.phase === 'playing' ? state.sheet : null;
       return {
@@ -366,7 +370,9 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
           outcome = result.outcome;
           if (!result.outcome) return state;
           // Sieg führt in die Zeremonie; Niederlage zeigt einen Dialog
-          const extra: Overlay[] = result.outcome.won ? [] : [{ kind: 'election', outcome: result.outcome }];
+          const extra: Overlay[] = result.outcome.won
+            ? []
+            : [{ kind: 'election', outcome: result.outcome }];
           return commit({ ...state, sheet: null }, result.game, extra);
         });
         return outcome;

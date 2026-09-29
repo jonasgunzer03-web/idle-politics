@@ -41,7 +41,13 @@ export function careerView(game: GameState, cfg: GameConfig): CareerView | null 
   const top = run.stage >= MAX_STAGE;
   const req = status.requirement;
   const bars: ProgressBar[] = [];
-  const add = (key: ProgressBar['key'], have: number, need: number, label: string, money = false) => {
+  const add = (
+    key: ProgressBar['key'],
+    have: number,
+    need: number,
+    label: string,
+    money = false,
+  ) => {
     if (need <= 0) return;
     bars.push({
       key,
@@ -57,7 +63,8 @@ export function careerView(game: GameState, cfg: GameConfig): CareerView | null 
   };
   add('money', run.resources.money, status.cost.money ?? 0, de.resources.money, true);
   add('influence', run.resources.influence, status.cost.influence ?? 0, de.resources.influence);
-  if (status.election) add('followers', run.resources.followers, req.followers, de.resources.followers);
+  if (status.election)
+    add('followers', run.resources.followers, req.followers, de.resources.followers);
   if (status.autocratic && isLoyaltyUnlocked(run, cfg)) {
     const need = Math.max(req.loyalty, cfg.balancing.autocracy.powerLoyaltyCost);
     bars.push({
@@ -79,8 +86,18 @@ export function careerView(game: GameState, cfg: GameConfig): CareerView | null 
     ready: status.ready,
     bars,
     chances,
-    campaignCosts: costs.map((c) => (c > 0 ? fill(de.careerPanel.campaignCost, { amount: formatResource('money', c, run.stateId, { rounding: 'ceil' }) }) : '')),
-    campaignAffordable: costs.map((c) => run.resources.money >= (status.cost.money ?? 0) + c && run.resources.influence >= (status.cost.influence ?? 0)),
+    campaignCosts: costs.map((c) =>
+      c > 0
+        ? fill(de.careerPanel.campaignCost, {
+            amount: formatResource('money', c, run.stateId, { rounding: 'ceil' }),
+          })
+        : '',
+    ),
+    campaignAffordable: costs.map(
+      (c) =>
+        run.resources.money >= (status.cost.money ?? 0) + c &&
+        run.resources.influence >= (status.cost.influence ?? 0),
+    ),
     fixBonus: run.fixElectionBonus,
   };
 }

@@ -1,6 +1,13 @@
 import type { GameConfig } from '../config';
 import type { EventDef, EventEffect } from '../config/events';
-import { costScale, foreignPartners, groupLoyalty, isWorldUnlocked, nextRequirement, relation } from './rules';
+import {
+  costScale,
+  foreignPartners,
+  groupLoyalty,
+  isWorldUnlocked,
+  nextRequirement,
+  relation,
+} from './rules';
 import { GROUP_IDS, type ForeignId } from './ids';
 import { drawRandom } from './rng';
 import type { GameState, OpenEvent, RunState } from './schema';
@@ -69,7 +76,10 @@ export function drawEvent(game: GameState, cfg: GameConfig, crisisOnly = false):
   const card: OpenEvent = { id: def.id, target };
   return {
     ...current,
-    run: { ...currentRun, events: { ...currentRun.events, open: [...currentRun.events.open, card] } },
+    run: {
+      ...currentRun,
+      events: { ...currentRun.events, open: [...currentRun.events.open, card] },
+    },
   };
 }
 
@@ -90,7 +100,10 @@ export function tickEvents(game: GameState, cfg: GameConfig): GameState {
   const after = draw.game.run ?? r;
   return {
     ...draw.game,
-    run: { ...after, events: { ...after.events, nextAt: after.playMs + nextInterval(draw.value, after, cfg) } },
+    run: {
+      ...after,
+      events: { ...after.events, nextAt: after.playMs + nextInterval(draw.value, after, cfg) },
+    },
   };
 }
 
@@ -102,7 +115,11 @@ export function applyEffect(
   cfg: GameConfig,
 ): RunState {
   const req = nextRequirement(run, cfg);
-  const scale = { money: req.money, influence: req.influence, followers: Math.max(req.followers, req.influence) };
+  const scale = {
+    money: req.money,
+    influence: req.influence,
+    followers: Math.max(req.followers, req.influence),
+  };
   const resources = { ...run.resources };
   const earned = { ...run.earned };
   for (const key of ['money', 'influence', 'followers'] as const) {
@@ -126,7 +143,10 @@ export function applyEffect(
   }
   const relations = { ...run.relations };
   const shift = (id: ForeignId, delta: number) => {
-    relations[id] = Math.min(100, Math.max(-100, (relations[id] ?? relation(run, id, cfg)) + delta));
+    relations[id] = Math.min(
+      100,
+      Math.max(-100, (relations[id] ?? relation(run, id, cfg)) + delta),
+    );
   };
   if (target && effect.relation !== undefined) shift(target, effect.relation);
   if (effect.relationsAll !== undefined && isWorldUnlocked(run, cfg)) {
@@ -145,7 +165,12 @@ export function applyEffect(
 }
 
 /** Karte beantworten (ja = rechts, nein = links). Jede Karte wirkt genau einmal. */
-export function resolveEvent(game: GameState, index: number, choice: 'yes' | 'no', cfg: GameConfig): GameState {
+export function resolveEvent(
+  game: GameState,
+  index: number,
+  choice: 'yes' | 'no',
+  cfg: GameConfig,
+): GameState {
   const run = game.run;
   if (game.phase !== 'playing' || !run) return game;
   const card = run.events.open[index];

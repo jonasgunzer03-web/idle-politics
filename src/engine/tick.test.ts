@@ -45,7 +45,12 @@ describe('tick', () => {
 
 describe('Offline-Fortschritt', () => {
   it('nur Erträge; Zustimmung, Unruhe und Loyalität bleiben eingefroren', () => {
-    const game = playingGame({ generators: { overtime: 10 }, approval: 37, unrest: 12, loyalty: 70 });
+    const game = playingGame({
+      generators: { overtime: 10 },
+      approval: 37,
+      unrest: 12,
+      loyalty: 70,
+    });
     const { game: next, report } = applyOffline(game, HOUR, cfg);
     expect(runOf(next).resources.money).toBeCloseTo(3600 * perSecond(), 3);
     expect(runOf(next)).toMatchObject({ approval: 37, unrest: 12, loyalty: 70, playMs: 0 });

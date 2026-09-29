@@ -91,7 +91,14 @@ export const GROUP_IDS = [
 ] as const;
 export type GroupId = (typeof GROUP_IDS)[number];
 
-export const FOREIGN_IDS = ['novaria', 'rhenania', 'borealis', 'zentralia', 'valmora', 'lysania'] as const;
+export const FOREIGN_IDS = [
+  'novaria',
+  'rhenania',
+  'borealis',
+  'zentralia',
+  'valmora',
+  'lysania',
+] as const;
 export type ForeignId = (typeof FOREIGN_IDS)[number];
 
 export const REGION_IDS = ['north', 'east', 'south', 'west'] as const;

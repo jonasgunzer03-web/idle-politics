@@ -52,7 +52,8 @@ const ActionRow = memo(function ActionRow({ id }: { id: ActionId }) {
         name: actionName(id, run.profession === 'office'),
         yieldText: formatGain(perRun, run.stateId),
         staff: progress.staff,
-        staffRate: progress.staff > 0 ? formatGain(perSecond, run.stateId, de.common.perSecond) : '',
+        staffRate:
+          progress.staff > 0 ? formatGain(perSecond, run.stateId, de.common.perSecond) : '',
         staffCost: formatCost(staffCost, run.stateId),
         staffAffordable: canAfford(run.resources, staffCost),
         training: progress.training,
@@ -102,7 +103,11 @@ const ActionRow = memo(function ActionRow({ id }: { id: ActionId }) {
               <UserPlus size={14} aria-hidden="true" />
               {fill(de.ui.staffCount, { count: view.staff })}
             </span>
-            {view.staffRate && <span className={`${styles.muted} num`}>{fill(de.ui.staffRate, { rate: view.staffRate })}</span>}
+            {view.staffRate && (
+              <span className={`${styles.muted} num`}>
+                {fill(de.ui.staffRate, { rate: view.staffRate })}
+              </span>
+            )}
           </div>
           <button
             type="button"
@@ -124,7 +129,9 @@ const ActionRow = memo(function ActionRow({ id }: { id: ActionId }) {
               <GraduationCap size={14} aria-hidden="true" />
               {de.ui.training}
             </span>
-            <span className={`${styles.muted} num`}>{fill(de.ui.trainingLevel, { level: view.training, max: view.trainingMax })}</span>
+            <span className={`${styles.muted} num`}>
+              {fill(de.ui.trainingLevel, { level: view.training, max: view.trainingMax })}
+            </span>
           </div>
           {view.training >= view.trainingMax ? (
             <span className={styles.maxed}>{de.ui.maxed}</span>

@@ -15,7 +15,9 @@ describe('Allianzen', () => {
     expect(rhen).toContain('civilSociety');
     expect(rhen).not.toContain('security');
     expect(rhen).not.toContain('oligarchs');
-    const bor = groupsFor(runOf(playingGame({ stage: 7 }, { stateId: 'borealis' })), cfg).map((g) => g.id);
+    const bor = groupsFor(runOf(playingGame({ stage: 7 }, { stateId: 'borealis' })), cfg).map(
+      (g) => g.id,
+    );
     expect(bor).toContain('oligarchs');
     expect(bor).toContain('security');
     expect(bor).not.toContain('civilSociety');
@@ -37,9 +39,21 @@ describe('Allianzen', () => {
   });
 
   it('Bonus ab 50 % und 80 % Loyalität', () => {
-    const none = resourceMultiplier(playingGame({ stage: 3, groups: { business: 30 } }), 'money', cfg);
-    const t1 = resourceMultiplier(playingGame({ stage: 3, groups: { business: 55 } }), 'money', cfg);
-    const t2 = resourceMultiplier(playingGame({ stage: 3, groups: { business: 85 } }), 'money', cfg);
+    const none = resourceMultiplier(
+      playingGame({ stage: 3, groups: { business: 30 } }),
+      'money',
+      cfg,
+    );
+    const t1 = resourceMultiplier(
+      playingGame({ stage: 3, groups: { business: 55 } }),
+      'money',
+      cfg,
+    );
+    const t2 = resourceMultiplier(
+      playingGame({ stage: 3, groups: { business: 85 } }),
+      'money',
+      cfg,
+    );
     expect(t1 / none).toBeCloseTo(1.1);
     expect(t2 / none).toBeCloseTo(1.25);
   });
@@ -52,8 +66,12 @@ describe('Allianzen', () => {
 
 describe('Außenpolitik', () => {
   it('erst ab Stufe 8', () => {
-    expect(foreignActionBlock(playingGame({ stage: 7, resources: rich }), 'novaria', 'stateVisit', cfg)).toBe('locked');
-    expect(foreignActionBlock(playingGame({ stage: 8, resources: rich }), 'novaria', 'stateVisit', cfg)).toBeNull();
+    expect(
+      foreignActionBlock(playingGame({ stage: 7, resources: rich }), 'novaria', 'stateVisit', cfg),
+    ).toBe('locked');
+    expect(
+      foreignActionBlock(playingGame({ stage: 8, resources: rich }), 'novaria', 'stateVisit', cfg),
+    ).toBeNull();
   });
 
   it('Staatsbesuch verbessert die Beziehung und kostet diplomatisches Kapital', () => {
@@ -61,7 +79,9 @@ describe('Außenpolitik', () => {
     const next = runOf(foreignAction(game, 'borealis', 'stateVisit', cfg));
     expect(relation(next, 'borealis', cfg)).toBe(-5 + 15);
     expect(next.resources.diplomacy).toBe(rich.diplomacy - 20);
-    expect(foreignActionBlock({ ...game, run: next }, 'borealis', 'stateVisit', cfg)).toBe('cooldown');
+    expect(foreignActionBlock({ ...game, run: next }, 'borealis', 'stateVisit', cfg)).toBe(
+      'cooldown',
+    );
   });
 
   it('Handelsabkommen braucht gute Beziehungen und bringt dauerhaft mehr Geld', () => {
@@ -75,7 +95,11 @@ describe('Außenpolitik', () => {
   });
 
   it('Sanktionen: Zustimmung im Inland, Abkommen enden', () => {
-    const game = playingGame({ stage: 8, resources: rich, treaties: { novaria: { trade: true, alliance: true } } });
+    const game = playingGame({
+      stage: 8,
+      resources: rich,
+      treaties: { novaria: { trade: true, alliance: true } },
+    });
     const next = runOf(foreignAction(game, 'novaria', 'sanctions', cfg));
     expect(next.treaties.novaria).toEqual({ trade: false, alliance: false });
     expect(next.approval).toBe(55);
@@ -92,7 +116,9 @@ describe('Außenpolitik', () => {
   });
 
   it('sich selbst gegenüber gibt es keine Außenpolitik', () => {
-    expect(foreignActionBlock(playingGame({ stage: 8, resources: rich }), 'rhenania', 'stateVisit', cfg)).toBe('locked');
+    expect(
+      foreignActionBlock(playingGame({ stage: 8, resources: rich }), 'rhenania', 'stateVisit', cfg),
+    ).toBe('locked');
   });
 });
 
@@ -112,7 +138,13 @@ describe('Autokratische Aktionen', () => {
   });
 
   it('alle anderen Aktionen erhöhen die Unruhe', () => {
-    for (const id of ['pressControl', 'harassOpposition', 'fixElection', 'emergency', 'buyLoyalty'] as const) {
+    for (const id of [
+      'pressControl',
+      'harassOpposition',
+      'fixElection',
+      'emergency',
+      'buyLoyalty',
+    ] as const) {
       const next = runOf(autocracyAction(playingGame({ ...auto, unrest: 20 }), id, cfg));
       expect(next.unrest).toBeGreaterThan(20);
     }

@@ -2,6 +2,7 @@ import { useGame } from '../../store';
 import { HintDialog } from './HintDialog';
 import { IntroDialog } from './IntroDialog';
 import { OfflineDialog } from './OfflineDialog';
+import { ElectionDialog, ResignedDialog } from './PoliticsDialogs';
 import { RecoveredDialog } from './RecoveredDialog';
 
 /**
@@ -21,5 +22,9 @@ export function OverlayHost() {
       return <IntroDialog onDone={dismiss} />;
     case 'hint':
       return <HintDialog hint={overlay.hint} onClose={dismiss} />;
+    case 'election':
+      return <ElectionDialog outcome={overlay.outcome} onClose={dismiss} />;
+    case 'resigned':
+      return <ResignedDialog stage={overlay.stage} onClose={dismiss} />;
   }
 }

@@ -1,194 +1,180 @@
 # Architektur von Idle Politics
 
-Stand: Ende Phase 1 (Kernschleife). Diese Datei erklärt, wo was passiert, damit du gezielt
-Änderungen ansagen kannst. Sie wird am Ende jeder Phase aktualisiert.
+Stand: Vollausbau (alle Phasen der Spezifikation plus begehbare Welt). Diese Datei erklärt, wo
+was passiert, damit du gezielt Änderungen ansagen kannst.
 
 ## Das große Bild
 
 ```
  ┌──────────────┐   liest Werte    ┌──────────────┐
  │  src/config  │ ───────────────▶ │  src/engine  │  reine Spiellogik, ohne Oberfläche
- │ Zahlen,      │                  │ tick, advance│
- │ Inhalte      │                  │ Kauf, Tippen │
+ │ Zahlen,      │                  │ Zeit, Welt,  │
+ │ Inhalte      │                  │ Karriere …   │
  └──────────────┘                  └──────┬───────┘
                                           │ wird aufgerufen von
                                    ┌──────▼───────┐
- ┌──────────────┐   Texte          │  src/store   │  hält den aktuellen Spielstand,
- │  src/i18n    │ ──────┐          │ Zustand-Store│  Spielschleife, Speichern
+ ┌──────────────┐   Texte          │  src/store   │  hält den Spielstand, Dialoge,
+ │  src/i18n    │ ──────┐          │ Zustand-Store│  Fenster, Spielschleife, Speichern
  └──────────────┘       │          └──────┬───────┘
                         │                 │ Werte per Selektor
-                        │          ┌──────▼───────┐
-                        └────────▶ │   src/ui     │  Bildschirme, Tabs, Dialoge
-                                   └──────────────┘
+                        │          ┌──────▼───────┐      ┌──────────────┐
+                        └────────▶ │   src/ui     │ ───▶ │   src/art    │  SVG-Grafik
+                                   └──────────────┘      └──────────────┘
 ```
 
 Die Engine weiß nichts von React. Die Oberfläche rechnet nichts selbst, sie zeigt nur an und
-ruft Aktionen des Stores auf. Deshalb lässt sich die ganze Spiellogik ohne Browser testen.
+ruft Aktionen des Stores auf. Deshalb lässt sich die ganze Spiellogik ohne Browser testen, und
+ein Bot kann das Spiel für die Balancing-Simulation durchspielen.
+
+## Das Spiel in einem Absatz
+
+Du läufst mit deiner Figur durch eine Straße mit vier Vierteln (Arbeiterviertel, Altstadt,
+Regierungsviertel, Prachtmeile), die mit deiner Karriere freigeschaltet werden und immer
+prächtiger aussehen. In den Gebäuden führst du Tätigkeiten aus (Tippen), stellst Mitarbeiter
+ein (automatisch) und schulst sie (mehr Ertrag). Fahrzeuge verkürzen die Wege. Im Tab
+„Investieren“ kaufst du Generatoren für passive Erträge. Am jeweiligen Karriere-Ort (Parteibüro,
+Rathaus, Parlament, Regierungssitz) kandidierst du, übernimmst Ämter oder baust als Autokrat
+deine Macht aus. Zustimmung, Unruhe, Loyalität, Ereigniskarten, Allianzen und ab Stufe 8 die
+Welt-Karte mit Regionen und Außenpolitik entscheiden über Tempo und Risiko.
 
 ## Ordner und Dateien
 
 ### `src/config/` – alles, was du nachjustieren kannst
 
-| Datei           | Inhalt                                                                                                                                                                                                                                             |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `balancing.ts`  | `GAME_SPEED`, Offline-Deckel (8 Std.), Autosave-Intervall, Preissteigerung 1,15, Tipp-Erträge, Berufs-Multiplikatoren, Freischalt-Stufen der Ressourcen, alle Generatoren mit Preis, Ertrag und Freischalt-Stufe, Farbschwellen des Unruhe-Balkens |
-| `states.ts`     | die vier Staaten: spielbar ja/nein, Tempo und Risiko, Währung, Ertrags-Multiplikatoren, Grund-Unruhe, Farben, Flagge                                                                                                                               |
-| `careers.ts`    | Aufbau der Karriereleitern (welche Stufe eine Wahl braucht). Anforderungen folgen in Phase 2                                                                                                                                                       |
-| `appearance.ts` | Hauttöne, Haarfarben, Parteifarben, Anzahl der Editor-Varianten, Namenslängen                                                                                                                                                                      |
-| `index.ts`      | bündelt alles zu einer `GameConfig`                                                                                                                                                                                                                |
+| Datei           | Inhalt                                                                                                                                                                                                                                                                                         |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `balancing.ts`  | `GAME_SPEED`, Zeiten (Offline-Deckel, Autosave), Preissteigerung, Tipp-Wachstum je Stufe, Berufe, Freischaltungen, Politik (Drift von Zustimmung, Unruhe, Loyalität, Frist vor dem Sturz, Putsch/Säuberung), Wahlen, autokratische Aktionen, Ereignis-Takt, Auswandern, Amtsjahre, Generatoren |
+| `careers.ts`    | Wahl-Stufen je Staat, **Aufstiegsanforderungen** (mit `scripts/calibrate.ts` eingestellt), Zielzeiten, Karriere-Orte je Stufe                                                                                                                                                                  |
+| `states.ts`     | die vier Staaten: Multiplikatoren, Tempo/Risiko, Währung, Grund-Unruhe, Startbeziehungen, Baustil, Farben, Flaggen; kleine Nachbarstaaten                                                                                                                                                      |
+| `world.ts`      | Viertel, Orte (Position in der Straße), Tätigkeiten mit Mitarbeitern und Schulungen, Fahrzeuge                                                                                                                                                                                                 |
+| `events.ts`     | 38 Ereigniskarten mit Bedingungen und Wirkungen                                                                                                                                                                                                                                                |
+| `alliances.ts`  | Gruppen, Boni ab 50 % und 80 %, Gegenspieler, Verfall                                                                                                                                                                                                                                          |
+| `foreign.ts`    | Regionalprojekte, außenpolitische Aktionen, Regeln (Handelsbonus, Krisen)                                                                                                                                                                                                                      |
+| `legacy.ts`     | Vermächtnis-Baum, Punkteformel, Erfolge mit Accessoires                                                                                                                                                                                                                                        |
+| `appearance.ts` | Farben und Varianten des Charakter-Editors                                                                                                                                                                                                                                                     |
+| `index.ts`      | bündelt alles zu einer `GameConfig`                                                                                                                                                                                                                                                            |
 
-Alle Werte haben einen deutschen Kommentar. **Texte** (Namen der Staaten, Amtstitel, Namen der
-Generatoren) stehen nicht hier, sondern in `src/i18n/de.ts`, damit später eine englische Fassung
-ergänzt werden kann.
+Alle Texte (Namen, Titel, Karten, Hinweise) stehen in `src/i18n/`.
 
-### `src/i18n/de.ts` – alle Spieltexte
+### `src/i18n/` – alle Spieltexte
 
-Jeder sichtbare Text der App. Platzhalter wie `{duration}` werden per `fill()` ersetzt.
+| Datei            | Inhalt                                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `de.ts`          | Grundtexte (Startablauf, Staaten, Berufe, Amtstitel, Generatoren, Profil, Speicher …) und Zusammenführung |
+| `de-world.ts`    | Viertel, Orte, Tätigkeiten, Fahrzeuge, Netzwerk-Gruppen, Welt-Karte                                       |
+| `de-politics.ts` | Karriere, Wahlen, Zeremonien, Macht, Ticker, Sturz, Sieg, Auswandern, Vermächtnis, Erfolge, Hinweise      |
+| `de-events.ts`   | Texte der 38 Ereigniskarten                                                                               |
 
-### `src/engine/` – die Spiellogik
+### `src/engine/` – die Spiellogik (alles mit Unit-Tests)
 
-| Datei                | Aufgabe                                                                                                  |
-| -------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ids.ts`             | feste Bezeichner: Ressourcen, Staaten, Berufe, Pfade, Generatoren                                        |
-| `schema.ts`          | **Form des Spielstands** (zod-Schema) und `SAVE_VERSION`. Daraus werden die Typen abgeleitet             |
-| `game.ts`            | neuen Spielstand anlegen, Durchlauf starten, Einführung/Hinweise als gesehen markieren                   |
-| `economy.ts`         | Kostenformel (Preise auf ganze Beträge aufgerundet), „Max kaufen“, Ertragsraten, Tippen, Kaufen (atomar) |
-| `unlocks.ts`         | ab welcher Stufe Ressourcen und Generatoren freigeschaltet sind                                          |
-| `tick.ts`            | **Zeit**: `tick` (ein Takt), `applyOffline` (Abwesenheit), `advance` (zentrale Zeitfunktion)             |
-| `sanitize.ts`        | fängt NaN, Infinity und negative Werte ab                                                                |
-| `format.ts`          | deutsche Zahlen- und Zeitformatierung                                                                    |
-| `rng.ts`             | seedbarer Zufallsgenerator                                                                               |
-| `debug.ts`           | reine Hilfsfunktionen fürs Debug-Menü                                                                    |
-| `save/storage.ts`    | abgesicherter Zugriff auf localStorage                                                                   |
-| `save/saveSystem.ts` | zwei rotierende Speicherplätze, Laden mit Rückfall                                                       |
-| `save/migrations.ts` | Umwandlung alter Spielstände auf die aktuelle Version                                                    |
-| `save/backup.ts`     | Backup-Code erzeugen und einlesen                                                                        |
-| `save/checksum.ts`   | Prüfsumme für den Backup-Code                                                                            |
+| Datei          | Aufgabe                                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `schema.ts`    | **Form des Spielstands** (zod) und `SAVE_VERSION` (aktuell 2)                                                                     |
+| `rules.ts`     | zentrale Regeln: Freischaltungen, Anforderungen, alle Multiplikatoren (Beruf, Staat, Vermächtnis, Allianzen, Abkommen), Zielwerte |
+| `tick.ts`      | **Zeit**: `advance` (zentrale Zeitfunktion), `tick`, Offline-Berechnung                                                           |
+| `world.ts`     | Bewegung der Figur, Betreten/Verlassen, Wegzeiten                                                                                 |
+| `economy.ts`   | Kosten, Erträge, Tätigkeiten, Mitarbeiter, Schulungen, Generatoren, Fahrzeuge, Regionalprojekte                                   |
+| `career.ts`    | Wahlen (Chance, Wahlkampf, Sieg/Niederlage), Ernennung, Macht ausbauen, Zeremonie, autoritärer Kurs                               |
+| `politics.ts`  | Drift von Zustimmung, Unruhe, Loyalität, Allianzen, Beziehungen; Rücktritt, Revolution, Putsch, Säuberung                         |
+| `events.ts`    | Karten ziehen (nur online), beantworten, Wirkungen                                                                                |
+| `alliances.ts` | Gruppen umwerben                                                                                                                  |
+| `foreign.ts`   | Außenpolitik                                                                                                                      |
+| `autocracy.ts` | autokratische Aktionen                                                                                                            |
+| `game.ts`      | Lebenszyklus: neuer Durchlauf, Sturz/Ruhestand, Sieg, Weiterregieren, Auswandern, Vermächtnis, Erfolge, Hinweise                  |
+| `sanitize.ts`  | fängt NaN, Infinity und Werte außerhalb des Bereichs ab                                                                           |
+| `format.ts`    | deutsche Zahlen- und Zeitformatierung                                                                                             |
+| `rng.ts`       | seedbarer Zufallsgenerator (Zustand im Spielstand)                                                                                |
+| `unlocks.ts`   | Nachschlagen von Orten, Tätigkeiten, Generatoren                                                                                  |
+| `debug.ts`     | Hilfen fürs Debug-Menü                                                                                                            |
+| `save/`        | zwei rotierende Speicherplätze, Migration v1 → v2, Backup-Code                                                                    |
 
 ### `src/store/` – Verbindung von Engine und Oberfläche
 
-| Datei            | Aufgabe                                                                       |
-| ---------------- | ----------------------------------------------------------------------------- |
-| `gameStore.ts`   | der Store: Spielstand, Dialog-Warteschlange, Speicherstatus und alle Aktionen |
-| `index.ts`       | die eine Store-Instanz der App und der Hook `useGame(selektor)`               |
-| `useGameLoop.ts` | **Spielschleife**, Autosave, Reaktion auf Hintergrund und Rückkehr            |
+| Datei            | Aufgabe                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `gameStore.ts`   | Spielstand, **Dialog-Warteschlange** (`overlays`), vom Spieler geöffnetes **Fenster** (`sheet`), Erfolgs-Einblendungen (`toasts`), alle Aktionen |
+| `index.ts`       | die eine Store-Instanz und der Hook `useGame(selektor)`                                                                                          |
+| `useGameLoop.ts` | Spielschleife, Autosave, Hintergrund/Rückkehr                                                                                                    |
 
 ### `src/ui/` – Oberfläche
 
-| Datei/Ordner           | Aufgabe                                                                                                                                            |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `App.tsx`              | Rahmen: im Startablauf nur `SetupFlow`, sonst Kopfzeile, Tab-Inhalt, Tab-Leiste, Dialoge, Banner, hochfliegende Zahlen, Debug-Knopf                |
-| `global.css`           | **Design-Tokens** (Farben, Schriften, Abstände), Hell/Dunkel, iOS-Regeln                                                                           |
-| `setup/SetupFlow.tsx`  | **Startablauf**: Titelbildschirm → Figur (Name, Hautton, Frisur, Haarfarbe, Zufall) → Staatswahl → Berufswahl                                      |
-| `tabs/CareerTab.tsx`   | **Hauptbildschirm**: Szene mit Amtstitel und Stufe, Tipp-Buttons, die drei günstigsten Investitionen                                               |
-| `tabs/InvestTab.tsx`   | **Investieren**: Generatoren nach Geld, Einfluss, Anhänger; Kaufmenge ×1 / ×10 / Max; nächster gesperrter Generator als Ausblick                   |
-| `tabs/ProfileTab.tsx`  | Backup-Code und iOS-Hinweis                                                                                                                        |
-| `tabs/OtherTabs.tsx`   | Netzwerk und Welt (Platzhalter bis Phase 4 bzw. 6)                                                                                                 |
-| `components/`          | Bausteine: Tab-Leiste, Ressourcenleiste, Balken, Tipp-Button, Generator-Zeile, Bottom Sheet, Buttons, Banner, Fehlerbildschirm, Querformat-Hinweis |
-| `dialogs/`             | Dialoge der Warteschlange: Rückkehr (Offline), Einführung (3 Karten), Hinweise bei Freischaltung, Wiederherstellung                                |
-| `effects/`             | hochfliegende Zahlen: `floatingBus.ts` (Auslöser) und `FloatingNumbers.tsx` (Pool mit 20 Elementen)                                                |
-| `generatorView.ts`     | bereitet die Anzeige einer Generator-Zeile auf (Preis, Fehlbetrag, Erträge) und wählt die Vorschläge für den Hauptbildschirm                       |
-| `gameText.ts`          | Amtstitel je Staat, Stufe und Pfad; Geldbeträge mit Währungszeichen                                                                                |
-| `characterDefaults.ts` | Zufalls-Charakter (über den seedbaren Zufallsgenerator)                                                                                            |
+| Ordner/Datei                                       | Aufgabe                                                                                                                                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `App.tsx`                                          | wählt nach `phase` den Bildschirm: Startablauf, Spiel, Zeremonie, Sieg, Abschluss, Auswandern                                                                                  |
+| `world/`                                           | **Karriere-Tab**: `WorldView` (Straße/Innenraum, Kamera, Wischen, Tippen aufs Gebäude), `Destinations` (Ziel-Leiste), `CareerCard`, `LocationPanel` (Tätigkeiten, Mitarbeiter) |
+| `tabs/`                                            | Netzwerk (Beziehungsnetz), Investieren (Fahrzeuge, Generatoren, Mitarbeiter), Welt (Karte), Profil (Figur, Vermächtnis, Erfolge, Statistik, Backup)                            |
+| `sheets/`                                          | Fenster von unten: Karriere/Wahl, Macht sichern, Entscheidungskarten (Wischen), Gruppe, Staat, Region, Editor, Auswandern                                                      |
+| `screens/`                                         | Vollbild: Vereidigung (5 Größen), Sieg, Abschluss nach Sturz/Ruhestand, Auswanderungs-Flug                                                                                     |
+| `dialogs/`                                         | Dialoge der Warteschlange: Einführung, Hinweise, Rückkehr, Wahlniederlage, Rücktritt                                                                                           |
+| `components/`                                      | Kopfzeile (`ResourceBar`, `Meters` mit Unruhe-Warnung und rotem Rand), `Ticker`, `CharacterEditor`, `Toasts`, Bausteine                                                        |
+| `setup/`                                           | Startablauf (erster Start und Neustart nach einem Durchlauf)                                                                                                                   |
+| `careerView.ts`, `generatorView.ts`, `gameText.ts` | Anzeige-Aufbereitung (getestet)                                                                                                                                                |
 
-### `src/art/` – Grafik (SVG, ohne Spiellogik)
+### `src/art/` – Grafik (SVG)
 
-| Datei                    | Aufgabe                                                                                                                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `figure/Figure.tsx`      | Figur aus Einzelteilen: Schatten, Beine, Rumpf mit Kleidung, Arme, Kopf (3 Gesichtsformen), Gesicht, 8 Frisuren. Atmen und Blinzeln per CSS |
-| `figure/outfit.ts`       | welche Kleidung die Figur trägt (Phase 1: Blaumann bzw. Bürohemd je nach Beruf)                                                             |
-| `flag/Flag.tsx`          | zeichnet die fiktiven Flaggen aus der Beschreibung in `states.ts`                                                                           |
-| `scene/layers.tsx`       | die **Ebenen** der Szene, jede eine eigene Komponente: Himmel, Wolken, Stadtsilhouette, Arbeitsplatz (Werkhalle oder Bürogebäude), Passant  |
-| `scene/Scene.tsx`        | setzt die Ebenen und die Figur zusammen                                                                                                     |
-| `scene/Scene.module.css` | Farben der Szene für Hell und Dunkel, Bewegungen von Wolken und Passant                                                                     |
+| Datei                                                    | Aufgabe                                                                                            |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `figure/`                                                | Figur aus Einzelteilen; Kleidung je Stufe/Pfad, Bart, Brille, Accessoires; Atmen, Blinzeln, Laufen |
+| `world/Street.tsx`                                       | die ganze Straße: Füllhäuser, Gebäude, Ausstattung je Viertel, gesperrte Viertel                   |
+| `world/buildings.tsx`                                    | Gebäude je Ort in vier Baustilen                                                                   |
+| `world/decor.tsx`                                        | Laternen, Bäume, Blumen, Hecken, Fahnen, Statuen, Springbrunnen, Kameras                           |
+| `world/Interior.tsx`                                     | Innenräume der Gebäude                                                                             |
+| `world/People.tsx`                                       | Passanten, Demonstranten, Soldaten, Mitarbeiter                                                    |
+| `world/Sky.tsx`, `world/palette.ts`, `world/geometry.ts` | Himmel, Farben, Maße                                                                               |
+| `flag/`                                                  | Flaggen aus der Beschreibung in `states.ts`                                                        |
 
-Wer eine Ebene später durch eine echte Illustration ersetzen will, tauscht nur die jeweilige
-Komponente in `layers.tsx` aus. Spielcode und Engine bleiben unberührt.
+### Weitere
 
-### Weitere Ordner
-
-| Ordner                         | Aufgabe                                                           |
-| ------------------------------ | ----------------------------------------------------------------- |
-| `src/debug/`                   | Debug-Menü und Schalter (`?debug=1`)                              |
-| `src/test/`                    | Hilfen für Unit-Tests                                             |
-| `tests/`                       | Playwright-Smoke-Test im iPhone-13-Profil                         |
-| `scripts/export-icons.ts`      | erzeugt die PNG-Icons aus `assets/icon.svg`                       |
-| `public/icons/`                | fertige Icons (werden vom Skript erzeugt)                         |
-| `.github/workflows/deploy.yml` | automatische Veröffentlichung auf GitHub Pages (noch nicht aktiv) |
+| Ordner                 | Aufgabe                                                              |
+| ---------------------- | -------------------------------------------------------------------- |
+| `scripts/simulate.ts`  | **Balancing-Simulation** (Bericht, schlägt bei Problemen fehl)       |
+| `scripts/calibrate.ts` | stellt die Aufstiegsanforderungen automatisch auf die Zielzeiten ein |
+| `scripts/sim-core.ts`  | der Bot, den beide nutzen                                            |
+| `tests/smoke.spec.ts`  | Playwright-Smoke-Test im iPhone-13-Profil                            |
 
 ## Wie die Teile zusammenspielen
 
-### Spielschleife (`store/useGameLoop.ts` → `engine/tick.ts`)
+### Zeit und Spielschleife
 
-1. Die Schleife läuft über `requestAnimationFrame`, schreibt aber nur etwa **10-mal pro Sekunde**
-   in den Store (`uiCommitIntervalMs`). So wird die Oberfläche nicht 60-mal pro Sekunde neu gezeichnet.
-2. Jeder Takt ruft `advance(spielstand, jetzt)`. Diese Funktion schaut auf **einen einzigen
-   Zeitstempel**, `lastActiveAt`, und verrechnet die Zeit bis jetzt:
-   - Lücke bis 5 Sekunden → normaler Takt (`tick`)
-   - größere Lücke → Abwesenheit (`applyOffline`): nur Erträge, höchstens 8 Stunden
-   - negative Lücke (Uhr zurückgestellt) → nichts gutschreiben
-     Danach steht `lastActiveAt` auf „jetzt“. Weil es nur diesen einen Zeitstempel gibt, kann
-     dieselbe Zeit nie doppelt gutgeschrieben werden.
-3. Geht die App in den Hintergrund (`visibilitychange`, `pagehide`), stoppt die Schleife und der
-   Stand wird gespeichert. CSS-Animationen pausieren. Beim Zurückkehren greift automatisch die
-   Offline-Berechnung aus Schritt 2.
-4. Alle 10 Sekunden wird zusätzlich automatisch gespeichert.
+Ein einziger Zeitstempel (`lastActiveAt`) und eine Funktion (`advance`) verrechnen alle Zeit.
+Kleine Lücken laufen als Takt (Erträge, Bewegung, Politik, Ereignisse), große als Abwesenheit
+(nur Erträge, höchstens 8 Stunden, Wege gelten als erledigt). Dieselbe Zeit kann nie doppelt
+zählen. Große Takte werden in Schritte von höchstens einer Sekunde zerlegt.
 
-### Speicherstand (`engine/save/`)
+### Zustandsmaschine (`game.phase`)
 
-- Zwei Plätze im localStorage: `idle-politics.save.a` und `…b`. Geschrieben wird immer in den
-  Platz, der nicht den neuesten gültigen Stand enthält. Jeder Eintrag hat eine laufende Nummer.
-- Vor dem Schreiben prüft zod den Stand. Ein ungültiger Stand wird nie geschrieben.
-- Beim Laden werden beide Plätze geprüft, der neueste gültige gewinnt. War der neueste beschädigt,
-  erscheint der Hinweis „Spielstand wiederhergestellt“.
-- Ist der Speicher voll oder gesperrt, erscheint ein gelbes Banner. Das Spiel läuft weiter.
-- **Backup-Code** (Profil-Tab): `IP1.<komprimierter Spielstand>.<Prüfsumme>`. Beim Einlesen:
-  Prüfsumme stimmt? → entpacken → Migration → zod-Prüfung → erst dann übernehmen.
-- **Migrationen:** Ändert sich die Form des Spielstands, wird `SAVE_VERSION` in `schema.ts` erhöht
-  und in `migrations.ts` eine Umwandlung ergänzt. Alte Stände werden beim Laden automatisch angehoben.
+`setup` → `playing` ⇄ `ceremony` → (`victory` → `playing` beim Weiterregieren) oder
+`runEnded` → `setup`. Auswandern: `playing` → `emigrating` → `playing`. Nur in `playing` läuft
+die Zeit.
 
-### Konfiguration
+### Dialoge und Fenster
 
-Die Engine bekommt die Konfiguration als Parameter (`cfg`). Die App nutzt `defaultConfig`,
-Tests und die spätere Balancing-Simulation können eigene Werte einsetzen (z. B. anderes
-`GAME_SPEED`). `GAME_SPEED` wirkt, indem alle Kosten durch diesen Wert geteilt werden.
+Dialoge (Hinweise, Rückkehr, Wahlniederlage …) stehen in einer Warteschlange, immer nur einer
+ist sichtbar. Fenster (Karriere, Karten, Gruppen …) öffnet der Spieler selbst; sie öffnen sich
+nur, wenn kein Dialog wartet. So liegen nie zwei Overlays übereinander.
 
-### Oberfläche
+### Unruhe und Sturz
 
-- Komponenten holen sich Werte per `useGame(s => s.game.run?.resources.money)`. Sie werden nur neu
-  gezeichnet, wenn sich genau dieser Wert ändert. **Wichtig:** Ein Selektor darf nicht bei jedem
-  Aufruf ein neues Array oder Objekt liefern, sonst zeichnet React endlos neu. Für mehrere Werte
-  gibt es `useShallow` mit Einzelwerten; Listen werden als Text verglichen.
-- Aktionen rufen den Store auf, z. B. `gameStore.getState().buy('overtime', 1)`. Jede Aktion ist ein
-  einzelner, atomarer Schritt: Kosten prüfen und abziehen passiert gemeinsam.
-- **Preise** werden auf ganze Beträge aufgerundet. Angezeigter und abgezogener Preis sind dadurch
-  immer identisch. Fehlbeträge werden aufgerundet angezeigt (nie „Fehlt: 0 €“).
-- **Dialoge** laufen über die Warteschlange `overlays` im Store. `OverlayHost` zeigt immer nur den
-  ersten Eintrag, der nächste kommt erst nach dem Schließen.
-- **Hochfliegende Zahlen:** Der Tipp-Button ruft `spawnFloatingNumber`. `FloatingNumbers` hält 20
-  fertige Elemente bereit und animiert sie nur über `transform` und `opacity`, ohne React neu zu zeichnen.
-- Farben kommen aus CSS-Variablen in `global.css`. Die Staatsfarben setzt `App.tsx` aus `states.ts`.
+Unruhe wandert zu einem Zielwert (Grund-Unruhe des Staates, bei Autokraten plus Druck durch
+niedrige Zustimmung). Ab 90 % läuft eine Frist von 60 Sekunden, erst danach führen 100 % zum
+Rücktritt (Demokratie: zwei Stufen zurück) bzw. zur Revolution (Durchlauf endet).
 
-### Startablauf
+### Balancing
 
-`game.phase` ist `'setup'`, solange kein Durchlauf läuft. Dann zeigt `App.tsx` nur `SetupFlow`.
-Die Auswahl (Figur, Staat, Beruf) liegt bis zum Schluss nur im Bildschirm selbst. Erst
-„Karriere beginnen“ ruft `beginRun`: Der Durchlauf startet, `phase` wird `'playing'`, die
-Einführung wird eingereiht und sofort gespeichert. Nicht spielbare Staaten lehnt die Engine ab.
+`npm run simulate` spielt jeden Staat und Pfad bei `GAME_SPEED` 1 und 0,05 durch. Zielzeiten
+richten sich nach dem angezeigten Tempo des Staates (Tempo 3 = Grundwert). Neue Werte:
+`npx tsx scripts/calibrate.ts` ausführen und die ausgegebene Tabelle in `careers.ts` einsetzen.
 
 ## Debug-Menü
 
-Im Entwicklungsmodus immer sichtbar, sonst mit `?debug=1` hinter der Adresse (Käfer-Knopf unten
-rechts, nicht im Startablauf). Funktionen bisher: Ressourcen hinzufügen, Zeitsprung +1 Std. /
-+8 Std. (Offline-Simulation), Stufe wechseln (z. B. Stufe 2 für Anhänger), Spielstand zurücksetzen.
-Aktionen, die einen Dialog auslösen können, schließen das Menü, damit nie zwei Fenster übereinander liegen. Im Debug-Modus ist der Store außerdem in der Browser-Konsole
-als `window.__idlePolitics` erreichbar.
+Im Entwicklungsmodus immer, sonst mit `?debug=1` (Käfer-Knopf). Ressourcen, Zeitsprung
+(+1/+8 Std.), Stufe, Zustimmung/Unruhe/Loyalität, Ereignis, Sturz, Staat wechseln,
+Zurücksetzen. Der Store ist dann in der Konsole als `window.__idlePolitics` erreichbar.
 
 ## Tests
 
-- **Unit-Tests** (`*.test.ts(x)` neben dem Code): Formeln, Zeit und Offline-Fortschritt inklusive
-  Grenzfällen, Speichern, Laden, Rückfall, Migration, Backup-Code, Zahlenformatierung, Store,
-  Startablauf, Karriere- und Investieren-Tab (inklusive Mehrfachtippen auf Kaufen), Anzeige-Helfer.
-- **Smoke-Test** (`tests/smoke.spec.ts`, WebKit im iPhone-13-Profil): kompletter Ablauf (anlegen,
-  Staat und Beruf wählen, tippen, kaufen, neu laden), kein horizontales Scrollen, Tap-Flächen,
-  Anhänger-Freischaltung mit Hinweis, Offline-Dialog, Backup-Code, Manifest und Offline-Cache.
+- **Unit-Tests** (198): Formeln, Welt, Zeit/Offline, Karriere, Wahlen, Politik mit Frist und
+  Putsch, Ereignisse, Allianzen, Außenpolitik, Lebenszyklus (keine Sackgassen), Speichern,
+  Migration, Backup, Zahlenformat, Store, Startablauf, Anzeige-Helfer.
+- **Simulation** (in `npm run check` als schneller Lauf).
+- **Smoke-Test** (8 Fälle, WebKit iPhone 13).

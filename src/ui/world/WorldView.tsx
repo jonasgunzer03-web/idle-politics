@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import { Crosshair } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { Figure } from '../../art/figure/Figure';
@@ -7,7 +7,8 @@ import { InteriorArt } from '../../art/world/Interior';
 import { architecture, districtGrandeur } from '../../art/world/palette';
 import { Npc } from '../../art/world/People';
 import { Sky } from '../../art/world/Sky';
-import { BUILDING_HALF_WIDTH, Skyline, StreetArt, WORLD_HEIGHT, WORLD_WIDTH } from '../../art/world/Street';
+import { BUILDING_HALF_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from '../../art/world/geometry';
+import { Skyline, StreetArt } from '../../art/world/Street';
 import { defaultConfig } from '../../config';
 import { partyColors } from '../../config/appearance';
 import { careerVenue } from '../../config/careers';
@@ -60,7 +61,9 @@ export function WorldView() {
     }),
   );
   const character = useGame((s) => s.game.character);
-  const [pan, setPan] = useState(0);
+  // Wisch-Versatz der Kamera. Er gilt nur, solange die Figur dort steht, wo gewischt wurde;
+  // sobald sie sich bewegt, folgt die Kamera wieder der Figur.
+  const [panState, setPanState] = useState({ value: 0, atX: 0 });
   const drag = useRef<{ startX: number; startPan: number; moved: boolean } | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -78,17 +81,12 @@ export function WorldView() {
     };
   }, []);
 
-  // Beim Losgehen folgt die Kamera wieder der Figur
-  const target = view?.target ?? null;
-  useEffect(() => {
-    if (target !== null) setPan(0);
-  }, [target]);
-
   const labels = useMemo(() => {
     const office = view?.profession === 'office';
-    return Object.fromEntries(
-      LOCATION_IDS.map((id) => [id, locationName(id, office)]),
-    ) as Record<LocationId, string>;
+    return Object.fromEntries(LOCATION_IDS.map((id) => [id, locationName(id, office)])) as Record<
+      LocationId,
+      string
+    >;
   }, [view?.profession]);
 
   if (!view || !character) return <div ref={ref} className={styles.view} />;
@@ -98,10 +96,15 @@ export function WorldView() {
   // Man darf ein Stück in das nächste (gesperrte) Viertel hineinschauen
   const maxCam = Math.max(0, Math.min(worldPx, (view.limit + 260) * scale) - size.w);
   const follow = view.posX * scale - size.w / 2;
+  const pan = Math.abs(panState.atX - view.posX) < 0.5 ? panState.value : 0;
+  const setPan = (value: number) => {
+    setPanState({ value, atX: view.posX });
+  };
   const cam = Math.min(maxCam, Math.max(0, follow + pan));
   const targetX = view.target ? (findLocation(view.target, cfg)?.x ?? view.posX) : view.posX;
   const facing = targetX < view.posX ? 'left' : 'right';
-  const figureH = size.h * 0.42;
+  // Figur im Maßstab der Gebäude (Tür ≈ 34 Einheiten hoch)
+  const figureH = size.h * 0.24;
   const figureW = (figureH * 120) / 230;
   const groundBottom = ((WORLD_HEIGHT - GROUND_Y) / WORLD_HEIGHT) * size.h;
   const outfit = outfitFor({ profession: view.profession, stage: view.stage, path: view.path });
@@ -151,12 +154,15 @@ export function WorldView() {
           office={view.profession === 'office'}
           grandeur={districtGrandeur[findLocation(view.here, cfg)?.district ?? 'quarter']}
         />
-        <div className={styles.staff} style={{ height: figureH * 0.8, bottom: groundBottom * 0.6 }}>
+        <div className={styles.staff} style={{ height: size.h * 0.34, bottom: groundBottom * 0.6 }}>
           {Array.from({ length: staff }, (_, i) => (
             <Npc key={i} seed={i + 3} kind="worker" className="workingNpc" />
           ))}
         </div>
-        <div className={styles.insideFigure} style={{ height: figureH * 1.2, bottom: groundBottom * 0.4 }}>
+        <div
+          className={styles.insideFigure}
+          style={{ height: size.h * 0.5, bottom: groundBottom * 0.4 }}
+        >
           <Figure character={character} outfit={outfit} facing="left" />
         </div>
         <p className={styles.placeTag}>
@@ -183,7 +189,10 @@ export function WorldView() {
       role="group"
     >
       <Sky grey={autocratic} />
-      <div className={styles.skylineLayer} style={{ transform: `translate3d(${-cam * 0.45}px,0,0)` }}>
+      <div
+        className={styles.skylineLayer}
+        style={{ transform: `translate3d(${-cam * 0.45}px,0,0)` }}
+      >
         <Skyline stateId={view.stateId} />
       </div>
       <div
@@ -205,7 +214,10 @@ export function WorldView() {
             key={l.id}
             type="button"
             className={styles.hit}
-            style={{ left: (l.x - BUILDING_HALF_WIDTH[l.id]) * scale, width: BUILDING_HALF_WIDTH[l.id] * 2 * scale }}
+            style={{
+              left: (l.x - BUILDING_HALF_WIDTH[l.id]) * scale,
+              width: BUILDING_HALF_WIDTH[l.id] * 2 * scale,
+            }}
             onClick={() => {
               go(l.id);
             }}
@@ -220,7 +232,7 @@ export function WorldView() {
               className={`${styles.passerby} walkingNpc`}
               style={{
                 left: x * scale,
-                height: figureH * 0.62,
+                height: figureH * 0.9,
                 bottom: groundBottom - 2,
                 animationDuration: `${18 + i * 5}s`,
                 animationDelay: `${-i * 4}s`,
@@ -235,17 +247,27 @@ export function WorldView() {
           <div
             key={`p-${i}`}
             className={styles.protester}
-            style={{ left: (view.posX + 70 + i * 26) * scale, height: figureH * 0.7, bottom: groundBottom - 4 }}
+            style={{
+              left: (view.posX + 70 + i * 26) * scale,
+              height: figureH * 0.95,
+              bottom: groundBottom - 4,
+            }}
           >
             <Npc seed={i + 7} kind="protester" sign={de.protestSigns[i % de.protestSigns.length]} />
           </div>
         ))}
-        {autocratic && venue && venue.x <= view.limit &&
+        {autocratic &&
+          venue &&
+          venue.x <= view.limit &&
           [-70, 70].map((dx) => (
             <div
               key={dx}
               className={styles.soldier}
-              style={{ left: (venue.x + dx) * scale, height: figureH * 0.72, bottom: groundBottom - 4 }}
+              style={{
+                left: (venue.x + dx) * scale,
+                height: figureH,
+                bottom: groundBottom - 4,
+              }}
             >
               <Npc seed={dx > 0 ? 1 : 2} kind="soldier" />
             </div>
@@ -260,7 +282,12 @@ export function WorldView() {
           }}
           data-testid="player-figure"
         >
-          <Figure character={character} outfit={outfit} walking={view.target !== null} facing={facing} />
+          <Figure
+            character={character}
+            outfit={outfit}
+            walking={view.target !== null}
+            facing={facing}
+          />
         </div>
       </div>
       {pan !== 0 && (

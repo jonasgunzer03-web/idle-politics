@@ -33,3 +33,13 @@
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Update-Hinweis liegt über allen Bildschirmen */
+.floating {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 80;
+  padding-top: calc(8px + var(--safe-top));
+}

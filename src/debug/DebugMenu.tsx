@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Bug } from 'lucide-react';
-import { MAX_STAGE } from '../engine/ids';
+import { MAX_STAGE, STATE_IDS } from '../engine/ids';
 import { de } from '../i18n/de';
 import { gameStore, useGame } from '../store';
 import { BottomSheet } from '../ui/components/BottomSheet';
@@ -102,6 +102,66 @@ export function DebugMenu() {
                 >
                   +
                 </Button>
+              </div>
+              <p className={styles.label}>{de.debug.meters}</p>
+              <div className={styles.grid3}>
+                {[
+                  ['Zust. 20', { approval: 20 }],
+                  ['Zust. 80', { approval: 80 }],
+                  ['Unruhe 0', { unrest: 0 }],
+                  ['Unruhe 75', { unrest: 75 }],
+                  ['Unruhe 95', { unrest: 95 }],
+                  ['Loyal. 10', { loyalty: 10 }],
+                  ['Loyal. 90', { loyalty: 90 }],
+                ].map(([label, values]) => (
+                  <Button
+                    key={label as string}
+                    variant="secondary"
+                    onClick={() => {
+                      actions.debugSetMeters(
+                        values as { approval?: number; unrest?: number; loyalty?: number },
+                      );
+                    }}
+                  >
+                    {label as string}
+                  </Button>
+                ))}
+              </div>
+              <div className={styles.grid}>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    actions.debugTriggerEvent();
+                    setOpen(false);
+                  }}
+                  data-testid="debug-event"
+                >
+                  {de.debug.triggerEvent}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    actions.debugOverthrow();
+                    setOpen(false);
+                  }}
+                  data-testid="debug-overthrow"
+                >
+                  {de.debug.triggerOverthrow}
+                </Button>
+              </div>
+              <p className={styles.label}>{de.debug.switchState}</p>
+              <div className={styles.grid}>
+                {STATE_IDS.map((id) => (
+                  <Button
+                    key={id}
+                    variant="secondary"
+                    onClick={() => {
+                      actions.debugSwitchState(id);
+                    }}
+                  >
+                    {de.states[id].name}
+                  </Button>
+                ))}
               </div>
             </>
           )}

@@ -24,7 +24,7 @@ export function UpdatePrompt() {
 
   if (!needRefresh) return null;
   return (
-    <div className={`${styles.banner} ${styles.info}`} role="status">
+    <div className={`${styles.banner} ${styles.info} ${styles.floating}`} role="status">
       <span>{de.update.available}</span>
       <button
         type="button"

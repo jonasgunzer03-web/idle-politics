@@ -10,7 +10,12 @@ export function Lamp({ x, grandeur }: { x: number; grandeur: number }) {
       <rect x={x - 1.5} y={GROUND - 70} width={3} height={70} fill={color} />
       {grandeur >= 1 ? (
         <g>
-          <path d={`M${x - 8} ${GROUND - 70} Q${x} ${GROUND - 80} ${x + 8} ${GROUND - 70}`} fill="none" stroke={color} strokeWidth={2} />
+          <path
+            d={`M${x - 8} ${GROUND - 70} Q${x} ${GROUND - 80} ${x + 8} ${GROUND - 70}`}
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+          />
           <circle className="lamp" cx={x - 8} cy={GROUND - 66} r={4} />
           <circle className="lamp" cx={x + 8} cy={GROUND - 66} r={4} />
         </g>
@@ -100,7 +105,12 @@ export function Fountain({ x }: { x: number }) {
       <ellipse cx={x} cy={GROUND - 7} rx={28} ry={4} className="water" />
       <rect x={x - 4} y={GROUND - 34} width={8} height={28} fill="#cfc8b8" />
       <ellipse cx={x} cy={GROUND - 34} rx={14} ry={4} fill="#cfc8b8" />
-      <path className="spray" d={`M${x} ${GROUND - 36} Q${x - 10} ${GROUND - 56} ${x - 16} ${GROUND - 36} M${x} ${GROUND - 36} Q${x + 10} ${GROUND - 56} ${x + 16} ${GROUND - 36}`} fill="none" strokeWidth={2} />
+      <path
+        className="spray"
+        d={`M${x} ${GROUND - 36} Q${x - 10} ${GROUND - 56} ${x - 16} ${GROUND - 36} M${x} ${GROUND - 36} Q${x + 10} ${GROUND - 56} ${x + 16} ${GROUND - 36}`}
+        fill="none"
+        strokeWidth={2}
+      />
     </g>
   );
 }
@@ -124,7 +134,11 @@ export function Barrier({ x, label }: { x: number; label: string }) {
     <g>
       <rect x={x - 3} y={GROUND - 40} width={6} height={40} fill="#3b3f47" />
       <rect x={x - 40} y={GROUND - 36} width={80} height={10} fill="#c0392b" />
-      <path d={`M${x - 36} ${GROUND - 36} l8 10 M${x - 20} ${GROUND - 36} l8 10 M${x - 4} ${GROUND - 36} l8 10 M${x + 12} ${GROUND - 36} l8 10 M${x + 28} ${GROUND - 36} l8 10`} stroke="#fff" strokeWidth={3} />
+      <path
+        d={`M${x - 36} ${GROUND - 36} l8 10 M${x - 20} ${GROUND - 36} l8 10 M${x - 4} ${GROUND - 36} l8 10 M${x + 12} ${GROUND - 36} l8 10 M${x + 28} ${GROUND - 36} l8 10`}
+        stroke="#fff"
+        strokeWidth={3}
+      />
       <rect x={x - 50} y={GROUND - 72} width={100} height={20} rx={3} fill="#1c1f24" />
       <text x={x} y={GROUND - 58} textAnchor="middle" className="signText" fill="#f4efe2">
         {label}

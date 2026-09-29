@@ -89,7 +89,12 @@ export const states: Record<StateId, StateDef> = {
     architecture: 'federal',
     // Marineblau und Sand
     palette: { primary: '#1f3a5f', secondary: '#d8c7a0', onPrimary: '#ffffff' },
-    flag: { layout: 'canton', colors: ['#d8c7a0', '#1f3a5f'], emblem: 'star', emblemColor: '#ffffff' },
+    flag: {
+      layout: 'canton',
+      colors: ['#d8c7a0', '#1f3a5f'],
+      emblem: 'star',
+      emblemColor: '#ffffff',
+    },
   },
   rhenania: {
     id: 'rhenania',
@@ -178,16 +183,31 @@ export const states: Record<StateId, StateDef> = {
     architecture: 'imperial',
     // Rot und Gold
     palette: { primary: '#9e1b1b', secondary: '#d9a21b', onPrimary: '#ffffff' },
-    flag: { layout: 'canton', colors: ['#9e1b1b', '#9e1b1b'], emblem: 'gear', emblemColor: '#d9a21b' },
+    flag: {
+      layout: 'canton',
+      colors: ['#9e1b1b', '#9e1b1b'],
+      emblem: 'gear',
+      emblemColor: '#d9a21b',
+    },
   },
 };
 
 /** Kleine Nachbarstaaten (nur für die Außenpolitik). */
 export const smallStates: Record<'valmora' | 'lysania', { flag: FlagDef }> = {
   valmora: {
-    flag: { layout: 'vertical', colors: ['#12848a', '#f2efe6', '#12848a'], emblem: 'wave', emblemColor: '#12848a' },
+    flag: {
+      layout: 'vertical',
+      colors: ['#12848a', '#f2efe6', '#12848a'],
+      emblem: 'wave',
+      emblemColor: '#12848a',
+    },
   },
   lysania: {
-    flag: { layout: 'horizontal', colors: ['#2e7d4f', '#f2efe6'], emblem: 'peak', emblemColor: '#6a3d9a' },
+    flag: {
+      layout: 'horizontal',
+      colors: ['#2e7d4f', '#f2efe6'],
+      emblem: 'peak',
+      emblemColor: '#6a3d9a',
+    },
   },
 };

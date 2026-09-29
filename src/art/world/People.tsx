@@ -39,7 +39,15 @@ export const Npc = memo(function Npc({ seed, kind = 'civilian', sign, className 
       {kind === 'protester' && (
         <g className={styles.sign}>
           <rect x="22" y="-26" width="2" height="48" fill="#6b4a32" />
-          <rect x="4" y="-28" width="36" height="18" fill="#f4efe2" stroke="#1c1f24" strokeWidth="1" />
+          <rect
+            x="4"
+            y="-28"
+            width="36"
+            height="18"
+            fill="#f4efe2"
+            stroke="#1c1f24"
+            strokeWidth="1"
+          />
           <text x="22" y="-15" textAnchor="middle" fontSize="7" fontWeight="700" fill="#b3261e">
             {sign ?? '!'}
           </text>

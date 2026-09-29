@@ -283,7 +283,8 @@ export const de = {
     vehicleSpeed: '{speed}× so schnell wie zu Fuß',
     vehicleBuy: 'Kaufen',
     staffTitle: 'Mitarbeiter',
-    staffText: 'Mitarbeiter stellst du in den Gebäuden ein. Sie erledigen die Tätigkeit dort automatisch.',
+    staffText:
+      'Mitarbeiter stellst du in den Gebäuden ein. Sie erledigen die Tätigkeit dort automatisch.',
     staffEntry: '{action}: {count} Mitarbeiter',
     groups: {
       money: 'Geld verdienen',

@@ -2,7 +2,16 @@ import { cfg, playingGame, runOf } from '../test/fixtures';
 import { demote } from './career';
 import { findLocation } from './unlocks';
 import { tick } from './tick';
-import { clampToWorld, currentLocation, enterBuilding, leaveBuilding, moveFigure, stopWalking, travelSeconds, walkTo } from './world';
+import {
+  clampToWorld,
+  currentLocation,
+  enterBuilding,
+  leaveBuilding,
+  moveFigure,
+  stopWalking,
+  travelSeconds,
+  walkTo,
+} from './world';
 
 const x = (id: Parameters<typeof findLocation>[0]) => findLocation(id, cfg)?.x ?? -1;
 
@@ -64,7 +73,9 @@ describe('Bewegung durch die Welt', () => {
   });
 
   it('nach einem Abstieg kehrt die Figur aus gesperrten Vierteln zurück', () => {
-    const run = runOf(playingGame({ stage: 7, world: { posX: x('parliament'), target: null, inside: true } }));
+    const run = runOf(
+      playingGame({ stage: 7, world: { posX: x('parliament'), target: null, inside: true } }),
+    );
     const down = demote(run, 2, cfg);
     expect(down.stage).toBe(5);
     expect(down.world.posX).toBe(x('partyOffice'));

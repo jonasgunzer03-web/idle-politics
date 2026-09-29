@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createNewGame } from '../../engine/game';
+import { testCharacter } from '../../test/fixtures';
 import { gameStore } from '../../store';
 import { SetupFlow } from './SetupFlow';
 
@@ -20,8 +21,8 @@ describe('SetupFlow', () => {
     fireEvent.change(name, { target: { value: 'Ida Brandt' } });
     fireEvent.click(screen.getByTestId('setup-next'));
 
-    // Nur Rhenanien ist spielbar
-    expect(screen.getByTestId('state-borealis')).toBeDisabled();
+    // Alle vier Staaten sind spielbar, Rhenanien ist vorausgewählt
+    expect(screen.getByTestId('state-borealis')).toBeEnabled();
     expect(screen.getByTestId('state-rhenania')).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(screen.getByTestId('setup-next'));
 
@@ -54,5 +55,26 @@ describe('SetupFlow', () => {
     fireEvent.click(screen.getByTestId('profession-office'));
     fireEvent.click(screen.getByTestId('setup-start'));
     expect(gameStore.getState().game.character?.name).toBe('Emil Tamm');
+  });
+
+  it('Neustart nach einem Durchlauf: Charakter bleibt, es geht direkt zur Staatswahl', () => {
+    act(() => {
+      gameStore.setState({
+        game: { ...createNewGame(0, 1), character: testCharacter },
+        hydrated: true,
+        overlays: [],
+      });
+    });
+    render(<SetupFlow />);
+    expect(screen.queryByTestId('new-game')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Zurück' })).toBeNull();
+    fireEvent.click(screen.getByTestId('state-zentralia'));
+    fireEvent.click(screen.getByTestId('setup-next'));
+    fireEvent.click(screen.getByTestId('profession-office'));
+    fireEvent.click(screen.getByTestId('setup-start'));
+    const game = gameStore.getState().game;
+    expect(game.character?.name).toBe(testCharacter.name);
+    expect(game.run?.stateId).toBe('zentralia');
+    expect(game.run?.path).toBe('autocratic');
   });
 });

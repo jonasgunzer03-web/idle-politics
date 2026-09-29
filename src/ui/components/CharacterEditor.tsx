@@ -1,7 +1,13 @@
 import { Shuffle } from 'lucide-react';
 import { Figure } from '../../art/figure/Figure';
 import type { Outfit } from '../../art/figure/outfit';
-import { appearanceCounts, hairColors, nameLimits, partyColors, skinTones } from '../../config/appearance';
+import {
+  appearanceCounts,
+  hairColors,
+  nameLimits,
+  partyColors,
+  skinTones,
+} from '../../config/appearance';
 import { randomSeed } from '../../engine/rng';
 import type { Character } from '../../engine/schema';
 import { de, fill } from '../../i18n/de';
@@ -10,9 +16,15 @@ import { Button } from './Button';
 import { PartySymbol } from './PartySymbol';
 import styles from './CharacterEditor.module.css';
 
-type NumericKey = 'build' | 'skinTone' | 'faceShape' | 'hairStyle' | 'hairColor' | 'beard' | 'glasses';
+type NumericKey =
+  'build' | 'skinTone' | 'faceShape' | 'hairStyle' | 'hairColor' | 'beard' | 'glasses';
 
-function Swatches({ label, colors, value, onChange }: {
+function Swatches({
+  label,
+  colors,
+  value,
+  onChange,
+}: {
   label: string;
   colors: readonly string[];
   value: number;
@@ -41,7 +53,13 @@ function Swatches({ label, colors, value, onChange }: {
   );
 }
 
-function Chips({ label, options, value, onChange, testId }: {
+function Chips({
+  label,
+  options,
+  value,
+  onChange,
+  testId,
+}: {
   label: string;
   options: readonly string[];
   value: number;
@@ -95,7 +113,12 @@ export function CharacterEditor({ draft, onChange, outfit, full }: Props) {
           onClick={() => {
             const random = randomCharacter(randomSeed());
             // Name und Partei bleiben, wenn schon gesetzt
-            onChange({ ...random, name: draft.name || random.name, party: full ? draft.party : random.party, accessories: draft.accessories });
+            onChange({
+              ...random,
+              name: draft.name || random.name,
+              party: full ? draft.party : random.party,
+              accessories: draft.accessories,
+            });
           }}
         >
           <Shuffle size={18} aria-hidden="true" />
@@ -123,13 +146,48 @@ export function CharacterEditor({ draft, onChange, outfit, full }: Props) {
       />
       {draft.name.trim().length === 0 && <p className={styles.error}>{c.nameMissing}</p>}
 
-      <Chips label={c.build} options={c.builds.slice(0, appearanceCounts.build)} value={draft.build} onChange={set('build')} />
-      <Swatches label={c.skinTone} colors={skinTones} value={draft.skinTone} onChange={set('skinTone')} />
-      <Chips label={c.faceShape} options={c.faceShapes.slice(0, appearanceCounts.faceShape)} value={draft.faceShape} onChange={set('faceShape')} />
-      <Chips label={c.hairStyle} options={c.hairStyles.slice(0, appearanceCounts.hairStyle)} value={draft.hairStyle} onChange={set('hairStyle')} />
-      <Swatches label={c.hairColor} colors={hairColors} value={draft.hairColor} onChange={set('hairColor')} />
-      <Chips label={c.beard} options={c.beards.slice(0, appearanceCounts.beard)} value={draft.beard} onChange={set('beard')} />
-      <Chips label={c.glasses} options={c.glassesOptions.slice(0, appearanceCounts.glasses)} value={draft.glasses} onChange={set('glasses')} />
+      <Chips
+        label={c.build}
+        options={c.builds.slice(0, appearanceCounts.build)}
+        value={draft.build}
+        onChange={set('build')}
+      />
+      <Swatches
+        label={c.skinTone}
+        colors={skinTones}
+        value={draft.skinTone}
+        onChange={set('skinTone')}
+      />
+      <Chips
+        label={c.faceShape}
+        options={c.faceShapes.slice(0, appearanceCounts.faceShape)}
+        value={draft.faceShape}
+        onChange={set('faceShape')}
+      />
+      <Chips
+        label={c.hairStyle}
+        options={c.hairStyles.slice(0, appearanceCounts.hairStyle)}
+        value={draft.hairStyle}
+        onChange={set('hairStyle')}
+      />
+      <Swatches
+        label={c.hairColor}
+        colors={hairColors}
+        value={draft.hairColor}
+        onChange={set('hairColor')}
+      />
+      <Chips
+        label={c.beard}
+        options={c.beards.slice(0, appearanceCounts.beard)}
+        value={draft.beard}
+        onChange={set('beard')}
+      />
+      <Chips
+        label={c.glasses}
+        options={c.glassesOptions.slice(0, appearanceCounts.glasses)}
+        value={draft.glasses}
+        onChange={set('glasses')}
+      />
 
       <h3 className={styles.section}>{c.sections.partyTitle}</h3>
       <label className={styles.legend} htmlFor="party-name">

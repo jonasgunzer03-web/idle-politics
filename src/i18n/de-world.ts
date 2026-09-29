@@ -22,15 +22,39 @@ export const worldTexts = {
 
   locations: {
     workplace: { name: 'Werk', office: 'Büro', text: 'Hier verdienst du dein Geld.' },
-    pub: { name: 'Eckkneipe', office: 'Eckkneipe', text: 'Hier trifft man Kollegen und knüpft Kontakte.' },
-    market: { name: 'Marktplatz', office: 'Marktplatz', text: 'Hier erreichst du die Leute auf der Straße.' },
-    partyOffice: { name: 'Parteibüro', office: 'Parteibüro', text: 'Hier beginnt jede politische Karriere.' },
-    townHall: { name: 'Rathaus', office: 'Rathaus', text: 'Sitz des Stadtrats und des Bürgermeisters.' },
-    newspaper: { name: 'Zeitungshaus', office: 'Zeitungshaus', text: 'Die Redaktion des Tagesboten.' },
+    pub: {
+      name: 'Eckkneipe',
+      office: 'Eckkneipe',
+      text: 'Hier trifft man Kollegen und knüpft Kontakte.',
+    },
+    market: {
+      name: 'Marktplatz',
+      office: 'Marktplatz',
+      text: 'Hier erreichst du die Leute auf der Straße.',
+    },
+    partyOffice: {
+      name: 'Parteibüro',
+      office: 'Parteibüro',
+      text: 'Hier beginnt jede politische Karriere.',
+    },
+    townHall: {
+      name: 'Rathaus',
+      office: 'Rathaus',
+      text: 'Sitz des Stadtrats und des Bürgermeisters.',
+    },
+    newspaper: {
+      name: 'Zeitungshaus',
+      office: 'Zeitungshaus',
+      text: 'Die Redaktion des Tagesboten.',
+    },
     bank: { name: 'Bank', office: 'Bank', text: 'Hier sitzen die Leute mit dem Geld.' },
     parliament: { name: 'Parlament', office: 'Parlament', text: 'Hier werden Gesetze gemacht.' },
     ministry: { name: 'Ministerium', office: 'Ministerium', text: 'Die Verwaltung des Landes.' },
-    embassy: { name: 'Botschaftsviertel', office: 'Botschaftsviertel', text: 'Empfänge, Gespräche, Diplomatie.' },
+    embassy: {
+      name: 'Botschaftsviertel',
+      office: 'Botschaftsviertel',
+      text: 'Empfänge, Gespräche, Diplomatie.',
+    },
     palace: { name: 'Regierungssitz', office: 'Regierungssitz', text: 'Das Zentrum der Macht.' },
   } satisfies Record<LocationId, { name: string; office: string; text: string }>,
 
@@ -101,7 +125,8 @@ export const worldTexts = {
   network: {
     title: 'Netzwerk',
     lockedText: 'Ab Stufe 2 knüpfst du Allianzen mit gesellschaftlichen Gruppen.',
-    legend: 'Kreisgröße = Macht · Füllung = Loyalität · dicke Linie = starke Allianz · rot gestrichelt = Spannung',
+    legend:
+      'Kreisgröße = Macht · Füllung = Loyalität · dicke Linie = starke Allianz · rot gestrichelt = Spannung',
     loyalty: 'Loyalität {value} %',
     power: 'Macht',
     rivals: 'Gegenspieler',
@@ -117,7 +142,8 @@ export const worldTexts = {
 
   foreign: {
     title: 'Welt',
-    lockedText: 'Ab Stufe 8 öffnet sich die Landkarte: Regionen mit wirtschaftlichen Möglichkeiten und die Beziehungen zu anderen Staaten.',
+    lockedText:
+      'Ab Stufe 8 öffnet sich die Landkarte: Regionen mit wirtschaftlichen Möglichkeiten und die Beziehungen zu anderen Staaten.',
     regionsTitle: 'Regionen',
     countriesTitle: 'Nachbarstaaten',
     relation: 'Beziehung {value}',
@@ -141,9 +167,18 @@ export const worldTexts = {
     actions: {
       stateVisit: { name: 'Staatsbesuch', text: 'Beziehung verbessern.' },
       tradeAgreement: { name: 'Handelsabkommen', text: 'Dauerhaft +6 % Geld. Ab Beziehung 25.' },
-      alliance: { name: 'Bündnis', text: 'Schützt vor Krisen mit diesem Staat, mehr Zustimmung. Ab Beziehung 50.' },
-      sanctions: { name: 'Sanktionen', text: 'Zustimmung im Inland steigt, Beziehung sinkt stark, Abkommen enden.' },
-      maneuver: { name: 'Militärmanöver', text: 'Militär wird loyaler, kurz mehr Zustimmung, Beziehung sinkt, Krisengefahr.' },
+      alliance: {
+        name: 'Bündnis',
+        text: 'Schützt vor Krisen mit diesem Staat, mehr Zustimmung. Ab Beziehung 50.',
+      },
+      sanctions: {
+        name: 'Sanktionen',
+        text: 'Zustimmung im Inland steigt, Beziehung sinkt stark, Abkommen enden.',
+      },
+      maneuver: {
+        name: 'Militärmanöver',
+        text: 'Militär wird loyaler, kurz mehr Zustimmung, Beziehung sinkt, Krisengefahr.',
+      },
     },
     countries: {
       novaria: 'Novaria',
@@ -162,7 +197,12 @@ export const worldTexts = {
       lysania: 'Kleiner Bergstaat, neutral',
     } satisfies Record<ForeignId, string>,
     regions: {
-      novaria: { north: 'Nordküste', east: 'Rostgürtel', south: 'Sonnenstaaten', west: 'Westküste' },
+      novaria: {
+        north: 'Nordküste',
+        east: 'Rostgürtel',
+        south: 'Sonnenstaaten',
+        west: 'Westküste',
+      },
       rhenania: { north: 'Hansemark', east: 'Erzgau', south: 'Voralpen', west: 'Rheintal' },
       borealis: { north: 'Eismeer', east: 'Uralgebiet', south: 'Steppe', west: 'Westgouvernement' },
       zentralia: { north: 'Nordprovinz', east: 'Ostküste', south: 'Reisland', west: 'Hochplateau' },

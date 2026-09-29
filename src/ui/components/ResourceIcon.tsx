@@ -1,11 +1,10 @@
-import { Coins, Globe, Handshake, Shield, Users, type LucideIcon } from 'lucide-react';
+import { Coins, Globe, Handshake, Users, type LucideIcon } from 'lucide-react';
 import type { ResourceId } from '../../engine/ids';
 
 const resourceIcons: Record<ResourceId, LucideIcon> = {
   money: Coins,
   influence: Handshake,
   followers: Users,
-  loyalty: Shield,
   diplomacy: Globe,
 };
 

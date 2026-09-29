@@ -15,13 +15,7 @@ export function foreignActionCost(def: ForeignActionDef, cfg: GameConfig): numbe
 }
 
 export type ForeignBlock =
-  | 'locked'
-  | 'relation'
-  | 'cooldown'
-  | 'cost'
-  | 'autocraticOnly'
-  | 'already'
-  | null;
+  'locked' | 'relation' | 'cooldown' | 'cost' | 'autocraticOnly' | 'already' | null;
 
 /** Warum eine Aktion gerade nicht geht (null = möglich). */
 export function foreignActionBlock(
@@ -60,7 +54,10 @@ export function foreignAction(
   let nextTreaty = treaty;
   let next: RunState = {
     ...run,
-    resources: { ...run.resources, diplomacy: run.resources.diplomacy - foreignActionCost(def, cfg) },
+    resources: {
+      ...run.resources,
+      diplomacy: run.resources.diplomacy - foreignActionCost(def, cfg),
+    },
     relations: {
       ...run.relations,
       [target]: Math.min(100, Math.max(-100, relation(run, target, cfg) + def.relation)),

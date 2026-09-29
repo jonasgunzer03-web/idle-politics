@@ -49,7 +49,8 @@ describe('Anzeige-Helfer', () => {
     expect(view.affordable).toBe(false);
     expect(view.costText).toBe('10 €');
     expect(view.missingText).toBe('Fehlt: 6 €');
-    expect(view.unitRateText).toBe('+0,2 €/s');
+    // 0,4 € × 0,63 (Facharbeiter in Rhenanien) ≈ 0,25 €/s
+    expect(view.unitRateText).toBe('+0,3 €/s');
   });
 
   it('Generator-Zeile: Kosten in mehreren Ressourcen', () => {

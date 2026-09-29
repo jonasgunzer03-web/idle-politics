@@ -2,9 +2,9 @@ import { memo, type ReactNode } from 'react';
 import { defaultConfig } from '../../config';
 import { skinTones, hairColors } from '../../config/appearance';
 import type { LocationDef } from '../../config/world';
-import type { DistrictId, LocationId, StateId } from '../../engine/ids';
+import type { LocationId, StateId } from '../../engine/ids';
 import type { Character } from '../../engine/schema';
-import { Flag } from '../flag/Flag';
+import { FlagGraphic } from '../flag/Flag';
 import { FillerHouse, GROUND, LocationBuilding } from './buildings';
 import {
   Barrier,
@@ -21,28 +21,10 @@ import {
   Tree,
 } from './decor';
 import { architecture, districtGrandeur, sidewalkColors } from './palette';
+import { BUILDING_HALF_WIDTH, WORLD_HEIGHT, WORLD_WIDTH } from './geometry';
 import styles from './Street.module.css';
 
 const cfg = defaultConfig;
-
-/** Gesamte Breite der Welt in Welt-Einheiten. */
-export const WORLD_WIDTH = cfg.world.districts.reduce((m, d) => Math.max(m, d.startX + d.width), 0);
-export const WORLD_HEIGHT = 300;
-
-/** Ungefähre halbe Breite der Gebäude (für Füllhäuser und Tipp-Flächen). */
-export const BUILDING_HALF_WIDTH: Record<LocationId, number> = {
-  workplace: 92,
-  pub: 60,
-  market: 82,
-  partyOffice: 62,
-  townHall: 96,
-  newspaper: 72,
-  bank: 82,
-  parliament: 132,
-  ministry: 102,
-  embassy: 78,
-  palace: 172,
-};
 
 export interface StreetArtProps {
   stateId: StateId;
@@ -56,7 +38,15 @@ export interface StreetArtProps {
   lockedLabel: (stage: number) => string;
 }
 
-function Poster({ x, y, character }: { x: number; y: number; character: StreetArtProps['character'] }) {
+function Poster({
+  x,
+  y,
+  character,
+}: {
+  x: number;
+  y: number;
+  character: StreetArtProps['character'];
+}) {
   const skin = skinTones[character.skinTone] ?? '#e0a883';
   const hair = hairColors[character.hairColor] ?? '#3b2a20';
   return (
@@ -68,11 +58,6 @@ function Poster({ x, y, character }: { x: number; y: number; character: StreetAr
       <rect x={x - 11} y={y + 30} width={22} height={4} fill="#c9a227" />
     </g>
   );
-}
-
-function districtOf(x: number): DistrictId {
-  for (const d of cfg.world.districts) if (x >= d.startX && x < d.startX + d.width) return d.id;
-  return 'capital';
 }
 
 /** Die ganze Straße als ein SVG. Wird nur neu gezeichnet, wenn sich Stufe, Staat oder Pfad ändern. */
@@ -93,7 +78,12 @@ export const StreetArt = memo(function StreetArt({
   const decor: ReactNode[] = [];
   const sidewalks: ReactNode[] = [];
   const overlays: ReactNode[] = [];
-  const flag = <Flag flag={state.flag} width={22} />;
+  // Als Gruppe statt eigenem <svg>: WebKit ignoriert sonst die Verschiebung am Fahnenmast
+  const flag = (
+    <g transform="scale(0.37)">
+      <FlagGraphic flag={state.flag} />
+    </g>
+  );
   // Das Arbeiterviertel wird ab Stufe 6 renoviert: Blumen statt Mülltonnen
   const renovated = stage >= 6;
 
@@ -102,12 +92,27 @@ export const StreetArt = memo(function StreetArt({
     const start = district.startX;
     const end = district.startX + district.width;
     sidewalks.push(
-      <rect key={`sw-${district.id}`} x={start} y={GROUND} width={district.width} height={14} fill={sidewalkColors[district.id]} />,
+      <rect
+        key={`sw-${district.id}`}
+        x={start}
+        y={GROUND}
+        width={district.width}
+        height={14}
+        fill={sidewalkColors[district.id]}
+      />,
     );
     if (grandeur >= 1) {
       // Pflaster: feines Muster im Gehweg
       sidewalks.push(
-        <rect key={`cb-${district.id}`} x={start} y={GROUND} width={district.width} height={14} fill="url(#cobble)" opacity={0.5} />,
+        <rect
+          key={`cb-${district.id}`}
+          x={start}
+          y={GROUND}
+          width={district.width}
+          height={14}
+          fill="url(#cobble)"
+          opacity={0.5}
+        />,
       );
     }
 
@@ -118,7 +123,10 @@ export const StreetArt = memo(function StreetArt({
     let cursor = start + 10;
     let seed = district.startX / 100;
     const edges = [
-      ...locs.map((l) => ({ left: l.x - BUILDING_HALF_WIDTH[l.id] - 8, right: l.x + BUILDING_HALF_WIDTH[l.id] + 8 })),
+      ...locs.map((l) => ({
+        left: l.x - BUILDING_HALF_WIDTH[l.id] - 8,
+        right: l.x + BUILDING_HALF_WIDTH[l.id] + 8,
+      })),
       { left: end - 10, right: end },
     ];
     for (const edge of edges) {
@@ -134,7 +142,11 @@ export const StreetArt = memo(function StreetArt({
             p={p}
             seed={Math.round(seed)}
             grandeur={grandeur}
-            poster={autocratic && seed % 2 < 1 ? <Poster x={x} y={GROUND - 70} character={character} /> : null}
+            poster={
+              autocratic && seed % 2 < 1 ? (
+                <Poster x={x} y={GROUND - 70} character={character} />
+              ) : null
+            }
           />,
         );
         cursor += width;
@@ -182,7 +194,8 @@ export const StreetArt = memo(function StreetArt({
         decor.push(<Tree key={`t-${x}`} x={x + 75} grandeur={grandeur} />);
         if (i === 2) decor.push(<Fountain key={`fo-${x}`} x={x + 30} />);
       }
-      if (autocratic && i % 2 === 1) decor.push(<Camera key={`c-${x}`} x={x + 2} y={GROUND - 64} />);
+      if (autocratic && i % 2 === 1)
+        decor.push(<Camera key={`c-${x}`} x={x + 2} y={GROUND - 64} />);
     }
     if (grandeur === 3) {
       const palace = locs.find((l) => l.id === 'palace');
@@ -193,7 +206,13 @@ export const StreetArt = memo(function StreetArt({
     if (stage < district.unlockStage) {
       overlays.push(
         <g key={`lock-${district.id}`}>
-          <rect x={start} y={0} width={district.width} height={WORLD_HEIGHT} className={styles.fog} />
+          <rect
+            x={start}
+            y={0}
+            width={district.width}
+            height={WORLD_HEIGHT}
+            className={styles.fog}
+          />
           <Barrier x={start + 50} label={lockedLabel(district.unlockStage)} />
         </g>,
       );
@@ -217,11 +236,24 @@ export const StreetArt = memo(function StreetArt({
         {buildings}
         {decor}
         {/* Straße und Gehweg */}
-        <rect x={0} y={GROUND + 14} width={WORLD_WIDTH} height={WORLD_HEIGHT - GROUND - 14} className={styles.road} />
+        <rect
+          x={0}
+          y={GROUND + 14}
+          width={WORLD_WIDTH}
+          height={WORLD_HEIGHT - GROUND - 14}
+          className={styles.road}
+        />
         {sidewalks}
         <rect x={0} y={GROUND + 13} width={WORLD_WIDTH} height={2} className={styles.curb} />
         {Array.from({ length: Math.floor(WORLD_WIDTH / 80) }, (_, i) => (
-          <rect key={i} x={i * 80 + 20} y={GROUND + 32} width={40} height={3} className={styles.lane} />
+          <rect
+            key={i}
+            x={i * 80 + 20}
+            y={GROUND + 32}
+            width={40}
+            height={3}
+            className={styles.lane}
+          />
         ))}
       </g>
       {overlays}
@@ -238,7 +270,9 @@ export const Skyline = memo(function Skyline({ stateId }: { stateId: StateId }) 
     const h = 60 + ((x * 7) % 70);
     const top = 230 - h;
     if (style === 'gabled' && (x / 90) % 3 === 0) {
-      shapes.push(<path key={x} d={`M${x} 230 V${top} L${x + 30} ${top - 26} L${x + 60} ${top} V230 Z`} />);
+      shapes.push(
+        <path key={x} d={`M${x} 230 V${top} L${x + 30} ${top - 26} L${x + 60} ${top} V230 Z`} />,
+      );
     } else if (style === 'soviet' && (x / 90) % 4 === 1) {
       shapes.push(
         <g key={x}>
@@ -250,7 +284,9 @@ export const Skyline = memo(function Skyline({ stateId }: { stateId: StateId }) 
       shapes.push(
         <g key={x}>
           <rect x={x + 10} y={top} width={40} height={h} />
-          <path d={`M${x} ${top} Q${x + 30} ${top - 12} ${x + 60} ${top} Z M${x + 4} ${top + 24} Q${x + 30} ${top + 12} ${x + 56} ${top + 24} Z`} />
+          <path
+            d={`M${x} ${top} Q${x + 30} ${top - 12} ${x + 60} ${top} Z M${x + 4} ${top + 24} Q${x + 30} ${top + 12} ${x + 56} ${top + 24} Z`}
+          />
         </g>,
       );
     } else if (style === 'federal' && (x / 90) % 5 === 2) {
@@ -260,10 +296,13 @@ export const Skyline = memo(function Skyline({ stateId }: { stateId: StateId }) 
     }
   }
   return (
-    <svg className={styles.skyline} viewBox={`0 0 ${width} 300`} preserveAspectRatio="xMinYMax meet" aria-hidden="true">
+    <svg
+      className={styles.skyline}
+      viewBox={`0 0 ${width} 300`}
+      preserveAspectRatio="xMinYMax meet"
+      aria-hidden="true"
+    >
       <g className={styles.far}>{shapes}</g>
     </svg>
   );
 });
-
-export { districtOf };

@@ -29,7 +29,12 @@ export const Ticker = memo(function Ticker() {
   }, [tier, autocratic, stage]);
   const text = items.join('   ·   ');
   return (
-    <div className={styles.ticker} data-tense={tier >= 6 ? 'true' : 'false'} aria-label={de.ticker.label} role="marquee">
+    <div
+      className={styles.ticker}
+      data-tense={tier >= 6 ? 'true' : 'false'}
+      aria-label={de.ticker.label}
+      role="marquee"
+    >
       <Newspaper size={14} aria-hidden="true" className={styles.icon} />
       <div className={styles.window}>
         <div className={styles.track} key={text}>

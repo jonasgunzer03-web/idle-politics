@@ -1,0 +1,52 @@
+.toast {
+  position: fixed;
+  left: 50%;
+  /* Unten über der Tab-Leiste, damit Ressourcen sichtbar bleiben */
+  bottom: calc(70px + var(--safe-bottom));
+  z-index: 70;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+  pointer-events: none;
+  animation: toast-in 3.2s ease both;
+  max-width: calc(100vw - 32px);
+}
+
+.icon {
+  color: var(--state-secondary);
+  flex-shrink: 0;
+}
+
+.kicker {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.name {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  10%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}

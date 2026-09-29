@@ -51,7 +51,11 @@ export function CareerSheet() {
   const store = gameStore.getState();
 
   return (
-    <BottomSheet title={v.top ? de.careerPanel.top : fill(de.careerPanel.next, { title: v.nextTitle })} onClose={close} testId="career-sheet">
+    <BottomSheet
+      title={v.top ? de.careerPanel.top : fill(de.careerPanel.next, { title: v.nextTitle })}
+      onClose={close}
+      testId="career-sheet"
+    >
       {!v.top && (
         <>
           <div className={styles.bars}>
@@ -62,7 +66,10 @@ export function CareerSheet() {
                   <span className="num">{b.text}</span>
                 </div>
                 <div className={styles.track}>
-                  <div className={`${styles.fill} ${b.ratio >= 1 ? styles.full : ''}`} style={{ transform: `scaleX(${b.ratio})` }} />
+                  <div
+                    className={`${styles.fill} ${b.ratio >= 1 ? styles.full : ''}`}
+                    style={{ transform: `scaleX(${b.ratio})` }}
+                  />
                 </div>
               </div>
             ))}
@@ -71,7 +78,11 @@ export function CareerSheet() {
           {v.mode === 'election' && (
             <fieldset className={styles.fieldset}>
               <legend className={styles.legend}>{de.careerPanel.campaign}</legend>
-              <div className={styles.options} role="radiogroup" aria-label={de.careerPanel.campaign}>
+              <div
+                className={styles.options}
+                role="radiogroup"
+                aria-label={de.careerPanel.campaign}
+              >
                 {de.careerPanel.campaigns.map((label, i) => (
                   <button
                     key={label}
@@ -85,7 +96,9 @@ export function CareerSheet() {
                     data-testid={`campaign-${i}`}
                   >
                     <span className={styles.optionTitle}>{label}</span>
-                    <span className="num">{fill(de.careerPanel.chance, { value: chances[i] ?? 0 })}</span>
+                    <span className="num">
+                      {fill(de.careerPanel.chance, { value: chances[i] ?? 0 })}
+                    </span>
                     <span className={`${styles.muted} num`}>{costs[i]}</span>
                   </button>
                 ))}
@@ -125,7 +138,8 @@ export function CareerSheet() {
               }}
               data-testid="run-election"
             >
-              {de.careerPanel.run} · {fill(de.careerPanel.chance, { value: chances[campaign] ?? 0 })}
+              {de.careerPanel.run} ·{' '}
+              {fill(de.careerPanel.chance, { value: chances[campaign] ?? 0 })}
             </Button>
           ) : (
             <Button
@@ -140,7 +154,9 @@ export function CareerSheet() {
             </Button>
           )}
           {v.mode === 'election' && v.atVenue && (
-            <p className={styles.muted}>{fill(de.careerPanel.confirmRun, { chance: chances[campaign] ?? 0 })}</p>
+            <p className={styles.muted}>
+              {fill(de.careerPanel.confirmRun, { chance: chances[campaign] ?? 0 })}
+            </p>
           )}
         </>
       )}

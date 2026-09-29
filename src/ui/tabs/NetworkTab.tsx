@@ -33,7 +33,10 @@ export function NetworkTab() {
     const run = s.game.run;
     if (!run) return '';
     return groupsFor(run, cfg)
-      .map((g) => `${g.id}:${Math.round(groupLoyalty(run, g.id, cfg))}:${g.power}:${groupTier(run, g, cfg)}`)
+      .map(
+        (g) =>
+          `${g.id}:${Math.round(groupLoyalty(run, g.id, cfg))}:${g.power}:${groupTier(run, g, cfg)}`,
+      )
       .join('|');
   });
   const figure = useGame(
@@ -66,7 +69,13 @@ export function NetworkTab() {
     for (const rival of def?.rivals ?? []) {
       const other = byId.get(rival);
       // Spannung, wenn eine der beiden Seiten verärgert ist (jede Paarung nur einmal)
-      if (other && n.id < other.id && (n.loyalty < rules.tension || other.loyalty < rules.tension || Math.abs(n.loyalty - other.loyalty) > 40)) {
+      if (
+        other &&
+        n.id < other.id &&
+        (n.loyalty < rules.tension ||
+          other.loyalty < rules.tension ||
+          Math.abs(n.loyalty - other.loyalty) > 40)
+      ) {
         tensions.push([n, other]);
       }
     }
@@ -76,9 +85,21 @@ export function NetworkTab() {
     <div className={styles.page}>
       <h1 className={styles.title}>{de.network.title}</h1>
       <div className={styles.graph}>
-        <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className={styles.svg} role="img" aria-label={de.network.legend}>
+        <svg
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          className={styles.svg}
+          role="img"
+          aria-label={de.network.legend}
+        >
           {tensions.map(([a, b]) => (
-            <line key={`${a.id}-${b.id}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className={styles.tension} />
+            <line
+              key={`${a.id}-${b.id}`}
+              x1={a.x}
+              y1={a.y}
+              x2={b.x}
+              y2={b.y}
+              className={styles.tension}
+            />
           ))}
           {nodes.map((n) => (
             <line
@@ -98,9 +119,21 @@ export function NetworkTab() {
               <circle cx={n.x} cy={n.y} r={n.r} className={styles.ring} />
               {/* Füllgrad = Loyalität: Kreis wird von unten gefüllt */}
               <clipPath id={`clip-${n.id}`}>
-                <rect x={n.x - n.r} y={n.y + n.r - (2 * n.r * n.loyalty) / 100} width={n.r * 2} height={(2 * n.r * n.loyalty) / 100} />
+                <rect
+                  x={n.x - n.r}
+                  y={n.y + n.r - (2 * n.r * n.loyalty) / 100}
+                  width={n.r * 2}
+                  height={(2 * n.r * n.loyalty) / 100}
+                />
               </clipPath>
-              <circle cx={n.x} cy={n.y} r={n.r - 2} className={styles.fill} data-tier={n.tier} clipPath={`url(#clip-${n.id})`} />
+              <circle
+                cx={n.x}
+                cy={n.y}
+                r={n.r - 2}
+                className={styles.fill}
+                data-tier={n.tier}
+                clipPath={`url(#clip-${n.id})`}
+              />
               <text x={n.x} y={n.y + 4} textAnchor="middle" className={styles.pct}>
                 {n.loyalty}
               </text>

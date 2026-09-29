@@ -19,9 +19,15 @@ describe('Ereigniskarten', () => {
   });
 
   it('Karten kommen erst, wenn ihre Zeit erreicht ist', () => {
-    const game = playingGame({ events: { open: [], nextAt: 10_000, crisisAt: null }, playMs: 5_000 });
+    const game = playingGame({
+      events: { open: [], nextAt: 10_000, crisisAt: null },
+      playMs: 5_000,
+    });
     expect(runOf(tickEvents(game, cfg)).events.open).toHaveLength(0);
-    const due = playingGame({ events: { open: [], nextAt: 10_000, crisisAt: null }, playMs: 10_000 });
+    const due = playingGame({
+      events: { open: [], nextAt: 10_000, crisisAt: null },
+      playMs: 10_000,
+    });
     const next = runOf(tickEvents(due, cfg));
     expect(next.events.open).toHaveLength(1);
     expect(next.events.nextAt).toBeGreaterThanOrEqual(10_000 + 120_000);
@@ -65,7 +71,14 @@ describe('Ereigniskarten', () => {
   });
 
   it('Antwort wirkt genau einmal und entfernt die Karte', () => {
-    const game = playingGame({ stage: 3, events: { open: [{ id: 'constructionDonation', target: null }], nextAt: 1e12, crisisAt: null } });
+    const game = playingGame({
+      stage: 3,
+      events: {
+        open: [{ id: 'constructionDonation', target: null }],
+        nextAt: 1e12,
+        crisisAt: null,
+      },
+    });
     const next = resolveEvent(game, 0, 'yes', cfg);
     const req = nextRequirement(runOf(game), cfg);
     expect(runOf(next).resources.money).toBeCloseTo(0.3 * req.money);
@@ -88,7 +101,10 @@ describe('Ereigniskarten', () => {
   });
 
   it('außerhalb des Spiels keine Karten', () => {
-    const game = { ...playingGame({ events: { open: [], nextAt: 0, crisisAt: null } }), phase: 'ceremony' as const };
+    const game = {
+      ...playingGame({ events: { open: [], nextAt: 0, crisisAt: null } }),
+      phase: 'ceremony' as const,
+    };
     expect(tickEvents(game, cfg)).toBe(game);
   });
 });

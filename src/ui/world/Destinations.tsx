@@ -44,7 +44,8 @@ export function Destinations() {
   const office = useGame((s) => s.game.run?.profession === 'office');
   const items: DestinationView[] = key
     ? key.split('|').map((entry) => {
-        const [id = 'workplace', seconds = '0', here = '0', target = '0', open = '0', venue = '0'] = entry.split(':');
+        const [id = 'workplace', seconds = '0', here = '0', target = '0', open = '0', venue = '0'] =
+          entry.split(':');
         const typed = id as DestinationView['id'];
         return {
           id: typed,

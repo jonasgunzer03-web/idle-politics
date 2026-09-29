@@ -1,14 +1,22 @@
 import { useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Bike, Car, Footprints, Lock, UserPlus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { defaultConfig } from '../../config';
-import type { BuyMode } from '../../engine/economy';
-import type { GeneratorId, ResourceId } from '../../engine/ids';
-import { isResourceUnlocked, resourceUnlockStage } from '../../engine/unlocks';
+import {
+  actionProgress,
+  canAfford,
+  vehicleCost,
+  vehicleIndex,
+  type BuyMode,
+} from '../../engine/economy';
+import { VEHICLE_IDS, type GeneratorId, type ResourceId } from '../../engine/ids';
+import { isResourceUnlocked, travelSpeed } from '../../engine/rules';
+import { isGeneratorAvailable } from '../../engine/unlocks';
 import { de, fill } from '../../i18n/de';
-import { useGame } from '../../store';
+import { gameStore, useGame } from '../../store';
 import { GeneratorRow } from '../components/GeneratorRow';
 import { ResourceIcon } from '../components/ResourceIcon';
+import { actionName, formatCost } from '../gameText';
 import styles from './InvestTab.module.css';
 
 const cfg = defaultConfig;
@@ -17,31 +25,22 @@ const MODES: { mode: BuyMode; label: string }[] = [
   { mode: 10, label: de.invest.modes.ten },
   { mode: 'max', label: de.invest.modes.max },
 ];
-// Reihenfolge der Gruppen im Tab (Loyalität und Diplomatie folgen in späteren Phasen)
-const GROUPS: ResourceId[] = ['money', 'influence', 'followers'];
-
-interface GroupView {
-  unlocked: boolean;
-  unlockStage: number;
-  /**
-   * Freigeschaltete Generatoren plus der nächste gesperrte als Ausblick, als Text mit
-   * Kommas. Ein Text statt eines Arrays, damit der flache Vergleich greift (ein neues
-   * Array bei jedem Aufruf führte zu einer Endlosschleife).
-   */
-  idList: string;
-}
+const GROUPS: ResourceId[] = ['money', 'influence', 'followers', 'diplomacy'];
 
 function Group({ resource, mode }: { resource: ResourceId; mode: BuyMode }) {
+  // Liste als Text: ein neues Array bei jedem Aufruf würde endlos neu zeichnen
   const view = useGame(
-    useShallow((s): GroupView => {
+    useShallow((s) => {
       const run = s.game.run;
-      const defs = cfg.balancing.generators.filter((g) => g.produces === resource);
       if (!run) return { unlocked: false, unlockStage: 1, idList: '' };
+      const defs = cfg.balancing.generators.filter(
+        (g) => g.produces === resource && isGeneratorAvailable(run, g),
+      );
       const open = defs.filter((g) => run.stage >= g.unlockStage).map((g) => g.id);
       const next = defs.find((g) => run.stage < g.unlockStage);
       return {
         unlocked: isResourceUnlocked(run, resource, cfg),
-        unlockStage: resourceUnlockStage(run.stateId, resource, cfg),
+        unlockStage: cfg.balancing.resourceUnlockStage[resource],
         idList: (next ? [...open, next.id] : open).join(','),
       };
     }),
@@ -64,6 +63,115 @@ function Group({ resource, mode }: { resource: ResourceId; mode: BuyMode }) {
           <Lock size={16} aria-hidden="true" />
           {fill(de.invest.groupLocked, { stage: view.unlockStage })}
         </p>
+      )}
+    </section>
+  );
+}
+
+function Vehicles() {
+  const v = useGame(
+    useShallow((s) => {
+      const run = s.game.run;
+      if (!run) return null;
+      const next = VEHICLE_IDS[vehicleIndex(run.vehicle) + 1];
+      const def = next ? cfg.world.vehicles.find((x) => x.id === next) : undefined;
+      const cost = next ? vehicleCost(next, cfg) : {};
+      const feet = cfg.world.vehicles[0]?.speed ?? 150;
+      return {
+        current: run.vehicle,
+        speed: Math.round((travelSpeed(s.game, cfg) / feet) * 10) / 10,
+        next: next ?? null,
+        nextStage: def?.unlockStage ?? 0,
+        nextLocked: def ? run.stage < def.unlockStage : true,
+        nextSpeed: def ? Math.round((def.speed / feet) * 10) / 10 : 0,
+        cost: formatCost(cost, run.stateId),
+        affordable: canAfford(run.resources, cost),
+      };
+    }),
+  );
+  if (!v) return null;
+  const Icon =
+    v.current === 'feet'
+      ? Footprints
+      : v.current === 'bicycle' || v.current === 'moped'
+        ? Bike
+        : Car;
+  return (
+    <section className={styles.group}>
+      <h2 className={styles.groupTitle}>
+        <Icon size={18} aria-hidden="true" />
+        {de.invest.vehiclesTitle}
+      </h2>
+      <div className={styles.vehicle}>
+        <div>
+          <p className={styles.vehicleName}>
+            {de.invest.vehicleOwned}: {de.vehicles[v.current]}
+          </p>
+          <p className={`${styles.muted} num`}>
+            {fill(de.invest.vehicleSpeed, { speed: v.speed.toLocaleString('de-DE') })}
+          </p>
+        </div>
+      </div>
+      {v.next && (
+        <div className={styles.vehicle}>
+          <div>
+            <p className={styles.vehicleName}>{de.vehicles[v.next]}</p>
+            <p className={`${styles.muted} num`}>
+              {v.nextLocked
+                ? fill(de.invest.unlockAt, { stage: v.nextStage })
+                : fill(de.invest.vehicleSpeed, { speed: v.nextSpeed.toLocaleString('de-DE') })}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={styles.buy}
+            disabled={v.nextLocked || !v.affordable}
+            onClick={() => {
+              if (v.next) gameStore.getState().buyVehicle(v.next);
+            }}
+            data-testid={`vehicle-${v.next}`}
+          >
+            <span>{de.invest.vehicleBuy}</span>
+            <span className="num">{v.cost}</span>
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function StaffOverview() {
+  const list = useGame((s) => {
+    const run = s.game.run;
+    if (!run) return '';
+    return cfg.world.actions
+      .map((a) => ({ id: a.id, staff: actionProgress(run, a.id).staff }))
+      .filter((a) => a.staff > 0)
+      .map((a) => `${a.id}:${a.staff}`)
+      .join('|');
+  });
+  const office = useGame((s) => s.game.run?.profession === 'office');
+  return (
+    <section className={styles.group}>
+      <h2 className={styles.groupTitle}>
+        <UserPlus size={18} aria-hidden="true" />
+        {de.invest.staffTitle}
+      </h2>
+      <p className={styles.muted}>{de.invest.staffText}</p>
+      {list && (
+        <ul className={styles.staffList}>
+          {list.split('|').map((entry) => {
+            const [id = 'work', count = '0'] = entry.split(':');
+            return (
+              <li key={id} className="num">
+                {fill(de.invest.staffEntry, {
+                  action: actionName(id as Parameters<typeof actionName>[0], office),
+                  count,
+                })}
+              </li>
+            );
+          })}
+        </ul>
       )}
     </section>
   );
@@ -93,9 +201,11 @@ export function InvestTab() {
           ))}
         </div>
       </div>
+      <Vehicles />
       {GROUPS.map((resource) => (
         <Group key={resource} resource={resource} mode={mode} />
       ))}
+      <StaffOverview />
     </div>
   );
 }

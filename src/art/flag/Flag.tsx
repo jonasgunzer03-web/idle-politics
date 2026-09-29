@@ -57,6 +57,23 @@ function Emblem({
         </g>
       );
     }
+    case 'wave':
+      return (
+        <path
+          d={`M${cx - r} ${cy} q${r / 2} ${-r / 2} ${r} 0 t${r} 0`}
+          fill="none"
+          stroke={color}
+          strokeWidth={r * 0.3}
+          strokeLinecap="round"
+        />
+      );
+    case 'peak':
+      return (
+        <path
+          d={`M${cx - r} ${cy + r * 0.6} L${cx} ${cy - r * 0.7} L${cx + r} ${cy + r * 0.6} Z`}
+          fill={color}
+        />
+      );
     case 'oak':
       // Stilisiertes Eichenblatt
       return (
@@ -71,8 +88,8 @@ function Emblem({
   }
 }
 
-/** Fiktive Staatsflagge, gezeichnet aus der Beschreibung in states.ts. */
-export function Flag({ flag, width = 48, className, title }: Props) {
+/** Flagge als SVG-Gruppe im Koordinatensystem 60 × 40 (zum Einbetten in andere SVGs). */
+export function FlagGraphic({ flag }: { flag: FlagDef }) {
   const w = 60;
   const h = 40;
   const { layout, colors, emblem, emblemColor } = flag;
@@ -97,18 +114,27 @@ export function Flag({ flag, width = 48, className, title }: Props) {
     );
   }
   return (
+    <g>
+      {body}
+      <Emblem kind={emblem} color={emblemColor} {...emblemPos} />
+      <rect width={w} height={h} fill="none" stroke="rgb(0 0 0 / 18%)" strokeWidth="1" />
+    </g>
+  );
+}
+
+/** Fiktive Staatsflagge als eigenständiges Bild. */
+export function Flag({ flag, width = 48, className, title }: Props) {
+  return (
     <svg
-      viewBox={`0 0 ${w} ${h}`}
+      viewBox="0 0 60 40"
       width={width}
-      height={(width * h) / w}
+      height={(width * 40) / 60}
       className={className}
       role={title ? 'img' : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
     >
-      {body}
-      <Emblem kind={emblem} color={emblemColor} {...emblemPos} />
-      <rect width={w} height={h} fill="none" stroke="rgb(0 0 0 / 18%)" strokeWidth="1" />
+      <FlagGraphic flag={flag} />
     </svg>
   );
 }

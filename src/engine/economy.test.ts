@@ -57,7 +57,9 @@ describe('Kostenformel', () => {
   });
 
   it('missingFor nennt nur Fehlbeträge', () => {
-    expect(missingFor({ ...zeroResources(), money: 100, influence: 4 }, { money: 60, influence: 5 })).toEqual({
+    expect(
+      missingFor({ ...zeroResources(), money: 100, influence: 4 }, { money: 60, influence: 5 }),
+    ).toEqual({
       influence: 1,
     });
   });
@@ -78,7 +80,9 @@ describe('Tätigkeiten an Orten', () => {
     const base = actionYield(playingGame(), act('work'), cfg).money ?? 0;
     const stage3 = actionYield(playingGame({ stage: 3 }), act('work'), cfg).money ?? 0;
     expect(stage3 / base).toBeCloseTo(cfg.balancing.tapStageGrowth ** 2);
-    const trained = actionYield(playingGame({ actions: { work: { staff: 0, training: 2 } } }), act('work'), cfg).money ?? 0;
+    const trained =
+      actionYield(playingGame({ actions: { work: { staff: 0, training: 2 } } }), act('work'), cfg)
+        .money ?? 0;
     expect(trained / base).toBeCloseTo(1.5);
   });
 
@@ -96,7 +100,10 @@ describe('Tätigkeiten an Orten', () => {
     const inside = playingGame({ resources: rich });
     const hired = buyActionUpgrade(inside, 'work', 'staff', cfg);
     expect(runOf(hired).actions.work?.staff).toBe(1);
-    const outside = playingGame({ resources: rich, world: { posX: 160, target: null, inside: false } });
+    const outside = playingGame({
+      resources: rich,
+      world: { posX: 160, target: null, inside: false },
+    });
     expect(buyActionUpgrade(outside, 'work', 'staff', cfg)).toBe(outside);
   });
 
@@ -109,7 +116,10 @@ describe('Tätigkeiten an Orten', () => {
   it('Mitarbeiter werden teurer', () => {
     const run0 = runOf(playingGame());
     const run5 = runOf(playingGame({ actions: { work: { staff: 5, training: 0 } } }));
-    expect((upgradeCost(run5, act('work'), 'staff', cfg).money ?? 0) > (upgradeCost(run0, act('work'), 'staff', cfg).money ?? 0)).toBe(true);
+    expect(
+      (upgradeCost(run5, act('work'), 'staff', cfg).money ?? 0) >
+        (upgradeCost(run0, act('work'), 'staff', cfg).money ?? 0),
+    ).toBe(true);
   });
 });
 
@@ -147,13 +157,29 @@ describe('Kaufen', () => {
   });
 
   it('×10 nur, wenn alle zehn bezahlbar sind', () => {
-    expect(buyGenerator(playingGame({ resources: { ...zeroResources(), money: 100 } }), 'overtime', 10, cfg).bought).toBe(0);
-    expect(buyGenerator(playingGame({ resources: { ...zeroResources(), money: 1000 } }), 'overtime', 10, cfg).bought).toBe(10);
+    expect(
+      buyGenerator(
+        playingGame({ resources: { ...zeroResources(), money: 100 } }),
+        'overtime',
+        10,
+        cfg,
+      ).bought,
+    ).toBe(0);
+    expect(
+      buyGenerator(
+        playingGame({ resources: { ...zeroResources(), money: 1000 } }),
+        'overtime',
+        10,
+        cfg,
+      ).bought,
+    ).toBe(10);
   });
 
   it('gesperrte Generatoren lassen sich nicht kaufen', () => {
     expect(buyGenerator(playingGame({ resources: rich }), 'flyers', 1, cfg).bought).toBe(0);
-    expect(buyGenerator(playingGame({ stage: 2, resources: rich }), 'flyers', 1, cfg).bought).toBe(1);
+    expect(buyGenerator(playingGame({ stage: 2, resources: rich }), 'flyers', 1, cfg).bought).toBe(
+      1,
+    );
   });
 
   it('Fahrzeuge nur in Reihenfolge und ab ihrer Stufe', () => {
@@ -162,11 +188,15 @@ describe('Kaufen', () => {
     const bike = buyVehicle(game, 'bicycle', cfg);
     expect(runOf(bike).vehicle).toBe('bicycle');
     expect(buyVehicle(bike, 'moped', cfg)).toBe(bike); // Moped erst ab Stufe 3
-    expect(runOf(buyVehicle({ ...bike, run: { ...runOf(bike), stage: 3 } }, 'moped', cfg)).vehicle).toBe('moped');
+    expect(
+      runOf(buyVehicle({ ...bike, run: { ...runOf(bike), stage: 3 } }, 'moped', cfg)).vehicle,
+    ).toBe('moped');
   });
 
   it('Regionalprojekte erst ab Stufe 8, danach bis zur Höchststufe', () => {
-    expect(buildProject(playingGame({ resources: rich, stage: 7 }), 'port', cfg).run?.projects.port).toBeUndefined();
+    expect(
+      buildProject(playingGame({ resources: rich, stage: 7 }), 'port', cfg).run?.projects.port,
+    ).toBeUndefined();
     let game = playingGame({ resources: rich, stage: 8 });
     for (let i = 0; i < 10; i++) game = buildProject(game, 'port', cfg);
     expect(runOf(game).projects.port).toBe(5);
