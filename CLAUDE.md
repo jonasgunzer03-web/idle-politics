@@ -68,3 +68,9 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 - Dateinamen, die sich nur in Groß-/Kleinschreibung unterscheiden, kollidieren auf macOS.
 - Kosten, die mit der Zeit anfallen (Verfall), müssen mit `GAME_SPEED` skalieren.
 - Playwright: Nach dem Öffnen eines Bottom Sheets ~400 ms warten, bevor Positionen gemessen werden.
+
+## Veröffentlichung
+
+- Live: https://jonasgunzer03-web.github.io/idle-politics/ (Repo `jonasgunzer03-web/idle-politics`, öffentlich).
+- Jeder Push auf `main` startet `.github/workflows/deploy.yml`: `npm run check`, Build mit `BASE_PATH=/idle-politics/`, Veröffentlichung auf GitHub Pages.
+- GitHub CLI liegt unter `~/.local/bin/gh` (kein Homebrew auf dem Mac).
