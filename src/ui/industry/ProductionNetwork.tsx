@@ -32,21 +32,21 @@ import styles from './Network.module.css';
 
 const cfg = defaultConfig;
 const W = 360;
-const H = 330;
+const H = 340;
 
 /** Feste Plätze im Netz: links Hersteller, Mitte Parteibüro, rechts Verbraucher. */
 const POS: Record<LocationId, { x: number; y: number }> = {
   workplace: { x: 58, y: 48 },
   pub: { x: 58, y: 150 },
   townHall: { x: 58, y: 230 },
-  ministry: { x: 58, y: 300 },
+  ministry: { x: 58, y: 306 },
   partyOffice: { x: 180, y: 150 },
   market: { x: 302, y: 48 },
   embassy: { x: 302, y: 112 },
   newspaper: { x: 302, y: 176 },
   bank: { x: 302, y: 232 },
-  parliament: { x: 250, y: 300 },
-  palace: { x: 318, y: 300 },
+  parliament: { x: 226, y: 306 },
+  palace: { x: 306, y: 300 },
 };
 
 const ICONS: Record<LocationId, LucideIcon> = {
@@ -89,80 +89,82 @@ export function ProductionNetwork() {
   const locs = Object.keys(POS) as LocationId[];
 
   return (
-    <div className={styles.wrap} data-testid="production-network">
-      <svg viewBox={`0 0 ${W} ${H}`} className={styles.svg} aria-hidden="true">
-        {EDGES.map((e, i) => {
-          const state = edgeStates[i] ?? 'off';
-          if (state === 'off') return null;
-          const a = POS[e.from];
-          const b = POS[e.to];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const length = Math.hypot(dx, dy);
-          const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-          const color = state === 'blocked' ? 'var(--bad)' : `var(--goods-${e.good})`;
+    <div className={styles.outer} data-testid="production-network">
+      <div className={styles.wrap}>
+        <svg viewBox={`0 0 ${W} ${H}`} className={styles.svg} aria-hidden="true">
+          {EDGES.map((e, i) => {
+            const state = edgeStates[i] ?? 'off';
+            if (state === 'off') return null;
+            const a = POS[e.from];
+            const b = POS[e.to];
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const length = Math.hypot(dx, dy);
+            const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+            const color = state === 'blocked' ? 'var(--bad)' : `var(--goods-${e.good})`;
+            return (
+              <g
+                key={`${e.from}-${e.to}-${e.good}`}
+                transform={`translate(${a.x} ${a.y}) rotate(${angle})`}
+              >
+                <line
+                  x1={0}
+                  y1={0}
+                  x2={length}
+                  y2={0}
+                  style={{ stroke: color }}
+                  strokeWidth={state === 'flow' ? 4 : 2.5}
+                  strokeDasharray={state === 'idle' ? '4 6' : undefined}
+                  opacity={state === 'idle' ? 0.45 : 0.85}
+                  strokeLinecap="round"
+                />
+                {state === 'flow' &&
+                  [0, 1, 2].map((k) => (
+                    <circle
+                      key={k}
+                      r={3.2}
+                      className={styles.dot}
+                      style={{
+                        fill: color,
+                        ['--len' as string]: `${length}px`,
+                        animationDelay: `${-k * 0.8}s`,
+                      }}
+                    />
+                  ))}
+              </g>
+            );
+          })}
+        </svg>
+        {locs.map((loc, i) => {
+          const state = nodeStates[i] ?? 'x';
+          const open = state !== 'x';
+          const blocked = state.endsWith('!');
+          const staff = open ? Number(state.replace('!', '')) : 0;
+          const Icon = ICONS[loc];
+          const p = POS[loc];
           return (
-            <g
-              key={`${e.from}-${e.to}-${e.good}`}
-              transform={`translate(${a.x} ${a.y}) rotate(${angle})`}
+            <button
+              key={loc}
+              type="button"
+              className={styles.node}
+              data-open={open ? 'true' : 'false'}
+              data-blocked={blocked ? 'true' : 'false'}
+              style={{ left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%` }}
+              disabled={!open}
+              onClick={() => {
+                gameStore.getState().walkTo(loc);
+              }}
+              aria-label={`${locationName(loc, office)}: ${de.industry.economy.walk}`}
             >
-              <line
-                x1={0}
-                y1={0}
-                x2={length}
-                y2={0}
-                style={{ stroke: color }}
-                strokeWidth={state === 'flow' ? 4 : 2.5}
-                strokeDasharray={state === 'idle' ? '4 6' : undefined}
-                opacity={state === 'idle' ? 0.45 : 0.85}
-                strokeLinecap="round"
-              />
-              {state === 'flow' &&
-                [0, 1, 2].map((k) => (
-                  <circle
-                    key={k}
-                    r={3.2}
-                    className={styles.dot}
-                    style={{
-                      fill: color,
-                      ['--len' as string]: `${length}px`,
-                      animationDelay: `${-k * 0.8}s`,
-                    }}
-                  />
-                ))}
-            </g>
+              <span className={styles.nodeIcon}>
+                <Icon size={20} aria-hidden="true" />
+                {staff > 0 && <span className={`${styles.count} num`}>{staff}</span>}
+              </span>
+              <span className={styles.nodeLabel}>{locationName(loc, office)}</span>
+            </button>
           );
         })}
-      </svg>
-      {locs.map((loc, i) => {
-        const state = nodeStates[i] ?? 'x';
-        const open = state !== 'x';
-        const blocked = state.endsWith('!');
-        const staff = open ? Number(state.replace('!', '')) : 0;
-        const Icon = ICONS[loc];
-        const p = POS[loc];
-        return (
-          <button
-            key={loc}
-            type="button"
-            className={styles.node}
-            data-open={open ? 'true' : 'false'}
-            data-blocked={blocked ? 'true' : 'false'}
-            style={{ left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%` }}
-            disabled={!open}
-            onClick={() => {
-              gameStore.getState().walkTo(loc);
-            }}
-            aria-label={`${locationName(loc, office)}: ${de.industry.economy.walk}`}
-          >
-            <span className={styles.nodeIcon}>
-              <Icon size={20} aria-hidden="true" />
-              {staff > 0 && <span className={`${styles.count} num`}>{staff}</span>}
-            </span>
-            <span className={styles.nodeLabel}>{locationName(loc, office)}</span>
-          </button>
-        );
-      })}
+      </div>
       <div className={styles.legend}>
         {GOOD_IDS.map((g) => (
           <span key={g} className={styles.legendItem}>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Copy, Lock, Pencil, Plane, Trophy } from 'lucide-react';
+import { Check, Copy, Lock, Newspaper, Pencil, Plane, Trophy } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { Figure } from '../../art/figure/Figure';
 import { outfitFor } from '../../art/figure/outfit';
@@ -56,6 +56,14 @@ function CharacterSection() {
         >
           <Pencil size={16} aria-hidden="true" />
           {de.profile.editCharacter}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => store.openSheet({ kind: 'chronicle' })}
+          data-testid="open-chronicle"
+        >
+          <Newspaper size={16} aria-hidden="true" />
+          {de.party.chronicle.title}
         </Button>
         <Button
           variant="secondary"

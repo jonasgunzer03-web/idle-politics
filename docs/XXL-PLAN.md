@@ -50,6 +50,10 @@ mit Beratern, dazu benannte Mitarbeiter, lebendige Bürger, Rivale, Stadtchronik
   Beteiligungen.
 - Chronik als Zeitungsseite (Tipp auf den Ticker).
 
+## Stand
+
+Alle Punkte umgesetzt (Commits „XXL 1“ bis „XXL 4“).
+
 ## Reihenfolge
 
 1. Engine Produktionsketten + Speicherstand v3 + Migration + Tests + Bot/Kalibrierung

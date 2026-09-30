@@ -21,7 +21,7 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 
 ## Arbeitsweise
 
-- Alle Phasen aus `docs/SPEC.md` sind umgesetzt, dazu die begehbare Welt (Wunsch des Auftraggebers vom 28.09.2026: Figur läuft durch eine seitliche Straße, Orte bringen Tätigkeiten, Mitarbeiter automatisieren, Viertel werden mit dem Aufstieg prächtiger, ab Stufe 8 Karte mit Regionen und Außenpolitik).
+- Alle Phasen aus `docs/SPEC.md` sind umgesetzt, dazu die begehbare Welt (28.09.2026) und die XXL-Erweiterung (30.09.2026, Bauplan `docs/XXL-PLAN.md`): Produktionsketten mit Engpässen, Ausbaustufen, Maschinen, benannte Mitarbeiter, Stimmung/Streik, Parteibüro mit Beratern und Gesetzen samt Spätfolgen, Rivale, Stadtchronik, neue Grafik mit Tag/Nacht, Wetter, Verkehr und belebten Innenräumen.
 - Neue Arbeit weiterhin in überschaubaren Schritten. Nach jeder Phase stoppen und liefern: was fertig
   ist, Testanleitung fürs iPhone, bekannte Einschränkungen, 2–3 Sätze zu Architekturentscheidungen.
   Dann auf OK warten.
@@ -68,6 +68,10 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 - Dateinamen, die sich nur in Groß-/Kleinschreibung unterscheiden, kollidieren auf macOS.
 - Kosten, die mit der Zeit anfallen (Verfall), müssen mit `GAME_SPEED` skalieren.
 - Playwright: Nach dem Öffnen eines Bottom Sheets ~400 ms warten, bevor Positionen gemessen werden.
+- CSS-Animation auf `opacity` überschreibt ein `opacity`-Attribut im SVG. Durchsichtige Ebenen mit Tag/Nacht-Klasse (`night`, `dusk`) immer in eine eigene `<g>` legen.
+- Tag und Nacht nie über CSS-Animationen mit Verzögerung steuern (neu eingehängte Elemente laufen sonst aus dem Takt), sondern über die CSS-Variablen `--day/--dusk/--night` (siehe `art/world/dayCycle.ts`).
+- In SVG-Attributen keine CSS-Variablen für `fill`; stattdessen `style={{ fill: … }}`.
+- Die Grafik zeichnet mit dem `Painter` (`art/world/paint.tsx`): Tag-Ebene, Licht-Ebene (nachts) und Effekte getrennt. Neue Gebäudeteile dort anlegen, nicht als eigene Komponenten.
 
 ## Veröffentlichung
 
