@@ -7,6 +7,10 @@ import { readFileSync } from 'node:fs';
 
 // Pfad, unter dem die App ausgeliefert wird. Für GitHub Pages z. B. BASE_PATH=/idle-politics/
 const base = process.env.BASE_PATH ?? '/';
+// Entwickler-Version (unendliche Ressourcen) als eigene App unter <base>dev/
+const devEdition = process.env.VITE_DEV_EDITION === '1';
+// Name auf dem Home-Bildschirm und im Tab (in index.html als %VITE_APP_TITLE%)
+process.env.VITE_APP_TITLE = devEdition ? 'IP Dev' : 'Idle Politics';
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as {
   version: string;
 };
@@ -23,8 +27,8 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['icons/apple-touch-icon.png', 'icons/icon.svg'],
       manifest: {
-        name: 'Idle Politics',
-        short_name: 'Idle Politics',
+        name: devEdition ? 'Idle Politics Dev' : 'Idle Politics',
+        short_name: devEdition ? 'IP Dev' : 'Idle Politics',
         description: 'Vom Arbeiter an die Spitze des Staates.',
         lang: 'de',
         start_url: base,
@@ -32,7 +36,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#f4f2ed',
-        theme_color: '#2b2f36',
+        theme_color: devEdition ? '#6a3d9a' : '#2b2f36',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -42,6 +46,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         cleanupOutdatedCaches: true,
+        // Die Entwickler-Version unter dev/ hat ihren eigenen Service Worker
+        navigateFallbackDenylist: devEdition ? [] : [/\/dev\//],
       },
       devOptions: { enabled: false },
     }),

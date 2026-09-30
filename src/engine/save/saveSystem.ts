@@ -8,6 +8,8 @@ import type { SafeStorage, StorageErrorKind } from './storage';
 // Speicher), bleibt der letzte gültige Stand im anderen Platz erhalten.
 
 export const SLOT_KEYS = ['idle-politics.save.a', 'idle-politics.save.b'] as const;
+/** Eigene Speicherplätze der Entwickler-Version (berührt das normale Spiel nie). */
+export const DEV_SLOT_KEYS = ['idle-politics.dev.save.a', 'idle-politics.dev.save.b'] as const;
 type SlotIndex = 0 | 1;
 
 const envelopeSchema = z.object({
@@ -61,13 +63,16 @@ export class SaveManager {
   private newest: SlotIndex | null = null;
   private seq = 0;
 
-  constructor(storage: SafeStorage) {
+  private readonly keys: readonly [string, string];
+
+  constructor(storage: SafeStorage, keys: readonly [string, string] = SLOT_KEYS) {
     this.storage = storage;
+    this.keys = keys;
   }
 
   load(): LoadResult {
-    const rawA = this.storage.read(SLOT_KEYS[0]);
-    const rawB = this.storage.read(SLOT_KEYS[1]);
+    const rawA = this.storage.read(this.keys[0]);
+    const rawB = this.storage.read(this.keys[1]);
     if (!rawA.ok) return { status: 'error', error: rawA.error };
     if (!rawB.ok) return { status: 'error', error: rawB.error };
     const slots = [inspectSlot(rawA.value), inspectSlot(rawB.value)] as const;
@@ -107,7 +112,7 @@ export class SaveManager {
     } catch {
       return { ok: false, error: 'invalid' };
     }
-    const result = this.storage.write(SLOT_KEYS[target], payload);
+    const result = this.storage.write(this.keys[target], payload);
     if (!result.ok) return { ok: false, error: result.error };
     this.newest = target;
     this.seq = nextSeq;
@@ -115,8 +120,8 @@ export class SaveManager {
   }
 
   clear(): SaveResult {
-    const a = this.storage.remove(SLOT_KEYS[0]);
-    const b = this.storage.remove(SLOT_KEYS[1]);
+    const a = this.storage.remove(this.keys[0]);
+    const b = this.storage.remove(this.keys[1]);
     this.newest = null;
     this.seq = 0;
     if (!a.ok) return { ok: false, error: a.error };

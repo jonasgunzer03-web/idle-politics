@@ -1,6 +1,6 @@
 import { defaultConfig } from '../config';
 import { nextRandom } from '../engine/rng';
-import { SaveManager } from '../engine/save/saveSystem';
+import { DEV_SLOT_KEYS, SaveManager } from '../engine/save/saveSystem';
 import { MemoryStorage, SafeStorage } from '../engine/save/storage';
 import { findLocation } from '../engine/unlocks';
 import { testCharacter } from '../test/fixtures';
@@ -201,5 +201,28 @@ describe('gameStore', () => {
     store.getState().beginRun({ stateId: 'novaria', profession: 'skilled' }, T0 + 100);
     expect(store.getState().game.run?.stateId).toBe('novaria');
     expect(store.getState().game.character?.name).toBe(testCharacter.name);
+  });
+});
+
+describe('Entwickler-Version', () => {
+  it('füllt Ressourcen bei jedem Takt wieder auf und nutzt eigene Speicherplätze', () => {
+    const backend = new MemoryStorage();
+    const saves = new SaveManager(new SafeStorage(() => backend), DEV_SLOT_KEYS);
+    const store = createGameStore({
+      saves,
+      config: cfg,
+      seed: () => 7,
+      debug: true,
+      resourceFloor: 1e15,
+    });
+    store.getState().hydrate(T0);
+    store.getState().beginRun(setup, T0);
+    store.getState().advanceTo(T0 + 100);
+    expect(store.getState().game.run?.resources.money).toBe(1e15);
+    store.getState().buy('overtime', 10);
+    store.getState().advanceTo(T0 + 200);
+    expect(store.getState().game.run?.resources.money).toBe(1e15);
+    expect(backend.data.has(DEV_SLOT_KEYS[0])).toBe(true);
+    expect(backend.data.has('idle-politics.save.a')).toBe(false);
   });
 });

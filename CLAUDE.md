@@ -78,3 +78,4 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 - Live: https://jonasgunzer03-web.github.io/idle-politics/ (Repo `jonasgunzer03-web/idle-politics`, öffentlich).
 - Jeder Push auf `main` startet `.github/workflows/deploy.yml`: `npm run check`, Build mit `BASE_PATH=/idle-politics/`, Veröffentlichung auf GitHub Pages.
 - GitHub CLI liegt unter `~/.local/bin/gh` (kein Homebrew auf dem Mac).
+- Entwickler-Version: https://jonasgunzer03-web.github.io/idle-politics/dev/ (Build mit `VITE_DEV_EDITION=1`, eigene App „IP Dev“, eigener Spielstand, Währungen werden ständig auf 10^15 aufgefüllt, Debug-Menü an). Siehe `src/debug/edition.ts`.

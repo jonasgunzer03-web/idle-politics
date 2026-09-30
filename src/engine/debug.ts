@@ -70,6 +70,16 @@ export function debugSwitchState(game: GameState, stateId: StateId, cfg: GameCon
   return { ...game, run: { ...run, stateId, path, relations: {}, treaties: {} } };
 }
 
+/** Alle Währungen auf mindestens `floor` auffüllen (Entwickler-Version). */
+export function debugFillResources(game: GameState, floor: number): GameState {
+  const run = game.run;
+  if (!run || !Number.isFinite(floor) || floor <= 0) return game;
+  if (RESOURCE_IDS.every((id) => run.resources[id] >= floor)) return game;
+  const resources = { ...run.resources };
+  for (const id of RESOURCE_IDS) resources[id] = Math.max(resources[id], floor);
+  return { ...game, run: { ...run, resources } };
+}
+
 /** Alle Gebäude eine Ausbaustufe höher, Maschinen auf Gebäudestufe, drei Leute mehr je Linie. */
 export function debugBoostBuildings(game: GameState, cfg: GameConfig): GameState {
   const run = game.run;

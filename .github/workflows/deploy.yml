@@ -35,6 +35,11 @@ jobs:
         env:
           BASE_PATH: /
       - run: npm run build
+      # Entwickler-Version mit unendlichen Ressourcen als eigene App unter /<repo>/dev/
+      - run: npx vite build --outDir dist/dev
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/dev/
+          VITE_DEV_EDITION: '1'
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

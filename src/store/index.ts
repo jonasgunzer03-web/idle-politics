@@ -1,17 +1,21 @@
 import { useStore } from 'zustand';
 import { defaultConfig } from '../config';
-import { SaveManager } from '../engine/save/saveSystem';
+import { DEV_SLOT_KEYS, SaveManager } from '../engine/save/saveSystem';
 import { browserStorage } from '../engine/save/storage';
 import { randomSeed } from '../engine/rng';
 import { isDebugEnabled } from '../debug/debugFlag';
+import { DEV_EDITION, DEV_RESOURCE_FLOOR } from '../debug/edition';
 import { createGameStore, type GameStoreState } from './gameStore';
 
 /** Die eine Store-Instanz der App. Tests erzeugen mit createGameStore eigene Instanzen. */
 export const gameStore = createGameStore({
-  saves: new SaveManager(browserStorage()),
+  saves: DEV_EDITION
+    ? new SaveManager(browserStorage(), DEV_SLOT_KEYS)
+    : new SaveManager(browserStorage()),
   config: defaultConfig,
   seed: randomSeed,
   debug: isDebugEnabled(),
+  resourceFloor: DEV_EDITION ? DEV_RESOURCE_FLOOR : 0,
 });
 
 /**

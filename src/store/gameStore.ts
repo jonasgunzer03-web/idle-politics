@@ -12,6 +12,7 @@ import {
 import {
   debugAddResources,
   debugBoostBuildings,
+  debugFillResources,
   debugOverthrow,
   debugSetMeters,
   debugSetStage,
@@ -185,6 +186,8 @@ export interface GameStoreDeps {
   config: GameConfig;
   seed: () => number;
   debug: boolean;
+  /** Entwickler-Version: Währungen werden bei jedem Takt auf diesen Wert aufgefüllt (0 = aus). */
+  resourceFloor?: number;
 }
 
 function overlayKey(o: Overlay): string {
@@ -244,7 +247,10 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
 
     /** Zeit verrechnen; bei Abwesenheit Rückkehr-Dialog, bei Rücktritt Hinweis. */
     const advanceState = (state: GameStoreState, now: number): Partial<GameStoreState> => {
-      const result = advance(state.game, now, cfg);
+      const advanced = advance(state.game, now, cfg);
+      const floor = deps.resourceFloor ?? 0;
+      const result =
+        floor > 0 ? { ...advanced, game: debugFillResources(advanced.game, floor) } : advanced;
       logIssues(result.issues);
       const extra: Overlay[] = [];
       let overlays = state.overlays;
