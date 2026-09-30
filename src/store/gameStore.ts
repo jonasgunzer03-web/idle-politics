@@ -11,6 +11,7 @@ import {
 } from '../engine/career';
 import {
   debugAddResources,
+  debugBoostBuildings,
   debugOverthrow,
   debugSetMeters,
   debugSetStage,
@@ -170,6 +171,7 @@ export interface GameStoreState {
   resetGame: (now: number) => void;
 
   debugAddResources: (amount: number) => void;
+  debugBoostBuildings: () => void;
   debugTimeJump: (ms: number, now: number) => void;
   debugSetStage: (stage: number) => void;
   debugSetMeters: (values: { approval?: number; unrest?: number; loyalty?: number }) => void;
@@ -510,6 +512,9 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
 
       debugAddResources: (amount) => {
         apply((g) => debugAddResources(g, amount));
+      },
+      debugBoostBuildings: () => {
+        apply((g) => debugBoostBuildings(g, cfg));
       },
       debugTimeJump: (ms, now) => {
         set((state) => advanceState({ ...state, game: debugShiftTime(state.game, ms) }, now));

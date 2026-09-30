@@ -230,7 +230,10 @@ function investGreedily(game: GameState, cfg: GameConfig, payback: number): Game
     // Nicht investieren, wenn der Aufstieg sofort möglich ist
     if (careerStatus(current, cfg)?.ready) return current;
     const here = run.world.inside ? currentLocation(run, cfg) : null;
-    const options = [...globalOptions(current, cfg), ...(here ? localOptions(current, here, cfg) : [])];
+    const options = [
+      ...globalOptions(current, cfg),
+      ...(here ? localOptions(current, here, cfg) : []),
+    ];
     const best = bestOption(current, options, cfg, payback);
     if (!best) return current;
     current = best.next;
@@ -239,7 +242,11 @@ function investGreedily(game: GameState, cfg: GameConfig, payback: number): Game
 }
 
 /** In welchem Gebäude gäbe es gerade den besten Kauf? */
-function bestPurchaseLocation(game: GameState, cfg: GameConfig, payback: number): LocationId | null {
+function bestPurchaseLocation(
+  game: GameState,
+  cfg: GameConfig,
+  payback: number,
+): LocationId | null {
   let best: { score: number; location: LocationId } | null = null;
   for (const b of cfg.industry.buildings) {
     const placed = placedAt(game, b.location, cfg);
@@ -328,7 +335,8 @@ function doPolitics(game: GameState, cfg: GameConfig): GameState {
     if ((def.effects.approvalBase ?? 0) < 0 || (def.effects.unrestTarget ?? 0) > 0) continue;
     const next = enactPolicy(current, id, cfg);
     const gain = deltaRate(current, next, w, cfg);
-    const helpsPolitics = (def.effects.approvalBase ?? 0) > 0 || (def.effects.unrestTarget ?? 0) < 0;
+    const helpsPolitics =
+      (def.effects.approvalBase ?? 0) > 0 || (def.effects.unrestTarget ?? 0) < 0;
     if (gain > 0 || helpsPolitics) current = next;
   }
   const r = current.run;
@@ -491,7 +499,8 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
       }
       if (target) game = goInside(game, target, cfg);
       const rr = game.run;
-      if (rr?.world.inside && currentLocation(rr, cfg) === 'partyOffice') game = doPolitics(game, cfg);
+      if (rr?.world.inside && currentLocation(rr, cfg) === 'partyOffice')
+        game = doPolitics(game, cfg);
       const tap = bestTap(game, cfg, true);
       if (tap && game.run?.world.inside) {
         for (let i = 0; i < TAPS_PER_SECOND * stepSeconds; i++)
@@ -511,7 +520,11 @@ export function simulate(scenario: Scenario, cfg: GameConfig, stepSeconds: numbe
       if (satisfied.followers === null && res.followers >= rq.followers)
         satisfied = { ...satisfied, followers: since };
     }
-    if (process.argv.includes('--trace') && game.run && elapsed % (Number(process.env.TRACE_MIN ?? 120) * 60_000) < stepMs) {
+    if (
+      process.argv.includes('--trace') &&
+      game.run &&
+      elapsed % (Number(process.env.TRACE_MIN ?? 120) * 60_000) < stepMs
+    ) {
       const rr = game.run;
       const st = careerStatus(game, cfg);
       console.log(

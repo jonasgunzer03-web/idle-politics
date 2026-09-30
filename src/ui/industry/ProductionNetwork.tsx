@@ -13,8 +13,15 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { defaultConfig } from '../../config';
-import { GOOD_IDS, type GoodId, type LocationId } from '../../engine/ids';
-import { chainSnapshot, isBuildingOpen, staffInBuilding } from '../../engine/production';
+import { GOOD_IDS, type LocationId } from '../../engine/ids';
+import {
+  chainSnapshot,
+  goodRoutes,
+  isBuildingOpen,
+  routeState,
+  staffInBuilding,
+  type RouteState,
+} from '../../engine/production';
 import { de } from '../../i18n/de';
 import { gameStore, useGame } from '../../store';
 import { locationName } from '../gameText';
@@ -56,28 +63,7 @@ const ICONS: Record<LocationId, LucideIcon> = {
   palace: Crown,
 };
 
-interface Edge {
-  from: LocationId;
-  to: LocationId;
-  good: GoodId;
-}
-
-/** Alle Warenwege aus der Config: Hersteller-Gebäude → Verbraucher-Gebäude. */
-const EDGES: Edge[] = (() => {
-  const list: Edge[] = [];
-  for (const good of GOOD_IDS) {
-    const producers = new Set(
-      cfg.world.actions.filter((a) => (a.outputs[good] ?? 0) > 0).map((a) => a.location),
-    );
-    const consumers = new Set(
-      cfg.world.actions.filter((a) => (a.inputs[good] ?? 0) > 0).map((a) => a.location),
-    );
-    for (const from of producers) for (const to of consumers) if (from !== to) list.push({ from, to, good });
-  }
-  return list;
-})();
-
-type EdgeState = 'off' | 'idle' | 'flow' | 'blocked';
+const EDGES = goodRoutes(cfg);
 
 export function ProductionNetwork() {
   // Zustand aller Kanten und Knoten als ein Text (nur neu zeichnen, wenn sich etwas ändert)
@@ -85,24 +71,19 @@ export function ProductionNetwork() {
     const run = s.game.run;
     if (!run) return '';
     const chain = chainSnapshot(s.game, cfg);
-    const edges = EDGES.map((e) => {
-      if (!isBuildingOpen(run, e.from, cfg) || !isBuildingOpen(run, e.to, cfg)) return 'off';
-      const lines = cfg.world.actions.filter((a) => a.location === e.to && (a.inputs[e.good] ?? 0) > 0);
-      const flows = chain.flows.filter((f) => lines.some((l) => l.id === f.id));
-      if (flows.some((f) => f.blockedBy === e.good)) return 'blocked';
-      return flows.some((f) => f.actual > 0) ? 'flow' : 'idle';
-    });
+    const edges = EDGES.map((e) => routeState(run, e, chain.flows, cfg));
     const nodes = (Object.keys(POS) as LocationId[]).map((loc) => {
       if (!isBuildingOpen(run, loc, cfg)) return 'x';
       const blocked = chain.flows.some(
-        (f) => f.blockedBy !== null && cfg.world.actions.find((a) => a.id === f.id)?.location === loc,
+        (f) =>
+          f.blockedBy !== null && cfg.world.actions.find((a) => a.id === f.id)?.location === loc,
       );
       return `${staffInBuilding(run, loc, cfg)}${blocked ? '!' : ''}`;
     });
     return `${edges.join(',')}|${nodes.join(',')}|${run.profession}`;
   });
   const [edgePart = '', nodePart = '', profession = 'skilled'] = key.split('|');
-  const edgeStates = edgePart.split(',') as EdgeState[];
+  const edgeStates = edgePart.split(',') as RouteState[];
   const nodeStates = nodePart.split(',');
   const office = profession === 'office';
   const locs = Object.keys(POS) as LocationId[];
@@ -121,7 +102,10 @@ export function ProductionNetwork() {
           const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
           const color = state === 'blocked' ? 'var(--bad)' : `var(--goods-${e.good})`;
           return (
-            <g key={`${e.from}-${e.to}-${e.good}`} transform={`translate(${a.x} ${a.y}) rotate(${angle})`}>
+            <g
+              key={`${e.from}-${e.to}-${e.good}`}
+              transform={`translate(${a.x} ${a.y}) rotate(${angle})`}
+            >
               <line
                 x1={0}
                 y1={0}

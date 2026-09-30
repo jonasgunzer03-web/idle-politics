@@ -449,6 +449,7 @@ export const de = {
     open: 'Debug-Menü öffnen',
     addResources: '+1.000 von allem',
     addResourcesBig: '+1 Mio. von allem',
+    boostBuildings: 'Gebäude +1 Stufe',
     jump1h: 'Zeitsprung +1 Std.',
     jump8h: 'Zeitsprung +8 Std.',
     stage: 'Stufe',

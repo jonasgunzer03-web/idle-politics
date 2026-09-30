@@ -128,7 +128,11 @@ export function shockLines(shock: PolicyShock | undefined): { text: string; good
   }
   for (const g of GROUP_IDS) {
     const v = shock.groups?.[g];
-    if (v) lines.push({ text: fill(l.group, { group: de.groups[g].name, value: signed(v) }), good: v > 0 });
+    if (v)
+      lines.push({
+        text: fill(l.group, { group: de.groups[g].name, value: signed(v) }),
+        good: v > 0,
+      });
   }
   return lines;
 }
@@ -160,7 +164,9 @@ export function chronicleHeadline(
     const v = p[key];
     return typeof v === 'number' ? v : 0;
   };
-  const rival = nameFromSeed(typeof p.seed === 'number' && entry.key.startsWith('election') ? p.seed : run.rival.seed);
+  const rival = nameFromSeed(
+    typeof p.seed === 'number' && entry.key.startsWith('election') ? p.seed : run.rival.seed,
+  );
   const values: Record<string, string | number> = {
     name: playerName,
     rival,
@@ -179,8 +185,7 @@ export function chronicleHeadline(
       break;
     case 'consequence': {
       const policy = de.party.policies[str('policy') as PolicyId] as
-        | (typeof de.party.policies)[PolicyId]
-        | undefined;
+        (typeof de.party.policies)[PolicyId] | undefined;
       values.title = policy?.consequences[num('index')]?.title ?? '';
       break;
     }

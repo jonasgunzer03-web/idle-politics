@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { GROUND } from './buildings';
+import { GROUND } from './paint';
 
 // Straßenausstattung. Je prächtiger das Viertel (grandeur 0–3), desto mehr und schöner.
 

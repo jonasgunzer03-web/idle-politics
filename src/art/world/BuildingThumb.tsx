@@ -1,11 +1,24 @@
 import { memo } from 'react';
 import { defaultConfig } from '../../config';
 import type { LocationId, StateId } from '../../engine/ids';
-import { GROUND, LocationBuilding } from './buildings';
+import { paintLocation, type BuildingProps } from './buildings';
+import { GROUND, Painter } from './paint';
 import { BUILDING_HALF_WIDTH } from './geometry';
 import { architecture, districtGrandeur } from './palette';
 
 const cfg = defaultConfig;
+
+/** Gebäude als eigenständiges Element (Tag-Ansicht, z. B. als Vorschaubild). */
+function LocationBuilding({ id, ...props }: BuildingProps & { id: LocationId }) {
+  const P = new Painter(`b-${id}`, 3);
+  paintLocation(P, id, props);
+  return (
+    <g>
+      {P.body}
+      {P.fx}
+    </g>
+  );
+}
 
 interface Props {
   location: LocationId;

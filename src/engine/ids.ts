@@ -87,7 +87,15 @@ export type GoodId = (typeof GOOD_IDS)[number];
 export type GoodMap = Record<GoodId, number>;
 
 /** Wofür eine Linie steht (Gesetze wirken auf solche Gruppen). */
-export const LINE_TAGS = ['industry', 'trade', 'party', 'media', 'finance', 'state', 'diplomacy'] as const;
+export const LINE_TAGS = [
+  'industry',
+  'trade',
+  'party',
+  'media',
+  'finance',
+  'state',
+  'diplomacy',
+] as const;
 export type LineTag = (typeof LINE_TAGS)[number];
 
 /** Maschinen, zwei je Gebäude. */

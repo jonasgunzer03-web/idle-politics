@@ -29,7 +29,9 @@ const SPEECH_DELAY = 550;
 export function PolicySheet({ id }: { id: PolicyId }) {
   const key = useGame((s) => {
     const run = s.game.run;
-    return run ? `${enactBlock(run, id, cfg) ?? 'ok'}|${run.agenda.items.includes(id) ? 1 : 0}|${run.advisors.length}` : '';
+    return run
+      ? `${enactBlock(run, id, cfg) ?? 'ok'}|${run.agenda.items.includes(id) ? 1 : 0}|${run.advisors.length}`
+      : '';
   });
   const [spoken, setSpoken] = useState(0);
   const run = gameStore.getState().game.run;
@@ -98,7 +100,10 @@ export function PolicySheet({ id }: { id: PolicyId }) {
                       className={styles.bubble}
                       data-stance={stance > 0 ? 'for' : stance < 0 ? 'against' : 'neutral'}
                     >
-                      <span className={styles.faction} style={{ color: `var(--faction-${a.faction})` }}>
+                      <span
+                        className={styles.faction}
+                        style={{ color: `var(--faction-${a.faction})` }}
+                      >
                         {nameFromSeed(a.seed)} · {de.party.factions[a.faction].short}
                       </span>
                       <span>{line}</span>
@@ -114,11 +119,22 @@ export function PolicySheet({ id }: { id: PolicyId }) {
           <div>
             <div className={styles.voteBar} aria-hidden="true">
               <span className={styles.voteFor} style={{ width: `${(vote.for / total) * 100}%` }} />
-              <span className={styles.voteNeutral} style={{ width: `${(vote.neutral / total) * 100}%` }} />
-              <span className={styles.voteAgainst} style={{ width: `${(vote.against / total) * 100}%` }} />
+              <span
+                className={styles.voteNeutral}
+                style={{ width: `${(vote.neutral / total) * 100}%` }}
+              />
+              <span
+                className={styles.voteAgainst}
+                style={{ width: `${(vote.against / total) * 100}%` }}
+              />
             </div>
             <p className={styles.small}>
-              {fill(de.party.session.vote, { for: vote.for, against: vote.against, neutral: vote.neutral })} · {de.party.session.loyaltyUp}
+              {fill(de.party.session.vote, {
+                for: vote.for,
+                against: vote.against,
+                neutral: vote.neutral,
+              })}{' '}
+              · {de.party.session.loyaltyUp}
             </p>
           </div>
         )}
@@ -168,18 +184,29 @@ export function PolicySheet({ id }: { id: PolicyId }) {
           <h3 className={styles.subTitle}>{de.party.session.citizens}</h3>
           <div className={styles.citizens}>
             <p className={styles.citizen}>
-              <Bust seed={hash32(run.seed, 1)} mood="happy" className={styles.speaker} background="var(--surface-2)" />
+              <Bust
+                seed={hash32(run.seed, 1)}
+                mood="happy"
+                className={styles.speaker}
+                background="var(--surface-2)"
+              />
               „{texts.pro}“
             </p>
             <p className={styles.citizen}>
-              <Bust seed={hash32(run.seed, 2)} mood="angry" className={styles.speaker} background="var(--surface-2)" />
+              <Bust
+                seed={hash32(run.seed, 2)}
+                mood="angry"
+                className={styles.speaker}
+                background="var(--surface-2)"
+              />
               „{texts.contra}“
             </p>
           </div>
         </div>
 
         <p className={styles.small}>
-          {de.party.session.cost}: <span className="num">{formatCost(policyCost(run, def, cfg), run.stateId)}</span>
+          {de.party.session.cost}:{' '}
+          <span className="num">{formatCost(policyCost(run, def, cfg), run.stateId)}</span>
         </p>
         {blockText && (
           <p className={styles.warn}>
@@ -206,7 +233,11 @@ export function PolicySheet({ id }: { id: PolicyId }) {
             }}
             data-testid="enact"
           >
-            {autocratic ? <Check size={16} aria-hidden="true" /> : <ThumbsUp size={16} aria-hidden="true" />}
+            {autocratic ? (
+              <Check size={16} aria-hidden="true" />
+            ) : (
+              <ThumbsUp size={16} aria-hidden="true" />
+            )}
             {autocratic ? de.party.session.decree : de.party.session.enact}
           </Button>
         </div>

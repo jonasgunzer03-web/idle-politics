@@ -6,6 +6,7 @@ import type {
   LocationId,
   ResourceId,
   ResourceMap,
+  StateId,
   VehicleId,
 } from '../engine/ids';
 
@@ -260,9 +261,28 @@ export interface WorldConfig {
   actions: ActionDef[];
   vehicles: VehicleDef[];
   startLocation: LocationId;
+  /** Ein Tag in der Welt (Sonne, Dämmerung, Nacht) dauert so viele Sekunden. Rein optisch. */
+  dayCycleSeconds: number;
+  /** Wetter (rein optisch): wechselt alle … Minuten, Wahrscheinlichkeiten je Wetterlage. */
+  weather: {
+    changeMinutes: number;
+    cloudy: number;
+    rain: number;
+    /** Schnee statt Regen in diesen Staaten. */
+    snowStates: StateId[];
+  };
 }
 
-export const world: WorldConfig = { districts, locations, actions, vehicles, startLocation };
+export const world: WorldConfig = {
+  districts,
+  locations,
+  actions,
+  vehicles,
+  startLocation,
+  dayCycleSeconds: 480,
+  // Alle 6 Minuten neues Wetter: 20 % bewölkt, 18 % Regen (in Borealis Schnee)
+  weather: { changeMinutes: 6, cloudy: 0.2, rain: 0.18, snowStates: ['borealis'] },
+};
 
 /** Hilfstyp für Ertragslisten. */
 export type Yields = Partial<Record<ResourceId, number>>;

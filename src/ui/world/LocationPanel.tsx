@@ -123,7 +123,14 @@ function Inside({ location, name }: { location: LocationId; name: string }) {
   );
   const tabs: { key: TabKey; label: string; icon: typeof Factory; badge?: number }[] = [
     ...(party
-      ? [{ key: 'politics' as const, label: de.industry.ui.tabs.politics, icon: Landmark, badge: info.agenda }]
+      ? [
+          {
+            key: 'politics' as const,
+            label: de.industry.ui.tabs.politics,
+            icon: Landmark,
+            badge: info.agenda,
+          },
+        ]
       : []),
     { key: 'production', label: de.industry.ui.tabs.production, icon: Factory },
     { key: 'build', label: de.industry.ui.tabs.build, icon: Wrench },

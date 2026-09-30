@@ -1,10 +1,4 @@
-import type {
-  GoodId,
-  LocationId,
-  MachineId,
-  ResourceMap,
-  TraitId,
-} from '../engine/ids';
+import type { GoodId, LocationId, MachineId, ResourceMap, TraitId } from '../engine/ids';
 
 // Aufbau-System: Waren, Gebäude-Ausbaustufen, Maschinen, Arbeiterstimmung und die
 // Eigenschaften benannter Mitarbeiter. Texte stehen in src/i18n/de-industry.ts.

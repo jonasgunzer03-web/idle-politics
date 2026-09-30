@@ -437,7 +437,11 @@ function achievementMet(game: GameState, id: AchievementId, cfg: GameConfig): bo
     case 'fullCabinet':
       return run !== null && run.advisors.length >= 5;
     case 'rivalDefeated':
-      return run !== null && run.stage >= cfg.party.rival.fromStage && (run.rival.status === 'jailed' || run.rival.strength <= 5);
+      return (
+        run !== null &&
+        run.stage >= cfg.party.rival.fromStage &&
+        (run.rival.status === 'jailed' || run.rival.strength <= 5)
+      );
     case 'bigEmployer':
       return run !== null && totalStaff(run) >= 100;
   }

@@ -60,26 +60,99 @@
   fill: rgb(244 242 237 / 72%);
 }
 
+.mid {
+  fill: #9aabb6;
+}
+
+/* Rauch aus Schornsteinen: steigt auf, wird größer und verblasst */
+.street :global(.smoke) {
+  fill: rgb(214 214 210 / 70%);
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: smoke-rise 3.9s ease-out infinite;
+}
+
+/* Blinklicht auf Schornsteinen und Antennen */
+.street :global(.beacon) {
+  fill: #ff4a3d;
+  animation: blink-cam 1.6s steps(2) infinite;
+}
+
+/* Leuchtschrift flackert ganz leicht */
+.street :global(.neonGlow) {
+  animation: neon-flicker 5s linear infinite;
+}
+
+.street :global(.ticker) {
+  animation: neon-flicker 2.2s linear infinite;
+}
+
+.street :global(.screenFlicker) {
+  animation: screen 3.2s ease-in-out infinite alternate;
+}
+
+/* Suchscheinwerfer der Parteizentrale */
+.street :global(.sweep) {
+  transform-box: fill-box;
+  transform-origin: 70% 100%;
+  animation: sweep 6s ease-in-out infinite alternate;
+}
+
 @media (prefers-color-scheme: dark) {
-  /* Nacht: Gebäude dunkler, Fenster und Laternen leuchten */
-  .built {
-    filter: brightness(0.6) saturate(0.85);
-  }
-
-  .street :global(.win) {
-    fill: #ffe08a;
-  }
-
-  .street :global(.lamp) {
-    fill: #fff3c4;
-  }
-
-  .far {
-    fill: #2b3540;
-  }
-
   .fog {
     fill: rgb(18 20 24 / 70%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .street :global(.smoke),
+  .street :global(.sweep),
+  .street :global(.screenFlicker),
+  .street :global(.neonGlow) {
+    animation: none;
+  }
+}
+
+@keyframes smoke-rise {
+  from {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate(10px, -34px) scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes neon-flicker {
+  0%,
+  92%,
+  100% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 0.5;
+  }
+  96% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes screen {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: rotate(-12deg);
+  }
+  to {
+    transform: rotate(12deg);
   }
 }
 

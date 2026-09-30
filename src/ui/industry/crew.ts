@@ -20,4 +20,3 @@ export function moodOf(morale: number, striking: boolean): BustMood {
   if (striking || morale < 35) return 'angry';
   return morale >= 60 ? 'happy' : 'neutral';
 }
-

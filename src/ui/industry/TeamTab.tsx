@@ -26,7 +26,13 @@ export function MoraleBar() {
   return (
     <div className={styles.stack}>
       <div className={styles.moraleRow}>
-        <Bust seed={7} mood={mood} outfit="overall" className={styles.moraleFace} background="var(--surface-2)" />
+        <Bust
+          seed={7}
+          mood={mood}
+          outfit="overall"
+          className={styles.moraleFace}
+          background="var(--surface-2)"
+        />
         <div style={{ flex: 1 }}>
           <div className={styles.cardHead}>
             <span className={styles.muted} style={{ flex: 1 }}>
@@ -60,7 +66,8 @@ export function TeamTab({ location }: { location: LocationId }) {
     const mood = moodOf(run.morale, run.striking);
     return `${run.seed}|${staffInBuilding(run, location, cfg)}|${mood}|${run.profession}`;
   });
-  const [seedText = '0', countText = '0', mood = 'neutral', profession = 'skilled'] = key.split('|');
+  const [seedText = '0', countText = '0', mood = 'neutral', profession = 'skilled'] =
+    key.split('|');
   const seed = Number(seedText);
   const count = Number(countText);
   const office = profession === 'office';
@@ -102,7 +109,11 @@ export function TeamTab({ location }: { location: LocationId }) {
       {count > shown && (
         <p className={styles.muted}>{fill(de.industry.ui.teamMore, { count: count - shown })}</p>
       )}
-      {count > 0 && <p className={styles.small}>{de.industry.ui.coreCrew}: {Math.min(count, cfg.industry.coreCrew)}</p>}
+      {count > 0 && (
+        <p className={styles.small}>
+          {de.industry.ui.coreCrew}: {Math.min(count, cfg.industry.coreCrew)}
+        </p>
+      )}
     </div>
   );
 }

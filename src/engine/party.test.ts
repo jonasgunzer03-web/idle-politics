@@ -98,7 +98,11 @@ describe('Beschlüsse im Parteibüro', () => {
   it('Spätfolgen treten nach der Wartezeit ein – und wirken dann dauerhaft', () => {
     const def = policy('lowTaxes');
     const delay = (def.consequences?.[0]?.afterSeconds ?? 0) * 1000;
-    const game = playingGame({ stage: 4, laws: { lowTaxes: { since: 0, fired: 0 } }, playMs: 1000 });
+    const game = playingGame({
+      stage: 4,
+      laws: { lowTaxes: { since: 0, fired: 0 } },
+      playMs: 1000,
+    });
     const early = tickParty(game, 1000, cfg);
     expect(runOf(early).laws.lowTaxes?.fired).toBe(0);
     const late = tickParty(
@@ -152,7 +156,10 @@ describe('Berater', () => {
     expect(modifiers(hired, cfg).resource.money).toBeCloseTo(0.1);
     const full = inOffice({
       advisors: [advisor('economic'), advisor('social')],
-      advisorPool: { candidates: [{ seed: 5, faction: 'social', skill: 'financier' }], refreshAt: 1e12 },
+      advisorPool: {
+        candidates: [{ seed: 5, faction: 'social', skill: 'financier' }],
+        refreshAt: 1e12,
+      },
     });
     expect(hireAdvisor(full, 0, cfg)).toBe(full);
   });
@@ -200,7 +207,10 @@ describe('Rivale', () => {
   });
 
   it('Gegenkampagne schwächt ihn sicher; Verhaftung nur für Autokraten', () => {
-    const game = inOffice({ stage: 3, rival: { seed: 1, strength: 50, status: 'active', nextMoveAt: 1e12 } });
+    const game = inOffice({
+      stage: 3,
+      rival: { seed: 1, strength: 50, status: 'active', nextMoveAt: 1e12 },
+    });
     const result = rivalCounter(game, 'counterCampaign', cfg);
     expect(result.outcome?.success).toBe(true);
     expect(runOf(result.game).rival.strength).toBe(38);

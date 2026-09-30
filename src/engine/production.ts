@@ -66,7 +66,9 @@ export function staffInBuilding(run: RunState, location: LocationId, cfg: GameCo
 
 export function buildingCapacity(run: RunState, location: LocationId, cfg: GameConfig): number {
   const level = buildingLevel(run, location);
-  return cfg.industry.capacity[level] ?? cfg.industry.capacity[cfg.industry.capacity.length - 1] ?? 0;
+  return (
+    cfg.industry.capacity[level] ?? cfg.industry.capacity[cfg.industry.capacity.length - 1] ?? 0
+  );
 }
 
 export function totalStaff(run: RunState): number {
@@ -185,9 +187,7 @@ export function storageCapacity(run: RunState, good: GoodId, cfg: GameConfig): n
   let capacity = 0;
   for (const loc of producers) {
     capacity +=
-      def.storagePerLevel *
-      buildingLevel(run, loc) *
-      (1 + machineBonus(run, loc, 'storage', cfg));
+      def.storagePerLevel * buildingLevel(run, loc) * (1 + machineBonus(run, loc, 'storage', cfg));
   }
   return Math.max(def.minStorage, capacity);
 }
@@ -362,7 +362,11 @@ export function tickMorale(
 // ---------------------------------------------------------------- Ausbau
 
 /** Karrierestufe, ab der ein Gebäude die Ausbaustufe `level` erreichen darf. */
-export function levelStageRequirement(location: LocationId, level: number, cfg: GameConfig): number {
+export function levelStageRequirement(
+  location: LocationId,
+  level: number,
+  cfg: GameConfig,
+): number {
   const loc = findLocation(location, cfg);
   const offset = cfg.industry.levelStageOffset[level] ?? 0;
   return Math.min(12, (loc?.unlockStage ?? 1) + offset);
@@ -371,4 +375,52 @@ export function levelStageRequirement(location: LocationId, level: number, cfg: 
 export function isBuildingOpen(run: RunState, location: LocationId, cfg: GameConfig): boolean {
   const loc = findLocation(location, cfg);
   return loc !== undefined && isLocationOpen(run, loc, cfg);
+}
+
+// ---------------------------------------------------------------- Warenwege
+
+export interface GoodRoute {
+  from: LocationId;
+  to: LocationId;
+  good: GoodId;
+}
+
+const routeCache = new WeakMap<GameConfig, GoodRoute[]>();
+
+/** Alle Warenwege: Gebäude, das eine Ware herstellt → Gebäude, das sie verbraucht. */
+export function goodRoutes(cfg: GameConfig): GoodRoute[] {
+  const cached = routeCache.get(cfg);
+  if (cached) return cached;
+  const list: GoodRoute[] = [];
+  for (const good of GOOD_IDS) {
+    const producers = new Set(
+      cfg.world.actions.filter((a) => (a.outputs[good] ?? 0) > 0).map((a) => a.location),
+    );
+    const consumers = new Set(
+      cfg.world.actions.filter((a) => (a.inputs[good] ?? 0) > 0).map((a) => a.location),
+    );
+    for (const from of producers) {
+      for (const to of consumers) if (from !== to) list.push({ from, to, good });
+    }
+  }
+  routeCache.set(cfg, list);
+  return list;
+}
+
+export type RouteState = 'off' | 'idle' | 'flow' | 'blocked';
+
+/** Zustand eines Warenwegs gerade jetzt (für Netz-Grafik und Lieferwagen). */
+export function routeState(
+  run: RunState,
+  route: GoodRoute,
+  flows: LineFlow[],
+  cfg: GameConfig,
+): RouteState {
+  if (!isBuildingOpen(run, route.from, cfg) || !isBuildingOpen(run, route.to, cfg)) return 'off';
+  const lines = cfg.world.actions.filter(
+    (a) => a.location === route.to && (a.inputs[route.good] ?? 0) > 0,
+  );
+  const relevant = flows.filter((f) => lines.some((l) => l.id === f.id));
+  if (relevant.some((f) => f.blockedBy === route.good)) return 'blocked';
+  return relevant.some((f) => f.actual > 0) ? 'flow' : 'idle';
 }

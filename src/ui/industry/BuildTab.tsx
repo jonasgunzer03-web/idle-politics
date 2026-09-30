@@ -86,7 +86,9 @@ const MachineCard = memo(function MachineCard({ id }: { id: MachineId }) {
           }}
           data-testid={`buy-machine-${id}`}
         >
-          <span>{view.level === 0 ? de.industry.ui.machineBuild : de.industry.ui.machineImprove}</span>
+          <span>
+            {view.level === 0 ? de.industry.ui.machineBuild : de.industry.ui.machineImprove}
+          </span>
           <span className="num">{view.cost}</span>
         </button>
       ) : (
@@ -201,8 +203,7 @@ export function BuildTab({ location }: { location: LocationId }) {
               {fill(de.industry.ui.upgradeTo, {
                 name: levelName(location, view.level + 1, view.office),
               })}{' '}
-              ·{' '}
-              {fill(de.industry.ui.upgradeGain, { seats: view.nextCap, level: view.level + 1 })}
+              · {fill(de.industry.ui.upgradeGain, { seats: view.nextCap, level: view.level + 1 })}
             </p>
             {view.block === 'stage' ? (
               <p className={styles.bad}>

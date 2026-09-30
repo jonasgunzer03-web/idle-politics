@@ -69,3 +69,19 @@ export function debugSwitchState(game: GameState, stateId: StateId, cfg: GameCon
   const path = cfg.states[stateId].alwaysAutocratic ? 'autocratic' : run.path;
   return { ...game, run: { ...run, stateId, path, relations: {}, treaties: {} } };
 }
+
+/** Alle Gebäude eine Ausbaustufe höher, Maschinen auf Gebäudestufe, drei Leute mehr je Linie. */
+export function debugBoostBuildings(game: GameState, cfg: GameConfig): GameState {
+  const run = game.run;
+  if (!run) return game;
+  const buildings = { ...run.buildings };
+  for (const b of cfg.industry.buildings) {
+    const level = Math.min(cfg.industry.maxLevel, (buildings[b.location]?.level ?? 1) + 1);
+    const machines: Partial<Record<(typeof b.machines)[number], number>> = {};
+    for (const m of b.machines) machines[m] = level;
+    buildings[b.location] = { level, machines };
+  }
+  const actions = { ...run.actions };
+  for (const a of cfg.world.actions) actions[a.id] = { staff: (actions[a.id]?.staff ?? 0) + 3 };
+  return { ...game, run: { ...run, buildings, actions } };
+}

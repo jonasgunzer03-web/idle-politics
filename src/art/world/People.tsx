@@ -7,7 +7,7 @@ const SHIRTS = ['#8a4f3d', '#2e6b8a', '#6a3d9a', '#3f7a4a', '#b5502c', '#5a5f66'
 const SKINS = ['#f1c9a8', '#d9a888', '#b07a55', '#7a4f33'];
 const HAIRS = ['#3b2a20', '#1d1a18', '#a07548', '#8e8e8e'];
 
-export type NpcKind = 'civilian' | 'protester' | 'soldier' | 'worker';
+export type NpcKind = 'civilian' | 'protester' | 'soldier' | 'worker' | 'rival';
 
 interface NpcProps {
   seed: number;
@@ -19,7 +19,12 @@ interface NpcProps {
 
 /** Eine Person, 30 × 70 Einheiten. */
 export const Npc = memo(function Npc({ seed, kind = 'civilian', sign, className }: NpcProps) {
-  const shirt = kind === 'soldier' ? '#4b5a3a' : (SHIRTS[seed % SHIRTS.length] ?? '#8a4f3d');
+  const shirt =
+    kind === 'soldier'
+      ? '#4b5a3a'
+      : kind === 'rival'
+        ? '#2b2f38'
+        : (SHIRTS[seed % SHIRTS.length] ?? '#8a4f3d');
   const skin = SKINS[(seed * 3) % SKINS.length] ?? '#d9a888';
   const hair = HAIRS[(seed * 5) % HAIRS.length] ?? '#3b2a20';
   const pants = kind === 'soldier' ? '#3c4a2e' : '#3b3f47';
@@ -54,6 +59,16 @@ export const Npc = memo(function Npc({ seed, kind = 'civilian', sign, className 
         </g>
       )}
       {kind === 'soldier' && <rect x="22" y="10" width="3" height="30" fill="#2b2f36" />}
+      {kind === 'rival' && (
+        <g>
+          <path d="M13 18 L15 30 L17 18 Z" fill="#7b3fa0" />
+          <g className={styles.sign}>
+            <rect x="21" y="4" width="4" height="12" rx="2" fill="#7b3fa0" />
+            <path d="M23 4 L33 -4" stroke="#2b2f36" strokeWidth="2" />
+            <path d="M31 -8 L39 -12 L39 2 L31 -2 Z" fill="#c9ccd1" />
+          </g>
+        </g>
+      )}
     </svg>
   );
 });

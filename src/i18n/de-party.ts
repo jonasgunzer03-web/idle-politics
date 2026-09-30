@@ -1,10 +1,4 @@
-import type {
-  ChronicleKey,
-  FactionId,
-  PolicyId,
-  RivalCounterId,
-  SkillId,
-} from '../engine/ids';
+import type { ChronicleKey, FactionId, PolicyId, RivalCounterId, SkillId } from '../engine/ids';
 import type { PolicyArea } from '../config/party';
 import type { LineTag } from '../engine/ids';
 
@@ -409,11 +403,22 @@ export const partyTexts = {
     notYet: 'Noch kennt dich niemand. Ab Stufe {stage} tritt ein Rivale auf.',
     quotes: {
       weak: ['Ich gebe nicht auf!', 'Wartet nur ab …', 'Noch ist nichts entschieden.'],
-      mid: ['Die Leute haben genug von dir.', 'Ich bin die echte Alternative!', 'Wir sehen uns an der Urne.'],
-      strong: ['Deine Tage sind gezählt!', 'Das Volk steht hinter mir!', 'Bald sitze ich auf deinem Stuhl.'],
+      mid: [
+        'Die Leute haben genug von dir.',
+        'Ich bin die echte Alternative!',
+        'Wir sehen uns an der Urne.',
+      ],
+      strong: [
+        'Deine Tage sind gezählt!',
+        'Das Volk steht hinter mir!',
+        'Bald sitze ich auf deinem Stuhl.',
+      ],
     },
     counters: {
-      counterCampaign: { name: 'Gegenkampagne', text: 'Plakate, Anzeigen, Hausbesuche. Sicher, aber teuer.' },
+      counterCampaign: {
+        name: 'Gegenkampagne',
+        text: 'Plakate, Anzeigen, Hausbesuche. Sicher, aber teuer.',
+      },
       exposeScandal: {
         name: 'Skandal aufdecken',
         text: 'Ein Tipp aus seinem Umfeld. Klappt es, ist er schwer beschädigt – sonst fällt es auf dich zurück.',

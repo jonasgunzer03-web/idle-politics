@@ -129,9 +129,9 @@ describe('Produktionslinien an Orten', () => {
   it('Mitarbeiter werden teurer', () => {
     const run0 = runOf(playingGame());
     const run5 = runOf(playingGame({ actions: { work: { staff: 5 } } }));
-    expect((hireCost(run5, act('work'), cfg).money ?? 0) > (hireCost(run0, act('work'), cfg).money ?? 0)).toBe(
-      true,
-    );
+    expect(
+      (hireCost(run5, act('work'), cfg).money ?? 0) > (hireCost(run0, act('work'), cfg).money ?? 0),
+    ).toBe(true);
   });
 });
 

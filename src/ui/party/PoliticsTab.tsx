@@ -35,7 +35,9 @@ function AdvisorTable() {
     if (!run) return '';
     const advisors = run.advisors.map((a) => `${a.seed}:${Math.round(a.loyalty)}`).join(',');
     const pool = run.advisorPool.candidates.map((c) => c.seed).join(',');
-    const blocks = run.advisorPool.candidates.map((_, i) => hireAdvisorBlock(run, i, cfg)).join(',');
+    const blocks = run.advisorPool.candidates
+      .map((_, i) => hireAdvisorBlock(run, i, cfg))
+      .join(',');
     return `${advisors}|${pool}|${blocks}|${seats(run, cfg)}|${Math.round((run.advisorPool.refreshAt - run.playMs) / 10_000)}`;
   });
   const [selected, setSelected] = useState<number | null>(null);
@@ -144,7 +146,9 @@ function AdvisorTable() {
                 data-testid={`hire-advisor-${i}`}
               >
                 <UserPlus size={16} aria-hidden="true" />
-                <span className="num">{block === 'seats' ? de.party.advisors.blocks.seats : cost}</span>
+                <span className="num">
+                  {block === 'seats' ? de.party.advisors.blocks.seats : cost}
+                </span>
               </button>
             </div>
           );
@@ -163,7 +167,12 @@ function AdvisorDetail({ index, onClose }: { index: number; onClose: () => void 
     <div className={styles.detail}>
       <div className={styles.head}>
         <span className={styles.name}>{nameFromSeed(a.seed)}</span>
-        <button type="button" className={styles.iconButton} onClick={onClose} aria-label={de.common.close}>
+        <button
+          type="button"
+          className={styles.iconButton}
+          onClick={onClose}
+          aria-label={de.common.close}
+        >
           <X size={18} aria-hidden="true" />
         </button>
       </div>
@@ -208,12 +217,16 @@ function Agenda() {
           <Gavel size={18} aria-hidden="true" /> {de.party.session.agenda}
         </h3>
         <span className={styles.small}>
-          {fill(de.party.session.agendaNext, { time: shortDuration(run.agenda.refreshAt - run.playMs) })}
+          {fill(de.party.session.agendaNext, {
+            time: shortDuration(run.agenda.refreshAt - run.playMs),
+          })}
         </span>
       </div>
       {run.agenda.items.length === 0 && (
         <p className={styles.small}>
-          {fill(de.party.session.agendaEmpty, { time: shortDuration(run.agenda.refreshAt - run.playMs) })}
+          {fill(de.party.session.agendaEmpty, {
+            time: shortDuration(run.agenda.refreshAt - run.playMs),
+          })}
         </p>
       )}
       <div className={styles.proposals}>
@@ -250,7 +263,10 @@ function Laws() {
     const run = s.game.run;
     if (!run) return '';
     const laws = activeLaws(run)
-      .map((id) => `${id}:${run.laws[id]?.fired ?? 0}:${canAfford(run.resources, revokeCost(run, id, cfg)) ? 1 : 0}`)
+      .map(
+        (id) =>
+          `${id}:${run.laws[id]?.fired ?? 0}:${canAfford(run.resources, revokeCost(run, id, cfg)) ? 1 : 0}`,
+      )
       .join(',');
     return `${laws}|${lawSlots(run, cfg)}|${Math.floor(run.playMs / 30_000)}`;
   });
@@ -321,7 +337,9 @@ export function RivalCard() {
     return (
       <section className={styles.card}>
         <h3 className={styles.title}>{de.party.rival.title}</h3>
-        <p className={styles.small}>{fill(de.party.rival.notYet, { stage: cfg.party.rival.fromStage })}</p>
+        <p className={styles.small}>
+          {fill(de.party.rival.notYet, { stage: cfg.party.rival.fromStage })}
+        </p>
       </section>
     );
   }
@@ -354,7 +372,9 @@ export function RivalCard() {
         <>
           <div>
             <div className={styles.head}>
-              <span className={styles.small}>{fill(de.party.rival.strength, { value: strength })}</span>
+              <span className={styles.small}>
+                {fill(de.party.rival.strength, { value: strength })}
+              </span>
               <span className={`${styles.small} ${effect < 0 ? styles.bad : styles.good}`}>
                 {fill(de.party.rival.election, {
                   value: `${effect >= 0 ? '+' : '−'}${formatNumber(Math.abs(effect), { rounding: 'round' })}`,
@@ -362,7 +382,10 @@ export function RivalCard() {
               </span>
             </div>
             <div className={styles.strength}>
-              <span className={styles.strengthFill} style={{ transform: `scaleX(${strength / 100})` }} />
+              <span
+                className={styles.strengthFill}
+                style={{ transform: `scaleX(${strength / 100})` }}
+              />
             </div>
           </div>
           {isRivalActive(run, cfg) &&
@@ -394,11 +417,16 @@ export function RivalCard() {
                     disabled={block !== null}
                     onClick={() => {
                       const outcome = gameStore.getState().rivalCounter(id);
-                      if (outcome) setMessage(outcome.success ? de.party.rival.success : de.party.rival.failure);
+                      if (outcome)
+                        setMessage(
+                          outcome.success ? de.party.rival.success : de.party.rival.failure,
+                        );
                     }}
                     data-testid={`counter-${id}`}
                   >
-                    <span className="num">{formatCost(counterCost(run, def, cfg), run.stateId)}</span>
+                    <span className="num">
+                      {formatCost(counterCost(run, def, cfg), run.stateId)}
+                    </span>
                   </button>
                 </div>
               );

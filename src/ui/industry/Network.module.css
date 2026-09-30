@@ -6,7 +6,11 @@
   aspect-ratio: 360 / 360;
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 20% 15%, color-mix(in srgb, var(--state-secondary) 10%, transparent), transparent 60%),
+    radial-gradient(
+      circle at 20% 15%,
+      color-mix(in srgb, var(--state-secondary) 10%, transparent),
+      transparent 60%
+    ),
     var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);

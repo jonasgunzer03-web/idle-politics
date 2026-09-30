@@ -1,0 +1,404 @@
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.interior {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.player {
+  position: absolute;
+  right: 6%;
+  bottom: 4%;
+  height: 52%;
+  aspect-ratio: 120 / 230;
+  pointer-events: none;
+}
+
+/* ---------- Maschinen ---------- */
+
+.interior :global(.spin) {
+  animation: spin 2.4s linear infinite;
+}
+
+.interior :global(.spinSlow) {
+  transform-box: view-box;
+  animation: spin 9s linear infinite;
+}
+
+.interior :global(.beltItem) {
+  animation: belt 4s linear infinite;
+}
+
+.interior :global(.robotArm) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: robot 2.6s ease-in-out infinite alternate;
+}
+
+.interior :global(.foam) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: foam 2.2s ease-in-out infinite alternate;
+}
+
+.interior :global(.glowCycle),
+.interior :global(.bulb) {
+  animation: glow 1.6s ease-in-out infinite alternate;
+}
+
+.interior :global(.note) {
+  animation: note 3.2s ease-out infinite;
+}
+
+.interior :global(.drawer) {
+  animation: drawer 2.8s ease-in-out infinite;
+}
+
+.interior :global(.coin) {
+  animation: note 2.4s ease-out infinite;
+}
+
+.interior :global(.sheet) {
+  animation: sheet 2.1s ease-out infinite;
+}
+
+.interior :global(.blink) {
+  animation: blink 1.4s steps(2) infinite;
+}
+
+.interior :global(.flicker) {
+  animation: flicker 3.4s ease-in-out infinite alternate;
+}
+
+.interior :global(.lift) {
+  animation: lift 5s ease-in-out infinite alternate;
+}
+
+.interior :global(.paperWeb) {
+  animation: web 0.9s linear infinite;
+}
+
+.interior :global(.tickerText) {
+  animation: ticker 7s linear infinite;
+}
+
+.interior :global(.candle) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: candle 0.9s ease-in-out infinite alternate;
+}
+
+.interior :global(.crowd) {
+  animation: crowd 0.8s ease-in-out infinite alternate;
+}
+
+.interior :global(.clothWave) {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: wave 2.6s ease-in-out infinite alternate;
+}
+
+.interior :global(.heart) {
+  fill: #e25b7a;
+  animation: note 2.8s ease-out infinite;
+}
+
+/* Streik: alles steht still */
+.interior :global(.stopped) *,
+.scene[data-striking='true'] :global(.spin) {
+  animation-play-state: paused !important;
+}
+
+/* ---------- Figuren ---------- */
+
+.interior :global(.legWalk.legA) {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: step 0.5s ease-in-out infinite alternate;
+}
+
+.interior :global(.legWalk.legB) {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: step 0.5s ease-in-out infinite alternate-reverse;
+}
+
+.interior :global(.legStomp.legA) {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: step 0.8s ease-in-out infinite alternate;
+}
+
+.interior :global(.armWork.armFront) {
+  transform-box: fill-box;
+  transform-origin: 50% 8%;
+  animation: hammer 0.7s ease-in-out infinite alternate;
+}
+
+.interior :global(.armWork.armBack) {
+  transform-box: fill-box;
+  transform-origin: 50% 8%;
+  animation: hammer 0.9s ease-in-out infinite alternate-reverse;
+}
+
+.interior :global(.armTalk.armFront) {
+  transform-box: fill-box;
+  transform-origin: 50% 8%;
+  animation: talk 1.4s ease-in-out infinite alternate;
+}
+
+.interior :global(.armWave) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: wave-sign 1s ease-in-out infinite alternate;
+}
+
+.interior :global(.bodyBob) {
+  animation: bob 0.7s ease-in-out infinite alternate;
+}
+
+.interior :global(.breathe) {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: breathe 3s ease-in-out infinite alternate;
+}
+
+.interior :global(.walkRoute) {
+  animation: route 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interior :global(*) {
+    animation: none !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .interior {
+    filter: brightness(0.9);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes belt {
+  from {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  to {
+    transform: translateX(var(--belt, 150px));
+    opacity: 0;
+  }
+}
+
+@keyframes robot {
+  from {
+    transform: rotate(-24deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes foam {
+  from {
+    transform: scaleY(0.6);
+  }
+  to {
+    transform: scaleY(1.3);
+  }
+}
+
+@keyframes glow {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes note {
+  from {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(8px, -30px);
+    opacity: 0;
+  }
+}
+
+@keyframes drawer {
+  0%,
+  70% {
+    transform: translateY(0);
+  }
+  80%,
+  90% {
+    transform: translateY(5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet {
+  from {
+    transform: translate(0, 0) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(46px, 18px) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes blink {
+  to {
+    opacity: 0.2;
+  }
+}
+
+@keyframes flicker {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes lift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-130px);
+  }
+}
+
+@keyframes web {
+  to {
+    transform: translateX(24px);
+  }
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(10px);
+  }
+  to {
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes candle {
+  from {
+    transform: scale(0.8, 0.9);
+  }
+  to {
+    transform: scale(1.1, 1.15);
+  }
+}
+
+@keyframes crowd {
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes wave {
+  from {
+    transform: skewY(-5deg) scaleX(0.94);
+  }
+  to {
+    transform: skewY(5deg) scaleX(1);
+  }
+}
+
+@keyframes step {
+  from {
+    transform: rotate(-18deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+
+@keyframes hammer {
+  from {
+    transform: rotate(-70deg);
+  }
+  to {
+    transform: rotate(-10deg);
+  }
+}
+
+@keyframes talk {
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(-55deg);
+  }
+}
+
+@keyframes wave-sign {
+  from {
+    transform: rotate(-6deg) translateY(0);
+  }
+  to {
+    transform: rotate(6deg) translateY(-3px);
+  }
+}
+
+@keyframes bob {
+  to {
+    transform: translateY(1.5px);
+  }
+}
+
+@keyframes breathe {
+  to {
+    transform: scaleY(1.02);
+  }
+}
+
+@keyframes route {
+  0% {
+    transform: translateX(0) scaleX(1);
+  }
+  48% {
+    transform: translateX(var(--route, 200px)) scaleX(1);
+  }
+  50% {
+    transform: translateX(var(--route, 200px)) scaleX(-1);
+  }
+  98% {
+    transform: translateX(0) scaleX(-1);
+  }
+  100% {
+    transform: translateX(0) scaleX(1);
+  }
+}

@@ -59,6 +59,15 @@ export function DebugMenu() {
                 <Button
                   variant="secondary"
                   onClick={() => {
+                    actions.debugBoostBuildings();
+                  }}
+                  data-testid="debug-boost"
+                >
+                  {de.debug.boostBuildings}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
                     actions.debugTimeJump(HOUR_MS, Date.now());
                     setOpen(false);
                   }}

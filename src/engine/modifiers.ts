@@ -44,10 +44,7 @@ export function addEffects(into: Modifiers, effects: PolicyEffects | undefined):
   if (!effects) return;
   for (const id of RESOURCE_IDS) into.resource[id] += effects.resource?.[id] ?? 0;
   if (effects.lineSpeed) {
-    for (const [tag, value] of Object.entries(effects.lineSpeed) as [
-      LineTag | 'all',
-      number,
-    ][]) {
+    for (const [tag, value] of Object.entries(effects.lineSpeed) as [LineTag | 'all', number][]) {
       into.lineSpeed[tag] += value;
     }
   }

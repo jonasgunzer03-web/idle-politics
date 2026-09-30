@@ -4,7 +4,6 @@ import { BottomSheet } from '../components/BottomSheet';
 import { chronicleHeadline, yearOf } from '../peopleText';
 import styles from './Chronicle.module.css';
 
-
 /** Die Stadtchronik als Zeitungsseite: neueste Schlagzeile groß, darunter die Geschichte. */
 export function ChronicleSheet() {
   const length = useGame((s) => s.game.run?.chronicle.length ?? 0);
@@ -29,7 +28,9 @@ export function ChronicleSheet() {
         {lead && (
           <section className={styles.lead}>
             <h3 className={styles.leadHeadline}>{chronicleHeadline(lead, run, character.name)}</h3>
-            <p className={styles.dateline}>{fill(de.party.chronicle.year, { year: yearOf(lead.t) })}</p>
+            <p className={styles.dateline}>
+              {fill(de.party.chronicle.year, { year: yearOf(lead.t) })}
+            </p>
           </section>
         )}
         <div className={styles.columns}>
@@ -40,9 +41,7 @@ export function ChronicleSheet() {
             </p>
           ))}
         </div>
-        <p className={styles.footer}>
-          {de.party.chronicle.subtitle}
-        </p>
+        <p className={styles.footer}>{de.party.chronicle.subtitle}</p>
       </article>
     </BottomSheet>
   );

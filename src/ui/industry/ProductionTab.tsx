@@ -212,13 +212,7 @@ const LineCard = memo(function LineCard({
 });
 
 /** Reiter „Produktion“: alle Linien im Gebäude. */
-export function ProductionTab({
-  location,
-  onFull,
-}: {
-  location: LocationId;
-  onFull: () => void;
-}) {
+export function ProductionTab({ location, onFull }: { location: LocationId; onFull: () => void }) {
   const capacity = useGame((s) => {
     const run = s.game.run;
     return run
@@ -231,7 +225,9 @@ export function ProductionTab({
     <div className={styles.stack}>
       {list.length === 0 && <p className={styles.muted}>{de.ui.noActions}</p>}
       {list.length > 0 && (
-        <p className={styles.small}>{fill(de.industry.ui.capacity, { used: used ?? 0, max: max ?? 0 })}</p>
+        <p className={styles.small}>
+          {fill(de.industry.ui.capacity, { used: used ?? 0, max: max ?? 0 })}
+        </p>
       )}
       {list.map((a) => (
         <LineCard key={a.id} action={a} onFull={onFull} />
@@ -239,4 +235,3 @@ export function ProductionTab({
     </div>
   );
 }
-

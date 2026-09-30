@@ -1,6 +1,6 @@
 .view {
   position: relative;
-  height: clamp(210px, 38dvh, 380px);
+  height: clamp(230px, 44dvh, 420px);
   flex-shrink: 0;
   overflow: hidden;
   contain: strict;
@@ -109,17 +109,126 @@
   place-items: center;
 }
 
-.staff {
-  position: absolute;
-  left: 6%;
-  display: flex;
-  gap: 2%;
-  align-items: flex-end;
-  pointer-events: none;
+.insideView {
+  height: clamp(230px, 44dvh, 420px);
 }
 
-.insideFigure {
+/* Sprechblase über Passanten und dem Rivalen */
+.bubble {
   position: absolute;
-  right: 10%;
+  left: 50%;
+  bottom: 104%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 150px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: #fffdf7;
+  color: #1c1f24;
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 1.2;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 22%);
+  animation: bubble 6.4s ease both;
+  white-space: normal;
+  text-align: center;
+}
+
+.bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  border: 5px solid transparent;
+  border-top-color: #fffdf7;
+  transform: translateX(-50%);
+}
+
+.bubble[data-mood='angry'] {
+  background: #ffe9e6;
+}
+
+.bubble[data-mood='angry']::after {
+  border-top-color: #ffe9e6;
+}
+
+@keyframes bubble {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.9);
+  }
+  8%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -4px) scale(1);
+  }
+}
+
+/* Lieferwagen pendeln zwischen Hersteller und Verbraucher */
+.truck {
+  position: absolute;
   pointer-events: none;
+  animation: truck-route 10s ease-in-out infinite;
+}
+
+@keyframes truck-route {
+  0% {
+    transform: translateX(0) scaleX(var(--dir, 1));
+  }
+  45% {
+    transform: translateX(var(--dist, 200px)) scaleX(var(--dir, 1));
+  }
+  50% {
+    transform: translateX(var(--dist, 200px)) scaleX(calc(var(--dir, 1) * -1));
+  }
+  95% {
+    transform: translateX(0) scaleX(calc(var(--dir, 1) * -1));
+  }
+  100% {
+    transform: translateX(0) scaleX(var(--dir, 1));
+  }
+}
+
+.bus {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+  animation: bus-drive 38s linear infinite;
+}
+
+@keyframes bus-drive {
+  from {
+    transform: translateX(-120px);
+  }
+  to {
+    transform: translateX(var(--dist, 1200px));
+  }
+}
+
+.rival {
+  position: absolute;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.soapbox {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -2%;
+  height: 12%;
+  background: #8b6b4a;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .truck,
+  .bus,
+  .bubble {
+    animation: none;
+  }
 }

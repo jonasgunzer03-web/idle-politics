@@ -59,7 +59,11 @@ test('Kompletter Ablauf: anlegen, arbeiten, kaufen, neu laden', async ({ page })
   // Start im Werk (drinnen)
   await expect(page.getByTestId('world-view')).toHaveAttribute('data-mode', 'inside');
   const tap = page.getByTestId('tap-work');
-  for (let i = 0; i < 17; i++) await tap.click();
+  // Nach fünf Schichten erklärt ein Hinweis die Produktionskette
+  for (let i = 0; i < 5; i++) await tap.click();
+  await closeDialogs(page);
+  // 0,315 € Lohn je Schicht: nach 32 Schichten werden 10 € angezeigt
+  for (let i = 0; i < 27; i++) await tap.click();
   await expect(page.getByTestId('resource-money-amount')).toHaveText('10 €');
 
   // Kaufen im Investieren-Tab
@@ -97,6 +101,47 @@ test('Durch die Welt laufen, hineingehen und netzwerken', async ({ page }) => {
   await expect(page.getByTestId('location-outside')).toContainText('Parteibüro', {
     timeout: 6000,
   });
+  expect(problems).toEqual([]);
+});
+
+test('Produktionskette, Ausbau und Beschluss im Parteibüro', async ({ page }) => {
+  const problems = collectConsoleProblems(page);
+  await page.goto('./?debug=1');
+  await completeSetup(page);
+  // Im Werk Waren herstellen, auf dem Markt verkaufen
+  for (let i = 0; i < 5; i++) await page.getByTestId('tap-work').click();
+  await closeDialogs(page);
+  await page.getByTestId('leave').click();
+  await page.getByTestId('dest-market').click();
+  await expect(page.getByTestId('location-outside')).toContainText('Marktplatz', { timeout: 8000 });
+  await page.getByTestId('enter').click();
+  const before = await page.getByTestId('resource-money-amount').textContent();
+  await page.getByTestId('tap-sell').click();
+  await expect(page.getByTestId('resource-money-amount')).not.toHaveText(before ?? '');
+  // Mit Startgeld aus dem Debug-Menü: Händler einstellen und den Markt ausbauen
+  await debug(page, 'window.__idlePolitics.getState().debugAddResources(1e6)');
+  await page.getByTestId('hire-sell').click();
+  await expect(page.getByTestId('action-sell')).toContainText('1 Mitarbeiter');
+  await page.getByTestId('tab-build').click();
+  await page.getByTestId('upgrade-building').click();
+  await expect(page.getByTestId('building-card')).toContainText('Wochenmarkt');
+  await page.getByTestId('tab-team').click();
+  await expect(page.getByTestId('location-inside')).toContainText('Händler');
+  // Im Parteibüro einen Beschluss fassen
+  await page.getByTestId('leave').click();
+  await page.getByTestId('dest-partyOffice').click();
+  await expect(page.getByTestId('location-outside')).toContainText('Parteibüro', { timeout: 8000 });
+  await page.getByTestId('enter').click();
+  await expect(page.getByTestId('agenda')).toBeVisible();
+  await page.locator('[data-testid^="proposal-"]').first().click();
+  await expect(page.getByTestId('policy-sheet')).toBeVisible();
+  await page.getByTestId('enact').click();
+  await expect(page.getByTestId('policy-sheet')).toBeHidden();
+  await expect(page.getByTestId('laws')).not.toContainText('Noch nichts beschlossen');
+  // Die Chronik berichtet davon
+  await page.getByTestId('ticker').click();
+  await expect(page.getByTestId('chronicle-sheet')).toContainText('Beschlossen');
+  await expectNoHorizontalScroll(page);
   expect(problems).toEqual([]);
 });
 

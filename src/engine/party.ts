@@ -58,7 +58,11 @@ export function activeLaws(run: RunState): PolicyId[] {
 // ---------------------------------------------------------------- Einmalige Wirkungen
 
 /** Einmalige Wirkung (Beschluss, Spätfolge, Rivale) auf den Durchlauf anwenden. */
-export function applyShock(run: RunState, shock: PolicyShock | undefined, cfg: GameConfig): RunState {
+export function applyShock(
+  run: RunState,
+  shock: PolicyShock | undefined,
+  cfg: GameConfig,
+): RunState {
   if (!shock) return run;
   const volatility = cfg.states[run.stateId].approvalVolatility;
   const groups = { ...run.groups };
@@ -273,7 +277,12 @@ export function enactBlock(run: RunState, id: PolicyId, cfg: GameConfig): EnactB
   return null;
 }
 
-function shiftAdvisorLoyalty(run: RunState, def: PolicyDef, factor: number, cfg: GameConfig): Advisor[] {
+function shiftAdvisorLoyalty(
+  run: RunState,
+  def: PolicyDef,
+  factor: number,
+  cfg: GameConfig,
+): Advisor[] {
   return run.advisors.map((a) => ({
     ...a,
     loyalty: clamp(a.loyalty + advisorStance(a, def) * cfg.party.advisor.loyaltyPerStance * factor),
@@ -380,7 +389,11 @@ export function findCounter(id: RivalCounterId, cfg: GameConfig): RivalCounterDe
   return cfg.party.rival.counters.find((c) => c.id === id);
 }
 
-export function counterCost(run: RunState, def: RivalCounterDef, cfg: GameConfig): Partial<ResourceMap> {
+export function counterCost(
+  run: RunState,
+  def: RivalCounterDef,
+  cfg: GameConfig,
+): Partial<ResourceMap> {
   const req = nextRequirement(run, cfg);
   const cost: Partial<ResourceMap> = {};
   if (def.cost.money) cost.money = Math.ceil(req.money * def.cost.money);
@@ -435,7 +448,11 @@ export function rivalCounter(
     const jailed = id === 'arrest';
     next = {
       ...next,
-      rival: { ...next.rival, strength: jailed ? 0 : strength, status: jailed ? 'jailed' : 'active' },
+      rival: {
+        ...next.rival,
+        strength: jailed ? 0 : strength,
+        status: jailed ? 'jailed' : 'active',
+      },
     };
     next = applyShock(next, def.shock, cfg);
     next = addChronicle(
@@ -498,10 +515,14 @@ function tickRival(game: GameState, minutes: number, cfg: GameConfig): GameState
         ),
       };
     }
-    const key = move.id === 'smear' ? 'rivalSmear' : move.id === 'poach' ? 'rivalPoach' : 'rivalRally';
+    const key =
+      move.id === 'smear' ? 'rivalSmear' : move.id === 'poach' ? 'rivalPoach' : 'rivalRally';
     next = addChronicle(next, key, { seed: run.rival.seed }, cfg);
   }
-  next = { ...next, rival: { ...next.rival, nextMoveAt: next.playMs + nextMoveDelay(when.value, cfg) } };
+  next = {
+    ...next,
+    rival: { ...next.rival, nextMoveAt: next.playMs + nextMoveDelay(when.value, cfg) },
+  };
   return { ...current, run: next };
 }
 

@@ -5,7 +5,16 @@ import { hash32 } from '../../engine/people';
 // einem Seed abgeleitet, damit eine Person immer gleich aussieht.
 
 const SKINS = ['#f6d3b3', '#eec19c', '#d9a57e', '#b97f57', '#8d5a3b', '#613d29'];
-const HAIRS = ['#2b1d16', '#4a2f1f', '#7a4a26', '#b07a3e', '#d8b26a', '#8f8f8f', '#1b1b1f', '#a23d24'];
+const HAIRS = [
+  '#2b1d16',
+  '#4a2f1f',
+  '#7a4a26',
+  '#b07a3e',
+  '#d8b26a',
+  '#8f8f8f',
+  '#1b1b1f',
+  '#a23d24',
+];
 
 export type BustOutfit = 'overall' | 'shirt' | 'suit' | 'apron' | 'blazer' | 'uniform';
 export type BustMood = 'happy' | 'neutral' | 'angry';
@@ -95,7 +104,12 @@ export const Bust = memo(function Bust({
         return (
           <g>
             <path d="M8 64 Q10 46 32 44 Q54 46 56 64 Z" fill={shirt} />
-            <path d="M26 45 L32 51 L38 45" fill="none" stroke="rgb(0 0 0 / 25%)" strokeWidth={1.5} />
+            <path
+              d="M26 45 L32 51 L38 45"
+              fill="none"
+              stroke="rgb(0 0 0 / 25%)"
+              strokeWidth={1.5}
+            />
           </g>
         );
     }
@@ -111,13 +125,21 @@ export const Bust = memo(function Bust({
   const hairFront = (() => {
     switch (style) {
       case 0:
-        return <path d="M16 25 Q16 11 32 11 Q48 11 48 25 Q42 17 32 18 Q22 17 16 25 Z" fill={hair} />;
+        return (
+          <path d="M16 25 Q16 11 32 11 Q48 11 48 25 Q42 17 32 18 Q22 17 16 25 Z" fill={hair} />
+        );
       case 1:
-        return <path d="M16 26 Q15 10 34 11 Q49 12 48 26 Q46 18 40 17 Q30 22 16 26 Z" fill={hair} />;
+        return (
+          <path d="M16 26 Q15 10 34 11 Q49 12 48 26 Q46 18 40 17 Q30 22 16 26 Z" fill={hair} />
+        );
       case 2:
-        return <path d="M16 28 Q15 11 32 11 Q49 11 48 28 Q44 17 32 17 Q20 17 16 28 Z" fill={hair} />;
+        return (
+          <path d="M16 28 Q15 11 32 11 Q49 11 48 28 Q44 17 32 17 Q20 17 16 28 Z" fill={hair} />
+        );
       case 3:
-        return <path d="M16 25 Q17 12 32 12 Q47 12 48 25 Q40 16 32 16 Q24 16 16 25 Z" fill={hair} />;
+        return (
+          <path d="M16 25 Q17 12 32 12 Q47 12 48 25 Q40 16 32 16 Q24 16 16 25 Z" fill={hair} />
+        );
       case 4:
         // Glatze mit Haarkranz
         return (
@@ -140,9 +162,21 @@ export const Bust = memo(function Bust({
 
   const mouth =
     mood === 'happy' ? (
-      <path d="M27 36 Q32 41 37 36" fill="none" stroke="#7a3b2e" strokeWidth={1.6} strokeLinecap="round" />
+      <path
+        d="M27 36 Q32 41 37 36"
+        fill="none"
+        stroke="#7a3b2e"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
     ) : mood === 'angry' ? (
-      <path d="M27 39 Q32 35 37 39" fill="none" stroke="#7a3b2e" strokeWidth={1.6} strokeLinecap="round" />
+      <path
+        d="M27 39 Q32 35 37 39"
+        fill="none"
+        stroke="#7a3b2e"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
     ) : (
       <path d="M28 37.5 H36" stroke="#7a3b2e" strokeWidth={1.5} strokeLinecap="round" />
     );
@@ -150,11 +184,23 @@ export const Bust = memo(function Bust({
     mood === 'angry' ? (
       <path d="M23 24 L29 26 M41 24 L35 26" stroke={hair} strokeWidth={1.8} strokeLinecap="round" />
     ) : (
-      <path d="M23 25 Q26 23 29 25 M35 25 Q38 23 41 25" fill="none" stroke={hair} strokeWidth={1.6} strokeLinecap="round" />
+      <path
+        d="M23 25 Q26 23 29 25 M35 25 Q38 23 41 25"
+        fill="none"
+        stroke={hair}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
     );
 
   return (
-    <svg viewBox="0 0 64 64" className={className} role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
+    <svg
+      viewBox="0 0 64 64"
+      className={className}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+    >
       <defs>
         <radialGradient id={`face-${uid}`} cx="45%" cy="40%" r="65%">
           <stop offset="0%" stopColor={skin} />
@@ -188,8 +234,16 @@ export const Bust = memo(function Bust({
         <circle cx={26.8} cy={28.8} r={0.5} fill="#fff" />
         <circle cx={38.8} cy={28.8} r={0.5} fill="#fff" />
         {/* Nase */}
-        <path d="M32 29 Q30.5 33 32.5 34" fill="none" stroke="rgb(0 0 0 / 22%)" strokeWidth={1.2} strokeLinecap="round" />
-        {beard && <path d="M18 32 Q20 46 32 46 Q44 46 46 32 Q42 40 32 40 Q22 40 18 32 Z" fill={hair} />}
+        <path
+          d="M32 29 Q30.5 33 32.5 34"
+          fill="none"
+          stroke="rgb(0 0 0 / 22%)"
+          strokeWidth={1.2}
+          strokeLinecap="round"
+        />
+        {beard && (
+          <path d="M18 32 Q20 46 32 46 Q44 46 46 32 Q42 40 32 40 Q22 40 18 32 Z" fill={hair} />
+        )}
         {mouth}
         {glasses && (
           <g fill="none" stroke="#2b2f36" strokeWidth={1.3}>

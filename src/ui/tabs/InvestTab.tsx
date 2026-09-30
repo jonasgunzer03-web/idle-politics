@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { Bike, Car, Factory, Footprints, Lock } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { defaultConfig } from '../../config';
-import {
-  canAfford,
-  vehicleCost,
-  vehicleIndex,
-  type BuyMode,
-} from '../../engine/economy';
+import { canAfford, vehicleCost, vehicleIndex, type BuyMode } from '../../engine/economy';
 import { formatNumber } from '../../engine/format';
 import { GOOD_IDS, VEHICLE_IDS, type GeneratorId, type ResourceId } from '../../engine/ids';
 import { storageCapacity, totalStaff } from '../../engine/production';
@@ -149,7 +144,11 @@ function GoodsOverview() {
   const text = useGame((s) => {
     const run = s.game.run;
     if (!run) return '';
-    return GOOD_IDS.map((g) => `${Math.floor(run.goods[g])}:${Math.floor(storageCapacity(run, g, cfg))}`).join(',') + `|${run.profession}`;
+    return (
+      GOOD_IDS.map(
+        (g) => `${Math.floor(run.goods[g])}:${Math.floor(storageCapacity(run, g, cfg))}`,
+      ).join(',') + `|${run.profession}`
+    );
   });
   const [list = '', profession = 'skilled'] = text.split('|');
   const office = profession === 'office';
@@ -193,7 +192,9 @@ function Economy() {
         </h2>
         <p className={styles.muted}>{de.industry.economy.networkHint}</p>
         <ProductionNetwork />
-        <p className={`${styles.muted} num`}>{fill(de.industry.economy.staffTotal, { count: staff })}</p>
+        <p className={`${styles.muted} num`}>
+          {fill(de.industry.economy.staffTotal, { count: staff })}
+        </p>
       </section>
       <section className={styles.group}>
         <h2 className={styles.groupTitle}>{de.industry.economy.moraleCard}</h2>
