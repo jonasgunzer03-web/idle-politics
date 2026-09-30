@@ -39,6 +39,8 @@ export interface AutocracyActionDef {
   loyalty: number;
   /** Beziehungsänderung zu allen Staaten (nur, wenn Außenpolitik freigeschaltet ist). */
   relations: number;
+  /** Änderung der Stärke des Rivalen (Prozentpunkte). */
+  rival: number;
   /** Wartezeit bis zur nächsten Nutzung in Sekunden. */
   cooldownSeconds: number;
 }
@@ -222,6 +224,7 @@ export const balancing: Balancing = {
         unrest: 6,
         loyalty: 0,
         relations: -3,
+        rival: 0,
         cooldownSeconds: 60,
       },
       // Opposition schikanieren
@@ -232,6 +235,8 @@ export const balancing: Balancing = {
         unrest: 8,
         loyalty: 6,
         relations: -5,
+        // Rivale verliert an Stärke
+        rival: -15,
         cooldownSeconds: 60,
       },
       // Wahlergebnis korrigieren
@@ -242,6 +247,7 @@ export const balancing: Balancing = {
         unrest: 12,
         loyalty: 0,
         relations: -8,
+        rival: 0,
         cooldownSeconds: 120,
       },
       // Notstand ausrufen
@@ -252,6 +258,7 @@ export const balancing: Balancing = {
         unrest: 10,
         loyalty: 15,
         relations: -6,
+        rival: 0,
         cooldownSeconds: 120,
       },
       // Loyalität kaufen
@@ -262,6 +269,7 @@ export const balancing: Balancing = {
         unrest: 2,
         loyalty: 12,
         relations: 0,
+        rival: 0,
         cooldownSeconds: 30,
       },
       // Repression: senkt Unruhe sofort, kostet Zustimmung und Auslandsbeziehungen
@@ -272,6 +280,8 @@ export const balancing: Balancing = {
         unrest: -20,
         loyalty: 3,
         relations: -10,
+        // Rivale wird eingeschüchtert
+        rival: -8,
         cooldownSeconds: 90,
       },
     ],

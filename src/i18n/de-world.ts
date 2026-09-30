@@ -59,10 +59,12 @@ export const worldTexts = {
   } satisfies Record<LocationId, { name: string; office: string; text: string }>,
 
   actions: {
-    work: { name: 'Schicht arbeiten', office: 'Akten bearbeiten' },
-    network: { name: 'Mit Kollegen reden', office: 'Mit Kollegen reden' },
-    canvass: { name: 'Flyer verteilen', office: 'Flyer verteilen' },
-    partyWork: { name: 'Parteiarbeit', office: 'Parteiarbeit' },
+    work: { name: 'Schicht arbeiten', office: 'Aufträge bearbeiten' },
+    network: { name: 'Mit Leuten reden', office: 'Mit Leuten reden' },
+    sell: { name: 'Waren verkaufen', office: 'Aufträge abrechnen' },
+    canvass: { name: 'Flugblätter verteilen', office: 'Flugblätter verteilen' },
+    print: { name: 'Flugblätter drucken', office: 'Flugblätter drucken' },
+    partyWork: { name: 'Mitglieder werben', office: 'Mitglieder werben' },
     consultation: { name: 'Bürgersprechstunde', office: 'Bürgersprechstunde' },
     interview: { name: 'Interview geben', office: 'Interview geben' },
     fundraise: { name: 'Spenden sammeln', office: 'Spenden sammeln' },

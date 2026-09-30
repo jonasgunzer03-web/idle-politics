@@ -20,13 +20,24 @@ import {
 } from '../engine/debug';
 import {
   buildProject,
-  buyActionUpgrade,
   buyGenerator,
+  buyMachine,
   buyVehicle,
+  hireStaff,
   performAction,
+  upgradeBuilding,
   type BuyMode,
-  type UpgradeKind,
+  type PerformResult,
 } from '../engine/economy';
+import {
+  dismissAdvisor,
+  enactPolicy,
+  hireAdvisor,
+  rejectPolicy,
+  revokePolicy,
+  rivalCounter,
+  type CounterOutcome,
+} from '../engine/party';
 import { resolveEvent } from '../engine/events';
 import { foreignAction } from '../engine/foreign';
 import {
@@ -55,10 +66,12 @@ import type {
   GroupId,
   LegacyId,
   LocationId,
+  MachineId,
+  PolicyId,
   ProfessionId,
   ProjectId,
   RegionId,
-  ResourceMap,
+  RivalCounterId,
   StateId,
   VehicleId,
 } from '../engine/ids';
@@ -92,7 +105,9 @@ export type Sheet =
   | { kind: 'country'; id: ForeignId }
   | { kind: 'region'; id: RegionId }
   | { kind: 'emigration' }
-  | { kind: 'editor' };
+  | { kind: 'editor' }
+  | { kind: 'chronicle' }
+  | { kind: 'policy'; id: PolicyId };
 
 export interface GameStoreState {
   game: GameState;
@@ -115,9 +130,17 @@ export interface GameStoreState {
   closeSheet: () => void;
 
   beginRun: (setup: RunSetup, now: number) => void;
-  perform: (action: ActionId) => Partial<ResourceMap>;
+  perform: (action: ActionId) => Omit<PerformResult, 'game'>;
   buy: (id: GeneratorId, mode: BuyMode) => number;
-  buyUpgrade: (action: ActionId, kind: UpgradeKind) => void;
+  hire: (action: ActionId) => void;
+  upgradeBuilding: (location: LocationId) => void;
+  buyMachine: (id: MachineId) => void;
+  hireAdvisor: (index: number) => void;
+  dismissAdvisor: (index: number) => void;
+  enactPolicy: (id: PolicyId) => void;
+  rejectPolicy: (id: PolicyId) => void;
+  revokePolicy: (id: PolicyId) => void;
+  rivalCounter: (id: RivalCounterId) => CounterOutcome | null;
   buyVehicle: (id: VehicleId) => void;
   walkTo: (id: LocationId) => void;
   stopWalking: () => void;
@@ -325,13 +348,13 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
 
       perform: (action) => {
         // Rückgabe über eine lokale Variable, weil `set` selbst nichts zurückgibt
-        let gained: Partial<ResourceMap> = {};
+        let outcome: Omit<PerformResult, 'game'> = { gained: {}, goods: {}, blockedBy: null };
         set((state) => {
-          const result = performAction(state.game, action, cfg);
-          gained = result.gained;
-          return result.game === state.game ? state : commit(state, result.game);
+          const { game, ...rest } = performAction(state.game, action, cfg);
+          outcome = rest;
+          return game === state.game ? state : commit(state, game);
         });
-        return gained;
+        return outcome;
       },
 
       buy: (id, mode) => {
@@ -344,8 +367,38 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         return bought;
       },
 
-      buyUpgrade: (action, kind) => {
-        apply((g) => buyActionUpgrade(g, action, kind, cfg));
+      hire: (action) => {
+        apply((g) => hireStaff(g, action, cfg));
+      },
+      upgradeBuilding: (location) => {
+        apply((g) => upgradeBuilding(g, location, cfg));
+      },
+      buyMachine: (id) => {
+        apply((g) => buyMachine(g, id, cfg));
+      },
+      hireAdvisor: (index) => {
+        apply((g) => hireAdvisor(g, index, cfg));
+      },
+      dismissAdvisor: (index) => {
+        apply((g) => dismissAdvisor(g, index, cfg));
+      },
+      enactPolicy: (id) => {
+        apply((g) => enactPolicy(g, id, cfg));
+      },
+      rejectPolicy: (id) => {
+        apply((g) => rejectPolicy(g, id, cfg));
+      },
+      revokePolicy: (id) => {
+        apply((g) => revokePolicy(g, id, cfg));
+      },
+      rivalCounter: (id) => {
+        let outcome: CounterOutcome | null = null;
+        set((state) => {
+          const result = rivalCounter(state.game, id, cfg);
+          outcome = result.outcome;
+          return result.game === state.game ? state : commit(state, result.game);
+        });
+        return outcome;
       },
       buyVehicle: (id) => {
         apply((g) => buyVehicle(g, id, cfg));

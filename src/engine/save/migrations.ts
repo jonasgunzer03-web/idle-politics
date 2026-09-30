@@ -1,3 +1,5 @@
+import { ACTION_IDS, type ActionId } from '../ids';
+import { hash32 } from '../people';
 import { SAVE_VERSION } from '../schema';
 
 // Migrationen heben alte Spielstände Schritt für Schritt auf die aktuelle saveVersion.
@@ -100,8 +102,96 @@ export function migrateV1toV2(old: Record<string, unknown>): Record<string, unkn
   };
 }
 
+/** Welche Linie in welchem Gebäude arbeitet (für die Umrechnung der Schulungen). */
+const V2_SPEED_MACHINE: Partial<Record<ActionId, [string, string]>> = {
+  work: ['workplace', 'conveyor'],
+  network: ['pub', 'beerTap'],
+  canvass: ['market', 'stalls'],
+  partyWork: ['partyOffice', 'printer'],
+  consultation: ['townHall', 'counter'],
+  interview: ['newspaper', 'rotary'],
+  fundraise: ['bank', 'tickerBoard'],
+  debate: ['parliament', 'mics'],
+  administer: ['ministry', 'mainframe'],
+  reception: ['embassy', 'interpreters'],
+  speech: ['palace', 'tvStudio'],
+};
+
+/** Plätze je Ausbaustufe zum Zeitpunkt der Umstellung (siehe config/industry.ts). */
+const V3_CAPACITY = [0, 5, 10, 18, 28, 40];
+
+/**
+ * Version 2 → Version 3 (Produktionsketten, Parteibüro, Rivale, Chronik).
+ * Mitarbeiter bleiben; das Gebäude wird so weit ausgebaut, dass sie Platz haben.
+ * Schulungen werden zu Tempo-Maschinen (zwei Schulungsstufen = eine Maschinenstufe).
+ */
+export function migrateV2toV3(old: Record<string, unknown>): Record<string, unknown> {
+  const oldRun = isRecord(old.run) ? old.run : null;
+  let run: Record<string, unknown> | null = null;
+  if (oldRun) {
+    const oldActions = isRecord(oldRun.actions) ? oldRun.actions : {};
+    const actions: Record<string, { staff: number }> = {};
+    const staffByBuilding: Record<string, number> = {};
+    const trainingByBuilding: Record<string, number> = {};
+    for (const id of ACTION_IDS) {
+      const entry = oldActions[id];
+      if (!isRecord(entry)) continue;
+      const staff = Math.max(0, Math.floor(num(entry.staff, 0)));
+      const training = Math.max(0, Math.floor(num(entry.training, 0)));
+      if (staff > 0) actions[id] = { staff };
+      const mapping = V2_SPEED_MACHINE[id];
+      if (mapping) {
+        const [building] = mapping;
+        staffByBuilding[building] = (staffByBuilding[building] ?? 0) + staff;
+        trainingByBuilding[building] = Math.max(trainingByBuilding[building] ?? 0, training);
+      }
+    }
+    const buildings: Record<string, { level: number; machines: Record<string, number> }> = {};
+    for (const mapping of Object.values(V2_SPEED_MACHINE)) {
+      const [building, machine] = mapping;
+      if (buildings[building]) continue;
+      const staff = staffByBuilding[building] ?? 0;
+      let level = 1;
+      while (level < 5 && (V3_CAPACITY[level] ?? 0) < staff) level++;
+      const machineLevel = Math.min(level, Math.round((trainingByBuilding[building] ?? 0) / 2));
+      if (level > 1 || machineLevel > 0) {
+        buildings[building] = {
+          level,
+          machines: machineLevel > 0 ? { [machine]: machineLevel } : {},
+        };
+      }
+    }
+    const playMs = num(oldRun.playMs, 0);
+    const seed = hash32(num(oldRun.startedAt, 0) >>> 0, 3);
+    const stats = isRecord(oldRun.stats) ? oldRun.stats : {};
+    run = {
+      ...oldRun,
+      seed,
+      actions,
+      goods: { wares: 0, contacts: 0, flyers: 0, files: 0 },
+      buildings,
+      morale: 60,
+      striking: false,
+      advisors: [],
+      advisorPool: { candidates: [], refreshAt: 0 },
+      agenda: { items: [], refreshAt: 0 },
+      laws: {},
+      rival: {
+        seed: hash32(seed, 99),
+        strength: 30,
+        status: 'active',
+        nextMoveAt: playMs + 300_000,
+      },
+      chronicle: [],
+      stats: { ...stats, lawsPassed: 0, upgrades: 0, defections: 0 },
+    };
+  }
+  return { ...old, saveVersion: 3, run };
+}
+
 export const migrations: Record<number, Migration> = {
   1: migrateV1toV2,
+  2: migrateV2toV3,
 };
 
 export type MigrationResult =

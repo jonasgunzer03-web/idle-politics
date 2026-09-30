@@ -69,6 +69,10 @@ export function autocracyAction(
     loyalty: clamp(run.loyalty + def.loyalty),
     relations,
     fixElectionBonus: id === 'fixElection' ? true : run.fixElectionBonus,
+    rival:
+      def.rival !== 0 && run.rival.status === 'active'
+        ? { ...run.rival, strength: Math.min(100, Math.max(0, run.rival.strength + def.rival)) }
+        : run.rival,
     cooldowns: {
       ...run.cooldowns,
       [autocracyCooldownKey(id)]: run.playMs + def.cooldownSeconds * 1000,

@@ -1,5 +1,6 @@
 import type { GameConfig } from '../config';
 import { canTurnAutocratic } from './career';
+import { addChronicle } from './chronicle';
 import { zeroResources } from './economy';
 import { nextInterval } from './events';
 import {
@@ -29,6 +30,9 @@ import {
   type RunEndReason,
   type RunState,
 } from './schema';
+import { hash32 } from './people';
+import { isRivalActive } from './party';
+import { buildingLevel, totalStaff, zeroGoods } from './production';
 import { findLocation } from './unlocks';
 
 /** Frischer Spielstand vor dem ersten Durchlauf. */
@@ -79,6 +83,8 @@ function freshRun(
   const state = cfg.states[stateId];
   const start = findLocation(cfg.world.startLocation, cfg);
   const bonus = legacyStartBonus(game, cfg);
+  // Seed des Durchlaufs: Namen und Gesichter der Mitarbeiter und des Rivalen
+  const seed = hash32(game.rngState, game.meta.runsStarted, Math.floor(now / 1000));
   const base: RunState = {
     stateId,
     profession,
@@ -94,7 +100,23 @@ function freshRun(
     generators: bonus.overtime > 0 ? { overtime: bonus.overtime } : {},
     // Start im Werk bzw. Büro, damit man sofort arbeiten kann
     world: { posX: start?.x ?? 0, target: null, inside: true },
+    seed,
     actions: {},
+    goods: zeroGoods(),
+    buildings: {},
+    morale: cfg.industry.morale.start,
+    striking: false,
+    advisors: [],
+    advisorPool: { candidates: [], refreshAt: 0 },
+    agenda: { items: [], refreshAt: 0 },
+    laws: {},
+    rival: {
+      seed: hash32(seed, 99),
+      strength: cfg.party.rival.startStrength,
+      status: 'active',
+      nextMoveAt: cfg.party.rival.moveIntervalSeconds[1] * 1000 * costScale(cfg),
+    },
+    chronicle: [],
     vehicle: 'feet',
     events: { open: [], nextAt: 0, crisisAt: null },
     groups: {},
@@ -113,10 +135,14 @@ function freshRun(
       taps: 0,
       survivedUnrest: false,
       atBrink: false,
+      lawsPassed: 0,
+      upgrades: 0,
+      defections: 0,
     },
   };
+  const withEntry = addChronicle(base, 'runStart', { state: stateId }, cfg);
   // Die erste Karte kommt nach dem längsten Abstand, damit man sich erst orientieren kann
-  return { ...base, events: { ...base.events, nextAt: nextInterval(1, base, cfg) } };
+  return { ...withEntry, events: { ...base.events, nextAt: nextInterval(1, base, cfg) } };
 }
 
 /** Startet einen neuen Durchlauf als Arbeiter (Stufe 1). */
@@ -340,6 +366,11 @@ export function pendingHints(game: GameState, cfg: GameConfig): HintId[] {
   add('worldUnlocked', isWorldUnlocked(run, cfg));
   add('capitalUnlocked', run.stage >= (cfg.world.districts[3]?.unlockStage ?? MAX_STAGE));
   add('firstEvent', run.events.open.length > 0);
+  add('productionChain', run.stats.taps >= 5);
+  // Erst nach den ersten Minuten, damit der Start nicht mit Hinweisen überladen ist
+  add('partySession', run.agenda.items.length > 0 && run.playMs >= 120_000);
+  add('rivalAppears', isRivalActive(run, cfg));
+  add('strike', run.striking);
   return due;
 }
 
@@ -396,6 +427,19 @@ function achievementMet(game: GameState, id: AchievementId, cfg: GameConfig): bo
       return m.retirements >= 1;
     case 'eventVeteran':
       return m.eventsResolved >= 50;
+    case 'industrialist':
+      return (
+        run !== null &&
+        cfg.industry.buildings.some((b) => buildingLevel(run, b.location) >= cfg.industry.maxLevel)
+      );
+    case 'lawmaker':
+      return run !== null && run.stats.lawsPassed >= 10;
+    case 'fullCabinet':
+      return run !== null && run.advisors.length >= 5;
+    case 'rivalDefeated':
+      return run !== null && run.stage >= cfg.party.rival.fromStage && (run.rival.status === 'jailed' || run.rival.strength <= 5);
+    case 'bigEmployer':
+      return run !== null && totalStaff(run) >= 100;
   }
 }
 

@@ -48,8 +48,8 @@ describe('gameStore', () => {
 
   it('Tätigkeit im Werk bringt Geld und schaltet einen Erfolg frei (Einblendung)', () => {
     const { store } = started();
-    const gained = store.getState().perform('work');
-    expect(gained.money).toBeGreaterThan(0);
+    const result = store.getState().perform('work');
+    expect(result.gained.money).toBeGreaterThan(0);
     expect(store.getState().toasts).toContain('firstShift');
     store.getState().dismissToast();
     expect(store.getState().toasts).toEqual([]);

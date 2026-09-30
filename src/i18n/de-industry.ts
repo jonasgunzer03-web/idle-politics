@@ -1,0 +1,192 @@
+import type { GoodId, LocationId, MachineId, TraitId } from '../engine/ids';
+
+// Texte zum Aufbau-System: Waren, Ausbaustufen, Maschinen, Belegschaft, Wirtschafts-Tab.
+
+export const industryTexts = {
+  goods: {
+    wares: { name: 'Waren', office: 'Aufträge' },
+    contacts: { name: 'Kontakte', office: 'Kontakte' },
+    flyers: { name: 'Flugblätter', office: 'Flugblätter' },
+    files: { name: 'Akten', office: 'Akten' },
+  } satisfies Record<GoodId, { name: string; office: string }>,
+
+  /** Namen der Ausbaustufen 1–5 je Gebäude. */
+  levels: {
+    workplace: {
+      skilled: ['Werkstatt', 'Fabrikhalle', 'Fabrik', 'Werk', 'Industriekomplex'],
+      office: ['Kleines Büro', 'Großraumbüro', 'Bürohaus', 'Firmensitz', 'Konzernzentrale'],
+    },
+    pub: {
+      skilled: ['Eckkneipe', 'Stammlokal', 'Wirtshaus', 'Brauhaus', 'Festhalle'],
+      office: ['Eckkneipe', 'Stammlokal', 'Wirtshaus', 'Brauhaus', 'Festhalle'],
+    },
+    market: {
+      skilled: ['Ein Stand', 'Wochenmarkt', 'Markthalle', 'Kaufhaus', 'Einkaufspassage'],
+      office: ['Ein Stand', 'Wochenmarkt', 'Markthalle', 'Kaufhaus', 'Einkaufspassage'],
+    },
+    partyOffice: {
+      skilled: ['Hinterzimmer', 'Ortsverein', 'Kreisbüro', 'Landesgeschäftsstelle', 'Parteizentrale'],
+      office: ['Hinterzimmer', 'Ortsverein', 'Kreisbüro', 'Landesgeschäftsstelle', 'Parteizentrale'],
+    },
+    townHall: {
+      skilled: ['Amtsstube', 'Rathaus', 'Neues Rathaus', 'Stadthaus', 'Bürgerpalast'],
+      office: ['Amtsstube', 'Rathaus', 'Neues Rathaus', 'Stadthaus', 'Bürgerpalast'],
+    },
+    newspaper: {
+      skilled: ['Druckerei', 'Lokalblatt', 'Tageszeitung', 'Verlagshaus', 'Medienhaus'],
+      office: ['Druckerei', 'Lokalblatt', 'Tageszeitung', 'Verlagshaus', 'Medienhaus'],
+    },
+    bank: {
+      skilled: ['Sparkasse', 'Volksbank', 'Handelsbank', 'Landesbank', 'Börse'],
+      office: ['Sparkasse', 'Volksbank', 'Handelsbank', 'Landesbank', 'Börse'],
+    },
+    parliament: {
+      skilled: ['Sitzungssaal', 'Landtag', 'Plenarsaal', 'Parlament', 'Hohes Haus'],
+      office: ['Sitzungssaal', 'Landtag', 'Plenarsaal', 'Parlament', 'Hohes Haus'],
+    },
+    ministry: {
+      skilled: ['Referat', 'Behörde', 'Ministerium', 'Bundesamt', 'Superministerium'],
+      office: ['Referat', 'Behörde', 'Ministerium', 'Bundesamt', 'Superministerium'],
+    },
+    embassy: {
+      skilled: ['Konsulat', 'Gesandtschaft', 'Botschaft', 'Botschaftsviertel', 'Diplomatenstadt'],
+      office: ['Konsulat', 'Gesandtschaft', 'Botschaft', 'Botschaftsviertel', 'Diplomatenstadt'],
+    },
+    palace: {
+      skilled: ['Amtssitz', 'Regierungssitz', 'Staatskanzlei', 'Palast', 'Prachtpalast'],
+      office: ['Amtssitz', 'Regierungssitz', 'Staatskanzlei', 'Palast', 'Prachtpalast'],
+    },
+  } satisfies Record<LocationId, { skilled: string[]; office: string[] }>,
+
+  machines: {
+    conveyor: { name: 'Fließband', office: 'Computer', text: 'Mehr Tempo für alle Linien hier.' },
+    warehouse: { name: 'Lagerhalle', office: 'Aktenschrank', text: 'Mehr Platz für Waren.' },
+    beerTap: { name: 'Zapfanlage', office: 'Zapfanlage', text: 'Mehr Gespräche pro Minute.' },
+    jukebox: { name: 'Musikbox', office: 'Musikbox', text: 'Bessere Stimmung, mehr Ertrag.' },
+    stalls: { name: 'Mehr Stände', office: 'Mehr Stände', text: 'Mehr Kunden gleichzeitig.' },
+    register: { name: 'Registrierkasse', office: 'Registrierkasse', text: 'Mehr Geld je Verkauf.' },
+    printer: { name: 'Druckmaschine', office: 'Druckmaschine', text: 'Druckt schneller.' },
+    phoneBank: { name: 'Telefonzentrale', office: 'Telefonzentrale', text: 'Mehr Ertrag je Gespräch.' },
+    counter: { name: 'Bürgerschalter', office: 'Bürgerschalter', text: 'Mehr Anliegen pro Minute.' },
+    archive: { name: 'Archiv', office: 'Archiv', text: 'Mehr Platz für Akten.' },
+    rotary: { name: 'Rotationsdruck', office: 'Rotationsdruck', text: 'Mehr Ausgaben pro Minute.' },
+    photoLab: { name: 'Fotolabor', office: 'Fotolabor', text: 'Bessere Bilder, mehr Leser.' },
+    tickerBoard: { name: 'Börsentafel', office: 'Börsentafel', text: 'Schnellere Geschäfte.' },
+    vault: { name: 'Tresor', office: 'Tresor', text: 'Größere Spenden je Kontakt.' },
+    mics: { name: 'Mikrofonanlage', office: 'Mikrofonanlage', text: 'Schnellere Debatten.' },
+    votingBoard: { name: 'Abstimmungstafel', office: 'Abstimmungstafel', text: 'Mehr Wirkung je Debatte.' },
+    mainframe: { name: 'Rechenzentrum', office: 'Rechenzentrum', text: 'Verwaltung im Eiltempo.' },
+    fileLift: { name: 'Aktenaufzug', office: 'Aktenaufzug', text: 'Mehr Platz für Akten.' },
+    interpreters: { name: 'Dolmetscherkabinen', office: 'Dolmetscherkabinen', text: 'Mehr Empfänge.' },
+    banquet: { name: 'Bankettsaal', office: 'Bankettsaal', text: 'Mehr Diplomatie je Empfang.' },
+    tvStudio: { name: 'Fernsehstudio', office: 'Fernsehstudio', text: 'Mehr Reden pro Stunde.' },
+    balcony: { name: 'Staatsbalkon', office: 'Staatsbalkon', text: 'Jede Rede wirkt stärker.' },
+  } satisfies Record<MachineId, { name: string; office: string; text: string }>,
+
+  traits: {
+    diligent: { name: 'fleißig', text: '+4 % Tempo im Gebäude' },
+    social: { name: 'gesellig', text: 'hebt die Stimmung aller' },
+    inventive: { name: 'erfinderisch', text: '+4 % Ertrag im Gebäude' },
+    meticulous: { name: 'genau', text: '+2 % Tempo und Ertrag' },
+    dreamy: { name: 'verträumt', text: 'etwas langsamer, aber gute Laune' },
+  } satisfies Record<TraitId, { name: string; text: string }>,
+
+  /** Berufsbezeichnung der Mitarbeiter je Gebäude. */
+  roles: {
+    workplace: { skilled: 'Arbeiter', office: 'Sachbearbeiter' },
+    pub: { skilled: 'Wirt', office: 'Wirt' },
+    market: { skilled: 'Händler', office: 'Händler' },
+    partyOffice: { skilled: 'Parteihelfer', office: 'Parteihelfer' },
+    townHall: { skilled: 'Stadtbeamter', office: 'Stadtbeamter' },
+    newspaper: { skilled: 'Redakteur', office: 'Redakteur' },
+    bank: { skilled: 'Bankkaufmann', office: 'Bankkaufmann' },
+    parliament: { skilled: 'Referent', office: 'Referent' },
+    ministry: { skilled: 'Ministerialrat', office: 'Ministerialrat' },
+    embassy: { skilled: 'Attaché', office: 'Attaché' },
+    palace: { skilled: 'Protokollchef', office: 'Protokollchef' },
+  } satisfies Record<LocationId, { skilled: string; office: string }>,
+
+  /** Was Mitarbeiter sagen, je nach Stimmung. */
+  chatter: {
+    happy: [
+      'Läuft wie geschmiert!',
+      'Gute Arbeit, Chef!',
+      'Heute schaffen wir den Rekord.',
+      'Ich bleib gern länger.',
+      'Endlich wird hier was bewegt.',
+      'Meine Familie ist stolz auf mich.',
+    ],
+    neutral: [
+      'Noch eine Kiste …',
+      'Wann ist Feierabend?',
+      'Könnte schlimmer sein.',
+      'Hast du die Zeitung gelesen?',
+      'Ein Kaffee wär jetzt was.',
+      'Die Maschine klemmt schon wieder.',
+    ],
+    angry: [
+      'Für den Lohn? Im Ernst?',
+      'So kann das nicht weitergehen.',
+      'Wir reden mit der Gewerkschaft.',
+      'Die da oben kümmert das nicht.',
+      'Ich überleg mir das mit dem Kündigen.',
+    ],
+    strike: ['Streik!', 'Wir legen die Arbeit nieder!', 'Faire Löhne jetzt!', 'Ohne uns läuft nichts!'],
+    blocked: ['Uns fehlt Nachschub!', 'Wo bleibt die Lieferung?', 'Das Lager ist leer.'],
+  },
+
+  ui: {
+    tabs: { production: 'Produktion', build: 'Ausbau', team: 'Team' },
+    lineIn: 'braucht',
+    lineOut: 'liefert',
+    blocked: 'Stockt – es fehlen {good}',
+    blockedMoney: 'Stockt – zu wenig Geld',
+    running: 'Läuft: {rate}',
+    idle: 'Noch niemand eingestellt',
+    tapMissing: 'Keine {good} da – erst herstellen!',
+    tapMissingMoney: 'Zu wenig Geld',
+    perCycle: 'je Durchgang',
+    capacity: 'Plätze {used} von {max}',
+    full: 'Gebäude voll – ausbauen!',
+    level: 'Ausbaustufe {level} von {max}',
+    levelName: 'Stufe {level}: {name}',
+    upgrade: 'Ausbauen',
+    upgradeTo: 'Ausbau zu: {name}',
+    upgradeGain: '{seats} Plätze, Maschinen bis Stufe {level}',
+    upgradeNeedsStage: 'Ab Karrierestufe {stage}',
+    maxLevel: 'Voll ausgebaut',
+    machines: 'Maschinen',
+    machineLevel: 'Stufe {level} von {max}',
+    machineBuild: 'Bauen',
+    machineImprove: 'Verbessern',
+    machineCapped: 'Erst Gebäude ausbauen',
+    kind: { speed: '+{value} % Tempo', yield: '+{value} % Ertrag', storage: '+{value} % Lager' },
+    team: 'Belegschaft',
+    teamEmpty: 'Noch niemand hier. Stelle in „Produktion“ jemanden ein.',
+    teamMore: 'und {count} weitere',
+    coreCrew: 'Stammbelegschaft',
+    morale: 'Stimmung',
+    moraleText: 'Stimmung der Belegschaft: {value} %',
+    strike: 'Streik! Die Belegschaft arbeitet kaum.',
+    storage: 'Lager',
+    storageOf: '{amount} / {max}',
+  },
+
+  economy: {
+    title: 'Wirtschaft',
+    network: 'Produktionsnetz',
+    networkHint: 'Waren wandern von Gebäude zu Gebäude. Rote Linien stocken – dort fehlt Nachschub.',
+    goods: 'Lager',
+    buildings: 'Betriebe',
+    staffTotal: '{count} Mitarbeiter',
+    investments: 'Beteiligungen',
+    investmentsHint: 'Beteiligungen bringen still im Hintergrund Geld, Einfluss und Anhänger.',
+    walk: 'Hingehen',
+    locked: 'Ab Stufe {stage}',
+    bottleneck: 'Engpass: {good}',
+    ok: 'läuft',
+    none: 'ruht',
+    moraleCard: 'Arbeiterstimmung',
+    strikeCard: 'Streik',
+  },
+};

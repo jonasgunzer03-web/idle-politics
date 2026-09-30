@@ -10,6 +10,7 @@ import {
   type LegacyId,
   type ResourceId,
 } from './ids';
+import { modifiers } from './modifiers';
 import type { GameState, RunState } from './schema';
 
 // Zentrale Regel-Helfer: Freischaltungen, Anforderungen und alle Multiplikatoren.
@@ -155,6 +156,8 @@ export function resourceMultiplier(game: GameState, resource: ResourceId, cfg: G
   if (resource === 'followers') m *= 1 + legacyValue(game, 'followersBoost', cfg);
   for (const v of activeGroupBonus(run, resource, cfg)) m *= v;
   if (resource === 'money') m *= 1 + tradeAgreements(run) * cfg.foreignRules.tradeBonus;
+  // Gesetze und Berater (nie unter 10 % des Werts)
+  m *= Math.max(0.1, 1 + modifiers(run, cfg).resource[resource]);
   return m;
 }
 
@@ -166,6 +169,7 @@ export function approvalBase(game: GameState, cfg: GameConfig): number {
   for (const v of activeGroupBonus(run, 'approvalBase', cfg)) base += v;
   base += alliances(run) * cfg.foreignRules.allianceApproval;
   for (const p of cfg.projects) base += (p.approvalPerLevel ?? 0) * (run.projects[p.id] ?? 0);
+  base += modifiers(run, cfg).approvalBase;
   return Math.min(90, Math.max(10, base));
 }
 
@@ -182,6 +186,7 @@ export function unrestTarget(game: GameState, cfg: GameConfig): number {
   for (const g of groupsFor(run, cfg)) {
     if (g.unrestSideEffect && groupTier(run, g, cfg) > 0) target += g.unrestSideEffect;
   }
+  target += modifiers(run, cfg).unrestTarget;
   return Math.min(85, Math.max(0, target));
 }
 
@@ -194,12 +199,16 @@ export function unrestDecayFactor(game: GameState, cfg: GameConfig): number {
 
 /** Zusätzliche Loyalitäts-Drift pro Minute durch Sicherheitsdienste und Parteiapparat. */
 export function loyaltyBonusPerMinute(run: RunState, cfg: GameConfig): number {
-  return activeGroupBonus(run, 'loyaltyDrift', cfg).reduce((a, b) => a + b, 0);
+  return (
+    activeGroupBonus(run, 'loyaltyDrift', cfg).reduce((a, b) => a + b, 0) +
+    modifiers(run, cfg).loyaltyDrift
+  );
 }
 
 /** Faktor auf das Putschrisiko (Militär schützt). */
 export function coupProtection(run: RunState, cfg: GameConfig): number {
-  return activeGroupBonus(run, 'coupProtection', cfg).reduce((a, b) => a * b, 1);
+  const groups = activeGroupBonus(run, 'coupProtection', cfg).reduce((a, b) => a * b, 1);
+  return groups * Math.max(0.1, 1 + modifiers(run, cfg).coupRisk);
 }
 
 /** Tempo der Figur in Welt-Einheiten pro Sekunde. */

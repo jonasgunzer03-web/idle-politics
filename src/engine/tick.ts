@@ -3,7 +3,9 @@ import { applyProduction, zeroResources } from './economy';
 import { tickEvents } from './events';
 import { endRun } from './game';
 import { RESOURCE_IDS, type ResourceMap } from './ids';
+import { tickParty } from './party';
 import { tickPolitics, type PoliticsSignal } from './politics';
+import { tickMorale } from './production';
 import { offlineCapHours } from './rules';
 import { sanitizeGame } from './sanitize';
 import type { GameState } from './schema';
@@ -49,6 +51,8 @@ function tickStep(game: GameState, dt: number, cfg: GameConfig): TickResult {
   ) {
     return { game: endRun(next, politics.signal, cfg), signal: politics.signal };
   }
+  next = tickMorale(next, dt, cfg).game;
+  next = tickParty(next, dt, cfg);
   next = tickEvents(next, cfg);
   return { game: next, signal: politics.signal };
 }

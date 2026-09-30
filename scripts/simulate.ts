@@ -3,7 +3,8 @@
 //         npm run simulate -- --quick (nur GAME_SPEED 1)
 // Optionen: --verbose (Raten je Stufe), --only=Novaria (nur passende Szenarien)
 // Der Lauf schlägt fehl, wenn eine Stufe unerreichbar ist oder länger als das Dreifache
-// ihrer Zielzeit dauert.
+// ihrer Zielzeit dauert (bei gestrecktem Tempo das Fünffache: Dort begrenzen die festen
+// Obergrenzen des Aufbaus – Plätze und Maschinenstufen – den Bot stärker).
 
 import { targetFactor } from '../src/config/careers';
 import { defaultConfig, withGameSpeed } from '../src/config';
@@ -26,15 +27,16 @@ function main() {
       const rows = result.times.map((t) => {
         const target = ((cfg.targetMinutes[t.stage - 2] ?? 7) * factor) / speed;
         const ratio = t.minutes / target;
+        const limit = speed < 1 ? 5 : 3;
         // Nach einer verlorenen Wahl (zwei Stufen zurück) zählt die Überschreitung nicht als Fehler
         const flag = t.afterLoss
           ? ' (nach Wahlniederlage)'
-          : ratio > 3
+          : ratio > limit
             ? ' ✗ zu lang'
             : ratio > 2
               ? ' ! langsam'
               : '';
-        if (ratio > 3 && !t.afterLoss) failed = true;
+        if (ratio > limit && !t.afterLoss) failed = true;
         return `  Stufe ${String(t.stage).padStart(2)}: ${t.minutes.toFixed(1).padStart(7)} min (Ziel ${target.toFixed(1)})${flag}`;
       });
       const reached = result.finalStage >= MAX_STAGE;

@@ -277,7 +277,7 @@ describe('Migration v1 → v2 (Spielstand aus Phase 1)', () => {
     const game = parseGame(v1);
     expect(game).not.toBeNull();
     if (!game?.run) return;
-    expect(game.saveVersion).toBe(2);
+    expect(game.saveVersion).toBe(3);
     expect(game.character?.accessories).toEqual([]);
     expect(game.run.resources).toEqual({ money: 123.4, influence: 56, followers: 7, diplomacy: 0 });
     expect(game.run.generators).toEqual({ overtime: 3, regularsTable: 1 });
@@ -296,5 +296,51 @@ describe('Migration v1 → v2 (Spielstand aus Phase 1)', () => {
   it('ein alter Stand im Startablauf bleibt im Startablauf', () => {
     const game = parseGame({ ...v1, phase: 'setup', run: null, character: null });
     expect(game?.phase).toBe('setup');
+  });
+});
+
+describe('Migration v2 → v3 (Produktionsketten, Parteibüro)', () => {
+  function v2Save(): Record<string, unknown> {
+    const game = JSON.parse(JSON.stringify(playingGame({ stage: 5 }))) as Record<string, unknown>;
+    const run = game.run as Record<string, unknown>;
+    for (const key of [
+      'seed',
+      'goods',
+      'buildings',
+      'morale',
+      'striking',
+      'advisors',
+      'advisorPool',
+      'agenda',
+      'laws',
+      'rival',
+      'chronicle',
+    ]) {
+      delete run[key];
+    }
+    const stats = run.stats as Record<string, unknown>;
+    delete stats.lawsPassed;
+    delete stats.upgrades;
+    delete stats.defections;
+    run.actions = { work: { staff: 12, training: 6 }, network: { staff: 0, training: 3 } };
+    return { ...game, saveVersion: 2, run };
+  }
+
+  it('Mitarbeiter bleiben, das Gebäude wächst mit, Schulungen werden Maschinen', () => {
+    const game = parseGame(v2Save());
+    expect(game?.saveVersion).toBe(3);
+    const run = game?.run;
+    if (!run) throw new Error('run');
+    expect(run.actions.work?.staff).toBe(12);
+    expect(run.actions.network).toBeUndefined();
+    // 12 Mitarbeiter brauchen Ausbaustufe 3 (18 Plätze)
+    expect(run.buildings.workplace?.level).toBe(3);
+    expect(run.buildings.workplace?.machines.conveyor).toBe(3);
+    // Kneipe: keine Mitarbeiter, Schulung 3 → Maschine Stufe 1 bei Ausbaustufe 1
+    expect(run.buildings.pub?.machines.beerTap).toBe(1);
+    expect(run.goods).toEqual({ wares: 0, contacts: 0, flyers: 0, files: 0 });
+    expect(run.rival.status).toBe('active');
+    expect(run.laws).toEqual({});
+    expect(run.stats.lawsPassed).toBe(0);
   });
 });

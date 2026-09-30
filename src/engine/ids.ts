@@ -60,10 +60,16 @@ export const LOCATION_IDS = [
 ] as const;
 export type LocationId = (typeof LOCATION_IDS)[number];
 
+/**
+ * Produktionslinien (früher „Tätigkeiten“). Die Reihenfolge ist auch die Rechenreihenfolge:
+ * Linien ohne Waren-Zutaten laufen zuerst, damit frische Ware im selben Takt weiterwandert.
+ */
 export const ACTION_IDS = [
   'work',
   'network',
+  'sell',
   'canvass',
+  'print',
   'partyWork',
   'consultation',
   'interview',
@@ -74,6 +80,131 @@ export const ACTION_IDS = [
   'speech',
 ] as const;
 export type ActionId = (typeof ACTION_IDS)[number];
+
+/** Waren: Zwischenprodukte, die zwischen Gebäuden wandern (keine Währung). */
+export const GOOD_IDS = ['wares', 'contacts', 'flyers', 'files'] as const;
+export type GoodId = (typeof GOOD_IDS)[number];
+export type GoodMap = Record<GoodId, number>;
+
+/** Wofür eine Linie steht (Gesetze wirken auf solche Gruppen). */
+export const LINE_TAGS = ['industry', 'trade', 'party', 'media', 'finance', 'state', 'diplomacy'] as const;
+export type LineTag = (typeof LINE_TAGS)[number];
+
+/** Maschinen, zwei je Gebäude. */
+export const MACHINE_IDS = [
+  'conveyor',
+  'warehouse',
+  'beerTap',
+  'jukebox',
+  'stalls',
+  'register',
+  'printer',
+  'phoneBank',
+  'counter',
+  'archive',
+  'rotary',
+  'photoLab',
+  'vault',
+  'tickerBoard',
+  'mics',
+  'votingBoard',
+  'mainframe',
+  'fileLift',
+  'banquet',
+  'interpreters',
+  'tvStudio',
+  'balcony',
+] as const;
+export type MachineId = (typeof MACHINE_IDS)[number];
+
+/** Eigenschaften benannter Mitarbeiter. */
+export const TRAIT_IDS = ['diligent', 'social', 'inventive', 'meticulous', 'dreamy'] as const;
+export type TraitId = (typeof TRAIT_IDS)[number];
+
+/** Parteiflügel der Berater. */
+export const FACTION_IDS = ['economic', 'social', 'security', 'liberty', 'populist'] as const;
+export type FactionId = (typeof FACTION_IDS)[number];
+
+/** Fähigkeiten der Berater (passiver Bonus, solange sie am Tisch sitzen). */
+export const SKILL_IDS = [
+  'campaigner',
+  'financier',
+  'strategist',
+  'mediaSavvy',
+  'organizer',
+  'diplomat',
+  'enforcer',
+] as const;
+export type SkillId = (typeof SKILL_IDS)[number];
+
+/** Beschlüsse und Gesetze. */
+export const POLICY_IDS = [
+  'workersFirst',
+  'businessFriendly',
+  'volunteerNetwork',
+  'partyDiscipline',
+  'openMeetings',
+  'publicTransit',
+  'tradeFair',
+  'cityPolice',
+  'pressFreedom',
+  'lowTaxes',
+  'wealthTax',
+  'housing',
+  'industrialPolicy',
+  'digitalState',
+  'pensionReform',
+  'familyBonus',
+  'surveillance',
+  'mediaLaw',
+  'openBorders',
+  'protectionism',
+  'education',
+  'army',
+  'greatProject',
+  'constitutionReform',
+  'stateOfEmergency',
+  'personalityCult',
+] as const;
+export type PolicyId = (typeof POLICY_IDS)[number];
+
+/** Was der Rivale von sich aus tut. */
+export const RIVAL_MOVE_IDS = ['smear', 'poach', 'rally'] as const;
+export type RivalMoveId = (typeof RIVAL_MOVE_IDS)[number];
+
+/** Gegenmaßnahmen gegen den Rivalen. */
+export const RIVAL_COUNTER_IDS = ['counterCampaign', 'exposeScandal', 'arrest'] as const;
+export type RivalCounterId = (typeof RIVAL_COUNTER_IDS)[number];
+
+/** Arten von Einträgen in der Stadtchronik. */
+export const CHRONICLE_KEYS = [
+  'runStart',
+  'promoted',
+  'electionWon',
+  'electionLost',
+  'resigned',
+  'autocraticTurn',
+  'lawEnacted',
+  'lawRevoked',
+  'consequence',
+  'buildingUpgraded',
+  'machineBuilt',
+  'firstWorker',
+  'workforce',
+  'advisorJoined',
+  'advisorLeft',
+  'advisorDefected',
+  'rivalSmear',
+  'rivalPoach',
+  'rivalRally',
+  'rivalCountered',
+  'rivalScandal',
+  'rivalScandalFailed',
+  'rivalJailed',
+  'strikeStarted',
+  'strikeEnded',
+] as const;
+export type ChronicleKey = (typeof CHRONICLE_KEYS)[number];
 
 export const VEHICLE_IDS = ['feet', 'bicycle', 'moped', 'car', 'chauffeur', 'helicopter'] as const;
 export type VehicleId = (typeof VEHICLE_IDS)[number];
@@ -170,6 +301,11 @@ export const ACHIEVEMENT_IDS = [
   'veteran',
   'retiree',
   'eventVeteran',
+  'industrialist',
+  'lawmaker',
+  'fullCabinet',
+  'rivalDefeated',
+  'bigEmployer',
 ] as const;
 export type AchievementId = (typeof ACHIEVEMENT_IDS)[number];
 

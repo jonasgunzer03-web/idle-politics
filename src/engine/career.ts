@@ -2,6 +2,9 @@ import type { GameConfig } from '../config';
 import { autocraticTurnStage, careerVenue, type StageRequirement } from '../config/careers';
 import { canAfford, pay } from './economy';
 import { MAX_STAGE, type LocationId, type ResourceMap } from './ids';
+import { addChronicle } from './chronicle';
+import { modifiers } from './modifiers';
+import { rivalAfterElection, rivalElectionEffect } from './party';
 import { drawRandom } from './rng';
 import {
   campaignLegacyBonus,
@@ -60,7 +63,9 @@ export function electionChance(game: GameState, campaign: number, cfg: GameConfi
     e.approvalWeight * (run.approval - 50) +
     followersTerm +
     (e.campaigns[campaign]?.bonus ?? 0) +
-    campaignLegacyBonus(game, cfg);
+    campaignLegacyBonus(game, cfg) +
+    modifiers(run, cfg).electionBonus +
+    rivalElectionEffect(run, cfg);
   return Math.round(Math.min(e.maxChance, Math.max(e.minChance, raw)));
 }
 
@@ -162,25 +167,37 @@ export function runForElection(
   const won = draw.value * 100 < chance;
   const paid: RunState = { ...run, resources: pay(run.resources, total) };
   if (won) {
-    const withStats = {
-      ...paid,
-      stats: { ...paid.stats, electionsWon: paid.stats.electionsWon + 1 },
-    };
+    let withStats: RunState = rivalAfterElection(
+      { ...paid, stats: { ...paid.stats, electionsWon: paid.stats.electionsWon + 1 } },
+      true,
+      cfg,
+    );
+    withStats = addChronicle(
+      withStats,
+      'electionWon',
+      { stage: run.stage + 1, chance, seed: run.rival.seed },
+      cfg,
+    );
     return {
       game: stageUp({ ...draw.game }, withStats),
       outcome: { won: true, chance, stage: run.stage + 1 },
     };
   }
   const e = cfg.balancing.elections;
-  const lost = demote(
-    {
-      ...paid,
-      approval: Math.max(0, paid.approval - e.lossApproval),
-      stats: { ...paid.stats, electionsLost: paid.stats.electionsLost + 1 },
-    },
+  let lost = demote(
+    rivalAfterElection(
+      {
+        ...paid,
+        approval: Math.max(0, paid.approval - e.lossApproval),
+        stats: { ...paid.stats, electionsLost: paid.stats.electionsLost + 1 },
+      },
+      false,
+      cfg,
+    ),
     e.lossStages,
     cfg,
   );
+  lost = addChronicle(lost, 'electionLost', { stage: run.stage + 1, seed: run.rival.seed }, cfg);
   return { game: { ...draw.game, run: lost }, outcome: { won: false, chance, stage: lost.stage } };
 }
 
@@ -204,6 +221,7 @@ export function promote(game: GameState, cfg: GameConfig): GameState {
       fixElectionBonus: false,
     };
   }
+  next = addChronicle(next, 'promoted', { stage: run.stage + 1 }, cfg);
   return stageUp(game, next);
 }
 
@@ -243,10 +261,11 @@ export function turnAutocratic(game: GameState, cfg: GameConfig): GameState {
   for (const id of foreignPartners(run)) {
     relations[id] = Math.max(-100, relation(run, id, cfg) - a.turnRelations);
   }
+  const withEntry = addChronicle(run, 'autocraticTurn', {}, cfg);
   return {
     ...game,
     run: {
-      ...run,
+      ...withEntry,
       path: 'autocratic',
       unrest: Math.min(100, run.unrest + a.turnUnrest),
       groups: {

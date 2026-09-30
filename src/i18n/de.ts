@@ -3,6 +3,8 @@
 
 import type { GeneratorId, ProfessionId, ResourceId, StateId } from '../engine/ids';
 import { eventTexts } from './de-events';
+import { industryTexts } from './de-industry';
+import { partyTexts } from './de-party';
 import { politicsTexts } from './de-politics';
 import { worldTexts } from './de-world';
 
@@ -52,7 +54,7 @@ export const de = {
   tabs: {
     career: 'Karriere',
     network: 'Netzwerk',
-    invest: 'Investieren',
+    invest: 'Wirtschaft',
     world: 'Welt',
     profile: 'Profil',
   },
@@ -438,6 +440,8 @@ export const de = {
 
   ...worldTexts,
   ...politicsTexts,
+  industry: industryTexts,
+  party: partyTexts,
   events: eventTexts,
 
   debug: {

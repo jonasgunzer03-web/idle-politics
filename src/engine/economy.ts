@@ -1,15 +1,39 @@
 import type { GameConfig } from '../config';
 import type { GeneratorDef } from '../config/balancing';
 import type { ActionDef } from '../config/world';
+import { addChronicle } from './chronicle';
 import {
   RESOURCE_IDS,
   VEHICLE_IDS,
   type ActionId,
   type GeneratorId,
+  type GoodId,
+  type GoodMap,
+  type LocationId,
+  type MachineId,
   type ProjectId,
+  type ResourceId,
   type ResourceMap,
   type VehicleId,
 } from './ids';
+import {
+  buildingCapacity,
+  buildingLevel,
+  chainSnapshot,
+  cycleInputs,
+  cycleOutputs,
+  findBuilding,
+  findMachine,
+  isBuildingOpen,
+  isResourceKey,
+  levelStageRequirement,
+  machineLevel,
+  runChain,
+  staffInBuilding,
+  staffOf,
+  storageCapacity,
+  totalStaff,
+} from './production';
 import { costScale, isWorldUnlocked, resourceMultiplier } from './rules';
 import type { GameState, RunState } from './schema';
 import {
@@ -135,37 +159,10 @@ export function maxAffordable(
   return maxAffordableScaled(def.baseCost, cfg.balancing.costGrowth, owned, resources, cfg);
 }
 
-// ---------------------------------------------------------------- Tätigkeiten
-
-export function actionProgress(run: RunState, id: ActionId): { staff: number; training: number } {
-  return run.actions[id] ?? { staff: 0, training: 0 };
-}
-
-/** Ertrag einer einzelnen Ausführung der Tätigkeit (inkl. Stufe, Schulung, Multiplikatoren). */
-export function actionYield(
-  game: GameState,
-  action: ActionDef,
-  cfg: GameConfig,
-): Partial<ResourceMap> {
-  const run = game.run;
-  if (!run) return {};
-  const { training } = actionProgress(run, action.id);
-  const factor =
-    Math.pow(cfg.balancing.tapStageGrowth, run.stage - 1) * (1 + training * action.training.bonus);
-  const result: Partial<ResourceMap> = {};
-  for (const id of RESOURCE_IDS) {
-    const base = action.yields[id];
-    if (base !== undefined && base > 0) {
-      result[id] = base * factor * resourceMultiplier(game, id, cfg);
-    }
-  }
-  return result;
-}
-
 // ---------------------------------------------------------------- Erträge
 
-/** Automatische Erträge pro Sekunde: Generatoren, Mitarbeiter, Regionalprojekte. */
-export function productionRates(game: GameState, cfg: GameConfig): ResourceMap {
+/** Passive Erträge pro Sekunde: Generatoren (Beteiligungen) und Regionalprojekte. */
+export function passiveRates(game: GameState, cfg: GameConfig): ResourceMap {
   const run = game.run;
   const rates = zeroResources();
   if (!run) return rates;
@@ -180,22 +177,25 @@ export function productionRates(game: GameState, cfg: GameConfig): ResourceMap {
     for (const id of RESOURCE_IDS) raw[id] += (p.output[id] ?? 0) * level;
   }
   for (const id of RESOURCE_IDS) rates[id] = raw[id] * resourceMultiplier(game, id, cfg);
-  // Mitarbeiter: Ausführungen pro Sekunde × Ertrag je Ausführung (enthält Multiplikatoren)
-  for (const action of cfg.world.actions) {
-    const { staff } = actionProgress(run, action.id);
-    if (staff <= 0 || !isActionUnlocked(run, action, cfg)) continue;
-    const perRun = actionYield(game, action, cfg);
-    const perSecond = staff * action.staff.ratePerStaff;
-    for (const id of RESOURCE_IDS) rates[id] += (perRun[id] ?? 0) * perSecond;
-  }
   return rates;
 }
 
-/** Erträge für einen Zeitraum gutschreiben (ohne sonstige Spiellogik). */
+/**
+ * Netto-Erträge pro Sekunde: Beteiligungen plus Produktionskette (wie sie gerade läuft,
+ * inklusive Engpässen; Zutaten wie Papiergeld sind abgezogen).
+ */
+export function productionRates(game: GameState, cfg: GameConfig): ResourceMap {
+  const rates = passiveRates(game, cfg);
+  const chain = chainSnapshot(game, cfg);
+  for (const id of RESOURCE_IDS) rates[id] += chain.resources[id];
+  return rates;
+}
+
+/** Erträge für einen Zeitraum gutschreiben (Beteiligungen und Produktionskette). */
 export function applyProduction(game: GameState, deltaMs: number, cfg: GameConfig): GameState {
   const run = game.run;
   if (!run || deltaMs <= 0) return game;
-  const rates = productionRates(game, cfg);
+  const rates = passiveRates(game, cfg);
   const seconds = deltaMs / 1000;
   const resources = { ...run.resources };
   const earned = { ...run.earned };
@@ -206,7 +206,16 @@ export function applyProduction(game: GameState, deltaMs: number, cfg: GameConfi
       earned[id] += gain;
     }
   }
-  return { ...game, run: { ...run, resources, earned } };
+  let current: GameState = { ...game, run: { ...run, resources, earned } };
+  // Kette in Schritten rechnen, damit Waren bei langer Abwesenheit weiterwandern
+  let remaining = seconds;
+  const step = Math.max(1, cfg.industry.offlineStepSeconds);
+  while (remaining > 1e-9) {
+    const dt = Math.min(step, remaining);
+    current = runChain(current, dt, cfg).game;
+    remaining -= dt;
+  }
+  return current;
 }
 
 /** Beträge gutschreiben (nur positive Anteile). */
@@ -223,29 +232,69 @@ export function addResources(run: RunState, gains: Partial<ResourceMap>): RunSta
   return { ...run, resources, earned };
 }
 
+// ---------------------------------------------------------------- Tippen
+
 export interface PerformResult {
   game: GameState;
   gained: Partial<ResourceMap>;
+  goods: Partial<GoodMap>;
+  /** Zutat, die fehlt (dann passiert nichts). */
+  blockedBy: GoodId | ResourceId | null;
 }
 
-/** Tätigkeit einmal ausführen (Tippen). Nur im passenden Gebäude und wenn freigeschaltet. */
+/** Einen Durchgang der Linie von Hand ausführen. Nur im passenden Gebäude. */
 export function performAction(game: GameState, id: ActionId, cfg: GameConfig): PerformResult {
   const run = game.run;
   const action = findAction(id, cfg);
-  if (game.phase !== 'playing' || !run || !action) return { game, gained: {} };
-  if (!run.world.inside || currentLocation(run, cfg) !== action.location) {
-    return { game, gained: {} };
+  const none: PerformResult = { game, gained: {}, goods: {}, blockedBy: null };
+  if (game.phase !== 'playing' || !run || !action) return none;
+  if (!run.world.inside || currentLocation(run, cfg) !== action.location) return none;
+  if (!isActionUnlocked(run, action, cfg)) return none;
+  const inputs = cycleInputs(run, action, cfg);
+  for (const [key, need] of Object.entries(inputs) as [GoodId | ResourceId, number][]) {
+    const available = isResourceKey(key) ? run.resources[key] : run.goods[key];
+    if (available + 1e-9 < need) return { ...none, blockedBy: key };
   }
-  if (!isActionUnlocked(run, action, cfg)) return { game, gained: {} };
-  const gained = actionYield(game, action, cfg);
-  const next = addResources(run, gained);
+  const resources = { ...run.resources };
+  const goods = { ...run.goods };
+  for (const [key, need] of Object.entries(inputs) as [GoodId | ResourceId, number][]) {
+    if (isResourceKey(key)) resources[key] = Math.max(0, resources[key] - need);
+    else goods[key] = Math.max(0, goods[key] - need);
+  }
+  const gained: Partial<ResourceMap> = {};
+  const madeGoods: Partial<GoodMap> = {};
+  const earned = { ...run.earned };
+  for (const [key, amount] of Object.entries(cycleOutputs(game, action, cfg)) as [
+    GoodId | ResourceId,
+    number,
+  ][]) {
+    if (isResourceKey(key)) {
+      resources[key] += amount;
+      earned[key] += amount;
+      gained[key] = amount;
+    } else {
+      const cap = storageCapacity(run, key, cfg);
+      const room = Math.max(0, cap - goods[key]);
+      const added = Math.min(room, amount);
+      goods[key] += added;
+      madeGoods[key] = added;
+    }
+  }
   return {
     game: {
       ...game,
-      run: { ...next, stats: { ...next.stats, taps: next.stats.taps + 1 } },
+      run: {
+        ...run,
+        resources,
+        goods,
+        earned,
+        stats: { ...run.stats, taps: run.stats.taps + 1 },
+      },
       meta: { ...game.meta, totalTaps: game.meta.totalTaps + 1 },
     },
     gained,
+    goods: madeGoods,
+    blockedBy: null,
   };
 }
 
@@ -289,44 +338,133 @@ export function buyGenerator(
   };
 }
 
-export type UpgradeKind = 'staff' | 'training';
+// ---------------------------------------------------------------- Mitarbeiter und Ausbau
 
-export function upgradeCost(
-  run: RunState,
-  action: ActionDef,
-  kind: UpgradeKind,
-  cfg: GameConfig,
-): Partial<ResourceMap> {
-  const progress = actionProgress(run, action.id);
-  const spec = kind === 'staff' ? action.staff : action.training;
-  return scaledCost(spec.baseCost, spec.costGrowth, progress[kind], 1, cfg);
+/** Preis für den nächsten Mitarbeiter an einer Linie. */
+export function hireCost(run: RunState, action: ActionDef, cfg: GameConfig): Partial<ResourceMap> {
+  return scaledCost(
+    action.staff.baseCost,
+    action.staff.costGrowth,
+    staffOf(run, action.id),
+    1,
+    cfg,
+  );
 }
 
-/** Mitarbeiter einstellen bzw. Schulung kaufen. Nur im Gebäude der Tätigkeit. */
-export function buyActionUpgrade(
-  game: GameState,
-  id: ActionId,
-  kind: UpgradeKind,
-  cfg: GameConfig,
-): GameState {
+/** Ist im Gebäude noch Platz für einen Mitarbeiter? */
+export function hasRoom(run: RunState, location: LocationId, cfg: GameConfig): boolean {
+  return staffInBuilding(run, location, cfg) < buildingCapacity(run, location, cfg);
+}
+
+function insideAt(run: RunState, location: LocationId, cfg: GameConfig): boolean {
+  return run.world.inside && currentLocation(run, cfg) === location;
+}
+
+/** Mitarbeiter einstellen. Nur im Gebäude der Linie und wenn Platz ist. */
+export function hireStaff(game: GameState, id: ActionId, cfg: GameConfig): GameState {
   const run = game.run;
   const action = findAction(id, cfg);
   if (game.phase !== 'playing' || !run || !action || !isActionUnlocked(run, action, cfg)) {
     return game;
   }
-  if (!run.world.inside || currentLocation(run, cfg) !== action.location) return game;
-  const progress = actionProgress(run, id);
-  if (kind === 'training' && progress.training >= action.training.maxLevel) return game;
-  const cost = upgradeCost(run, action, kind, cfg);
+  if (!insideAt(run, action.location, cfg) || !hasRoom(run, action.location, cfg)) return game;
+  const cost = hireCost(run, action, cfg);
   if (!canAfford(run.resources, cost)) return game;
-  return {
-    ...game,
-    run: {
-      ...run,
-      resources: pay(run.resources, cost),
-      actions: { ...run.actions, [id]: { ...progress, [kind]: progress[kind] + 1 } },
-    },
+  const before = totalStaff(run);
+  let next: RunState = {
+    ...run,
+    resources: pay(run.resources, cost),
+    actions: { ...run.actions, [id]: { staff: staffOf(run, id) + 1 } },
   };
+  if (before === 0) next = addChronicle(next, 'firstWorker', {}, cfg);
+  const milestone = cfg.industry.workforceMilestones.find((m) => before < m && before + 1 >= m);
+  if (milestone !== undefined) next = addChronicle(next, 'workforce', { count: milestone }, cfg);
+  return { ...game, run: next };
+}
+
+/** Preis für die nächste Ausbaustufe (null = schon ganz ausgebaut). */
+export function buildingUpgradeCost(
+  run: RunState,
+  location: LocationId,
+  cfg: GameConfig,
+): Partial<ResourceMap> | null {
+  const def = findBuilding(location, cfg);
+  const level = buildingLevel(run, location);
+  if (!def || level >= cfg.industry.maxLevel) return null;
+  return scaledCost(def.levelCost, def.levelCostGrowth, level - 1, 1, cfg);
+}
+
+export type UpgradeBlock = 'maxed' | 'stage' | 'money' | 'away' | null;
+
+/** Warum der Ausbau gerade nicht geht (null = er geht). */
+export function buildingUpgradeBlock(
+  run: RunState,
+  location: LocationId,
+  cfg: GameConfig,
+): UpgradeBlock {
+  const cost = buildingUpgradeCost(run, location, cfg);
+  if (!cost) return 'maxed';
+  const level = buildingLevel(run, location);
+  if (run.stage < levelStageRequirement(location, level + 1, cfg)) return 'stage';
+  if (!insideAt(run, location, cfg)) return 'away';
+  if (!canAfford(run.resources, cost)) return 'money';
+  return null;
+}
+
+/** Gebäude eine Stufe ausbauen: mehr Plätze, mehr Maschinen, sichtbar größer. */
+export function upgradeBuilding(game: GameState, location: LocationId, cfg: GameConfig): GameState {
+  const run = game.run;
+  if (game.phase !== 'playing' || !run || !isBuildingOpen(run, location, cfg)) return game;
+  const cost = buildingUpgradeCost(run, location, cfg);
+  if (!cost || buildingUpgradeBlock(run, location, cfg) !== null) return game;
+  const current = run.buildings[location] ?? { level: 1, machines: {} };
+  const level = current.level + 1;
+  let next: RunState = {
+    ...run,
+    resources: pay(run.resources, cost),
+    buildings: { ...run.buildings, [location]: { ...current, level } },
+    stats: { ...run.stats, upgrades: run.stats.upgrades + 1 },
+  };
+  next = addChronicle(next, 'buildingUpgraded', { location, level }, cfg);
+  return { ...game, run: next };
+}
+
+/** Preis für die nächste Maschinenstufe (null = am Gebäude-Limit bzw. unbekannt). */
+export function machineCost(
+  run: RunState,
+  id: MachineId,
+  cfg: GameConfig,
+): Partial<ResourceMap> | null {
+  const def = findMachine(id, cfg);
+  if (!def) return null;
+  const level = machineLevel(run, id, cfg);
+  if (level >= buildingLevel(run, def.location)) return null;
+  return scaledCost(def.baseCost, def.costGrowth, level, 1, cfg);
+}
+
+/** Maschine bauen bzw. verbessern. Höchstens so weit wie die Ausbaustufe des Gebäudes. */
+export function buyMachine(game: GameState, id: MachineId, cfg: GameConfig): GameState {
+  const run = game.run;
+  const def = findMachine(id, cfg);
+  if (game.phase !== 'playing' || !run || !def || !isBuildingOpen(run, def.location, cfg)) {
+    return game;
+  }
+  if (!insideAt(run, def.location, cfg)) return game;
+  const cost = machineCost(run, id, cfg);
+  if (!cost || !canAfford(run.resources, cost)) return game;
+  const current = run.buildings[def.location] ?? { level: 1, machines: {} };
+  const level = machineLevel(run, id, cfg) + 1;
+  let next: RunState = {
+    ...run,
+    resources: pay(run.resources, cost),
+    buildings: {
+      ...run.buildings,
+      [def.location]: { ...current, machines: { ...current.machines, [id]: level } },
+    },
+    stats: { ...run.stats, upgrades: run.stats.upgrades + 1 },
+  };
+  next = addChronicle(next, 'machineBuilt', { machine: id, level }, cfg);
+  return { ...game, run: next };
 }
 
 export function vehicleIndex(id: VehicleId): number {

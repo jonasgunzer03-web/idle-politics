@@ -1,9 +1,7 @@
 import { withGameSpeed } from '../config';
 import { cfg, playingGame, runOf } from '../test/fixtures';
 import {
-  actionYield,
   buildProject,
-  buyActionUpgrade,
   buyGenerator,
   buyVehicle,
   canAfford,
@@ -11,10 +9,12 @@ import {
   maxAffordable,
   missingFor,
   performAction,
+  hireCost,
+  hireStaff,
   productionRates,
-  upgradeCost,
   zeroResources,
 } from './economy';
+import { cycleOutputs, lineSpeedFactor } from './production';
 import { resourceMultiplier } from './rules';
 import { findAction, findGenerator } from './unlocks';
 
@@ -65,61 +65,73 @@ describe('Kostenformel', () => {
   });
 });
 
-describe('Tätigkeiten an Orten', () => {
+describe('Produktionslinien an Orten', () => {
   it('Arbeiten geht nur im Werk (drinnen)', () => {
     const inside = playingGame();
     const r1 = performAction(inside, 'work', cfg);
     expect(r1.gained.money).toBeGreaterThan(0);
+    expect(r1.goods.wares).toBeCloseTo(1);
     const outside = playingGame({ world: { ...runOf(inside).world, inside: false } });
     expect(performAction(outside, 'work', cfg).gained).toEqual({});
     // Netzwerken geht im Werk nicht (das ist in der Kneipe)
     expect(performAction(inside, 'network', cfg).gained).toEqual({});
   });
 
-  it('Ertrag wächst mit Stufe und Schulung', () => {
-    const base = actionYield(playingGame(), act('work'), cfg).money ?? 0;
-    const stage3 = actionYield(playingGame({ stage: 3 }), act('work'), cfg).money ?? 0;
+  it('Ertrag wächst mit der Stufe', () => {
+    const base = cycleOutputs(playingGame(), act('work'), cfg).money ?? 0;
+    const stage3 = cycleOutputs(playingGame({ stage: 3 }), act('work'), cfg).money ?? 0;
     expect(stage3 / base).toBeCloseTo(cfg.balancing.tapStageGrowth ** 2);
-    const trained =
-      actionYield(playingGame({ actions: { work: { staff: 0, training: 2 } } }), act('work'), cfg)
-        .money ?? 0;
-    expect(trained / base).toBeCloseTo(1.5);
   });
 
-  it('Facharbeiter in Rhenanien: 1 € × 0,7 × 0,9 pro Schicht', () => {
-    expect(actionYield(playingGame(), act('work'), cfg).money).toBeCloseTo(0.63);
+  it('Facharbeiter in Rhenanien: 0,5 € × 0,7 × 0,9 Lohn pro Schicht', () => {
+    expect(cycleOutputs(playingGame(), act('work'), cfg).money).toBeCloseTo(0.315);
+  });
+
+  it('Verkaufen braucht Waren, sonst passiert nichts', () => {
+    const atMarket = playingGame({ world: { posX: 650, target: null, inside: true } });
+    const empty = performAction(atMarket, 'sell', cfg);
+    expect(empty.game).toBe(atMarket);
+    expect(empty.blockedBy).toBe('wares');
+    const stocked = playingGame({
+      world: { posX: 650, target: null, inside: true },
+      goods: { wares: 3, contacts: 0, flyers: 0, files: 0 },
+    });
+    const sold = performAction(stocked, 'sell', cfg);
+    expect(runOf(sold.game).goods.wares).toBeCloseTo(2);
+    expect(sold.gained.money).toBeGreaterThan(0);
   });
 
   it('Mitarbeiter erzeugen automatische Erträge', () => {
-    const game = playingGame({ actions: { work: { staff: 4, training: 0 } } });
-    // 4 Mitarbeiter × 0,5 Ausführungen/s × 0,63 €
-    expect(productionRates(game, cfg).money).toBeCloseTo(4 * 0.5 * 0.63);
+    const game = playingGame({ actions: { work: { staff: 4 } } });
+    const run = runOf(game);
+    // 4 Mitarbeiter × 0,5 Durchgänge/s × Lohn × Tempo (Belegschaft) × Stimmung (60 % → 1,04)
+    const speed = lineSpeedFactor(run, act('work'), cfg);
+    const wage = cycleOutputs(game, act('work'), cfg).money ?? 0;
+    expect(productionRates(game, cfg).money).toBeCloseTo(4 * 0.5 * wage * speed * 1.04);
   });
 
-  it('Mitarbeiter und Schulungen kauft man nur im Gebäude', () => {
+  it('Mitarbeiter stellt man nur im Gebäude ein', () => {
     const inside = playingGame({ resources: rich });
-    const hired = buyActionUpgrade(inside, 'work', 'staff', cfg);
+    const hired = hireStaff(inside, 'work', cfg);
     expect(runOf(hired).actions.work?.staff).toBe(1);
     const outside = playingGame({
       resources: rich,
       world: { posX: 160, target: null, inside: false },
     });
-    expect(buyActionUpgrade(outside, 'work', 'staff', cfg)).toBe(outside);
+    expect(hireStaff(outside, 'work', cfg)).toBe(outside);
   });
 
-  it('Schulung endet bei der Höchststufe', () => {
-    const max = act('work').training.maxLevel;
-    const game = playingGame({ resources: rich, actions: { work: { staff: 0, training: max } } });
-    expect(buyActionUpgrade(game, 'work', 'training', cfg)).toBe(game);
+  it('Ein volles Gebäude nimmt niemanden mehr auf', () => {
+    const full = playingGame({ resources: rich, actions: { work: { staff: 5 } } });
+    expect(hireStaff(full, 'work', cfg)).toBe(full);
   });
 
   it('Mitarbeiter werden teurer', () => {
     const run0 = runOf(playingGame());
-    const run5 = runOf(playingGame({ actions: { work: { staff: 5, training: 0 } } }));
-    expect(
-      (upgradeCost(run5, act('work'), 'staff', cfg).money ?? 0) >
-        (upgradeCost(run0, act('work'), 'staff', cfg).money ?? 0),
-    ).toBe(true);
+    const run5 = runOf(playingGame({ actions: { work: { staff: 5 } } }));
+    expect((hireCost(run5, act('work'), cfg).money ?? 0) > (hireCost(run0, act('work'), cfg).money ?? 0)).toBe(
+      true,
+    );
   });
 });
 

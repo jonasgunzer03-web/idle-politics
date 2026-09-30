@@ -4,16 +4,22 @@ import {
   ACCESSORY_IDS,
   ACHIEVEMENT_IDS,
   ACTION_IDS,
+  CHRONICLE_KEYS,
+  FACTION_IDS,
   FOREIGN_IDS,
+  GOOD_IDS,
   GENERATOR_IDS,
   GROUP_IDS,
   LEGACY_IDS,
   LOCATION_IDS,
+  MACHINE_IDS,
   MAX_STAGE,
   PATH_IDS,
+  POLICY_IDS,
   PROFESSION_IDS,
   PROJECT_IDS,
   RESOURCE_IDS,
+  SKILL_IDS,
   STATE_IDS,
   VEHICLE_IDS,
   type GeneratorId,
@@ -23,7 +29,7 @@ import {
 // werden daraus abgeleitet. Jede Änderung hier erfordert eine neue saveVersion und eine
 // Migration in save/migrations.ts.
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 // z.number() lehnt in zod 4 NaN und Infinity bereits ab.
 const finiteNonNeg = z.number().min(0);
@@ -61,6 +67,36 @@ export const characterSchema = z.object({
   accessories: z.array(z.enum(ACCESSORY_IDS)),
 });
 
+export const goodMapSchema = z.object(
+  Object.fromEntries(GOOD_IDS.map((id) => [id, finiteNonNeg])) as Record<
+    (typeof GOOD_IDS)[number],
+    typeof finiteNonNeg
+  >,
+);
+
+const seedSchema = z.number().int().min(0).max(0xffffffff);
+
+const advisorCandidateSchema = z.object({
+  /** Aus dem Seed werden Name und Aussehen abgeleitet. */
+  seed: seedSchema,
+  faction: z.enum(FACTION_IDS),
+  skill: z.enum(SKILL_IDS),
+});
+
+const advisorSchema = advisorCandidateSchema.extend({
+  loyalty: percent,
+  /** playMs, seit dem der Berater am Tisch sitzt. */
+  joinedAt: finiteNonNeg,
+});
+
+const chronicleEntrySchema = z.object({
+  /** playMs des Ereignisses. */
+  t: finiteNonNeg,
+  key: z.enum(CHRONICLE_KEYS),
+  /** Platzhalter für den Text (Namen, Zahlen). */
+  params: z.record(z.string().max(24), z.union([z.string().max(80), z.number()])),
+});
+
 const openEventSchema = z.object({
   id: z.string().min(1).max(64),
   /** Staat, um den es in einer außenpolitischen Karte geht. */
@@ -91,8 +127,44 @@ export const runSchema = z.object({
     /** Ist die Figur gerade in einem Gebäude? */
     inside: z.boolean(),
   }),
-  /** Mitarbeiter und Schulungen je Tätigkeit. */
-  actions: z.partialRecord(z.enum(ACTION_IDS), z.object({ staff: count, training: count })),
+  /** Seed des Durchlaufs: Namen der Mitarbeiter, Rivale (bleibt im ganzen Durchlauf gleich). */
+  seed: seedSchema,
+  /** Mitarbeiter je Produktionslinie. */
+  actions: z.partialRecord(z.enum(ACTION_IDS), z.object({ staff: count })),
+  /** Lagerbestand der Waren. */
+  goods: goodMapSchema,
+  /** Ausbaustufe und Maschinen je Gebäude (fehlt = Stufe 1 ohne Maschinen). */
+  buildings: z.partialRecord(
+    z.enum(LOCATION_IDS),
+    z.object({
+      level: z.number().int().min(1).max(10),
+      machines: z.partialRecord(z.enum(MACHINE_IDS), z.number().int().min(0).max(10)),
+    }),
+  ),
+  /** Arbeiterstimmung in Prozent. */
+  morale: percent,
+  /** Läuft gerade ein Streik? */
+  striking: z.boolean(),
+  /** Berater am Tisch des Parteibüros. */
+  advisors: z.array(advisorSchema).max(8),
+  /** Bewerber für den Beratertisch und playMs der nächsten Auffrischung. */
+  advisorPool: z.object({
+    candidates: z.array(advisorCandidateSchema).max(5),
+    refreshAt: finiteNonNeg,
+  }),
+  /** Vorlagen auf der Tagesordnung und playMs der nächsten Auffrischung. */
+  agenda: z.object({ items: z.array(z.enum(POLICY_IDS)).max(6), refreshAt: finiteNonNeg }),
+  /** Geltende Gesetze: seit wann (playMs) und wie viele Spätfolgen schon eingetreten sind. */
+  laws: z.partialRecord(z.enum(POLICY_IDS), z.object({ since: finiteNonNeg, fired: count })),
+  rival: z.object({
+    seed: seedSchema,
+    strength: percent,
+    status: z.enum(['active', 'jailed']),
+    /** playMs der nächsten Aktion des Rivalen. */
+    nextMoveAt: finiteNonNeg,
+  }),
+  /** Stadtchronik (neueste zuletzt). */
+  chronicle: z.array(chronicleEntrySchema).max(200),
   vehicle: z.enum(VEHICLE_IDS),
   events: z.object({
     open: z.array(openEventSchema).max(10),
@@ -126,6 +198,9 @@ export const runSchema = z.object({
     survivedUnrest: z.boolean(),
     /** Gerade über 99 % Unruhe (für survivedUnrest). */
     atBrink: z.boolean(),
+    lawsPassed: count,
+    upgrades: count,
+    defections: count,
   }),
 });
 
@@ -139,6 +214,10 @@ export const HINT_IDS = [
   'worldUnlocked',
   'firstEvent',
   'autocraticTurn',
+  'productionChain',
+  'partySession',
+  'rivalAppears',
+  'strike',
 ] as const;
 
 export const RUN_END_REASONS = ['revolution', 'coup', 'purge', 'retired'] as const;
@@ -203,4 +282,7 @@ export type HintId = (typeof HINT_IDS)[number];
 export type RunEndReason = (typeof RUN_END_REASONS)[number];
 export type GamePhase = GameState['phase'];
 export type OpenEvent = z.infer<typeof openEventSchema>;
+export type Advisor = z.infer<typeof advisorSchema>;
+export type AdvisorCandidate = z.infer<typeof advisorCandidateSchema>;
+export type ChronicleEntry = z.infer<typeof chronicleEntrySchema>;
 export type GeneratorCounts = Partial<Record<GeneratorId, number>>;

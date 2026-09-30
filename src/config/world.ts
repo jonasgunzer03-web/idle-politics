@@ -1,6 +1,8 @@
 import type {
   ActionId,
   DistrictId,
+  GoodId,
+  LineTag,
   LocationId,
   ResourceId,
   ResourceMap,
@@ -29,16 +31,24 @@ export interface LocationDef {
   unlockStage: number;
 }
 
+/** Zutaten bzw. Erzeugnisse einer Linie je Durchgang: Waren und Währungen gemischt. */
+export type FlowMap = Partial<Record<GoodId | ResourceId, number>>;
+
 export interface ActionDef {
   id: ActionId;
   location: LocationId;
   unlockStage: number;
-  /** Ertrag pro Ausführung (Stufe 1, vor Multiplikatoren). */
-  yields: Partial<ResourceMap>;
-  /** Mitarbeiter: Grundpreis, Preissteigerung und Ausführungen pro Sekunde je Mitarbeiter. */
+  /** Wofür die Linie steht (Gesetze und Berater wirken auf solche Gruppen). */
+  tag: LineTag;
+  /**
+   * Zutaten je Durchgang. Waren in Stück; Währungen (Stufe 1) wachsen mit der Karrierestufe
+   * wie die Erträge. Fehlt eine Zutat, stockt die Linie.
+   */
+  inputs: FlowMap;
+  /** Erzeugnisse je Durchgang. Währungen (Stufe 1, vor Multiplikatoren), Waren in Stück. */
+  outputs: FlowMap;
+  /** Mitarbeiter: Grundpreis, Preissteigerung und Durchgänge pro Sekunde je Mitarbeiter. */
   staff: { baseCost: Partial<ResourceMap>; costGrowth: number; ratePerStaff: number };
-  /** Schulung: Grundpreis, Preissteigerung, Ertragsbonus je Stufe, Höchststufe. */
-  training: { baseCost: Partial<ResourceMap>; costGrowth: number; bonus: number; maxLevel: number };
 }
 
 export interface VehicleDef {
@@ -63,7 +73,7 @@ export const districts: DistrictDef[] = [
 export const locations: LocationDef[] = [
   { id: 'workplace', district: 'quarter', x: 160, unlockStage: 1 },
   { id: 'pub', district: 'quarter', x: 430, unlockStage: 1 },
-  { id: 'market', district: 'quarter', x: 650, unlockStage: 2 },
+  { id: 'market', district: 'quarter', x: 650, unlockStage: 1 },
   { id: 'partyOffice', district: 'quarter', x: 860, unlockStage: 1 },
   { id: 'townHall', district: 'oldTown', x: 1220, unlockStage: 4 },
   { id: 'newspaper', district: 'oldTown', x: 1480, unlockStage: 4 },
@@ -78,116 +88,147 @@ export const locations: LocationDef[] = [
 export const startLocation: LocationId = 'workplace';
 
 /**
- * Tätigkeiten an den Orten. Tippen führt sie einmal aus, Mitarbeiter führen sie automatisch aus,
- * Schulungen erhöhen den Ertrag.
+ * Produktionslinien an den Orten. Tippen führt einen Durchgang von Hand aus, Mitarbeiter
+ * arbeiten automatisch. Waren wandern von Linie zu Linie (Produktionskette).
  */
 export const actions: ActionDef[] = [
-  // Werk/Büro: Schicht arbeiten → Geld
+  // Werk/Büro: Schicht arbeiten → Lohn und Waren
   {
     id: 'work',
     location: 'workplace',
     unlockStage: 1,
-    yields: { money: 1 },
+    tag: 'industry',
+    inputs: {},
+    outputs: { money: 0.5, wares: 1 },
     staff: { baseCost: { money: 40 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 30 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Kneipe: Mit Kollegen reden → Einfluss
+  // Kneipe: Mit Leuten reden → Einfluss und Kontakte
   {
     id: 'network',
     location: 'pub',
     unlockStage: 1,
-    yields: { influence: 0.5 },
+    tag: 'party',
+    inputs: {},
+    outputs: { influence: 0.5, contacts: 0.5 },
     staff: { baseCost: { money: 70 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 50 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Marktplatz: Flyer verteilen → Anhänger
+  // Markt: Waren verkaufen → Geld
+  {
+    id: 'sell',
+    location: 'market',
+    unlockStage: 1,
+    tag: 'trade',
+    inputs: { wares: 1 },
+    outputs: { money: 2 },
+    staff: { baseCost: { money: 55 }, costGrowth: 1.3, ratePerStaff: 0.5 },
+  },
+  // Markt: Flugblätter verteilen → Anhänger
   {
     id: 'canvass',
     location: 'market',
     unlockStage: 2,
-    yields: { followers: 0.6 },
+    tag: 'party',
+    inputs: { flyers: 1 },
+    outputs: { followers: 1.2 },
     staff: { baseCost: { money: 300, influence: 20 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 200 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Parteibüro: Parteiarbeit → Einfluss und Anhänger
+  // Parteibüro: Flugblätter drucken (kostet Papier und Tinte) → Flugblätter
+  {
+    id: 'print',
+    location: 'partyOffice',
+    unlockStage: 2,
+    tag: 'party',
+    inputs: { money: 0.4 },
+    outputs: { flyers: 2 },
+    staff: { baseCost: { money: 350, influence: 20 }, costGrowth: 1.3, ratePerStaff: 0.5 },
+  },
+  // Parteibüro: Kontakte zu Mitgliedern machen → Einfluss und Anhänger
   {
     id: 'partyWork',
     location: 'partyOffice',
     unlockStage: 2,
-    yields: { influence: 0.3, followers: 0.3 },
+    tag: 'party',
+    inputs: { contacts: 1 },
+    outputs: { influence: 0.8, followers: 0.4 },
     staff: { baseCost: { money: 450, influence: 40 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 300 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Rathaus: Bürgersprechstunde → Einfluss und Anhänger
+  // Rathaus: Bürgersprechstunde → Einfluss, Anhänger und Akten
   {
     id: 'consultation',
     location: 'townHall',
     unlockStage: 4,
-    yields: { influence: 0.4, followers: 0.4 },
+    tag: 'state',
+    inputs: {},
+    outputs: { influence: 0.4, followers: 0.4, files: 1 },
     staff: { baseCost: { money: 9_000, influence: 600 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 6_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Zeitungshaus: Interview geben → Anhänger
+  // Zeitungshaus: Kontakte in Interviews verwandeln → Anhänger
   {
     id: 'interview',
     location: 'newspaper',
     unlockStage: 4,
-    yields: { followers: 0.9 },
+    tag: 'media',
+    inputs: { contacts: 1 },
+    outputs: { followers: 2.2 },
     staff: { baseCost: { money: 9_000, influence: 600 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 6_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Bank: Spenden sammeln → Geld
+  // Bank: Kontakte um Spenden bitten → Geld
   {
     id: 'fundraise',
     location: 'bank',
     unlockStage: 4,
-    yields: { money: 1.6 },
+    tag: 'finance',
+    inputs: { contacts: 1 },
+    outputs: { money: 4.5 },
     staff: { baseCost: { money: 9_000, influence: 600 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 6_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Parlament: Debattieren → Einfluss und Anhänger
+  // Parlament: Akten debattieren → Einfluss und Anhänger
   {
     id: 'debate',
     location: 'parliament',
     unlockStage: 7,
-    yields: { influence: 0.8, followers: 0.5 },
+    tag: 'state',
+    inputs: { files: 1 },
+    outputs: { influence: 1.5, followers: 1 },
     staff: { baseCost: { money: 400_000, influence: 30_000 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 250_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Ministerium: Verwalten → Geld und Einfluss
+  // Ministerium: Verwalten → Geld, Einfluss und Akten
   {
     id: 'administer',
     location: 'ministry',
     unlockStage: 7,
-    yields: { money: 1.2, influence: 0.4 },
+    tag: 'state',
+    inputs: {},
+    outputs: { money: 1.2, influence: 0.4, files: 1 },
     staff: { baseCost: { money: 400_000, influence: 30_000 }, costGrowth: 1.3, ratePerStaff: 0.5 },
-    training: { baseCost: { money: 250_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Botschaftsviertel: Empfang geben → Diplomatie
+  // Botschaftsviertel: Waren als Gastgeschenke → Diplomatie
   {
     id: 'reception',
     location: 'embassy',
     unlockStage: 8,
-    yields: { diplomacy: 0.02 },
+    tag: 'diplomacy',
+    inputs: { wares: 2 },
+    outputs: { diplomacy: 0.03 },
     staff: {
       baseCost: { money: 2_000_000, influence: 100_000 },
       costGrowth: 1.3,
       ratePerStaff: 0.5,
     },
-    training: { baseCost: { money: 1_500_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
-  // Regierungssitz: Rede an die Nation → Anhänger und Einfluss
+  // Regierungssitz: Akten in eine Rede an die Nation gießen → Anhänger und Einfluss
   {
     id: 'speech',
     location: 'palace',
     unlockStage: 10,
-    yields: { followers: 1.2, influence: 0.6 },
+    tag: 'media',
+    inputs: { files: 1 },
+    outputs: { followers: 2.5, influence: 1.2 },
     staff: {
       baseCost: { money: 60_000_000, influence: 4_000_000 },
       costGrowth: 1.3,
       ratePerStaff: 0.5,
     },
-    training: { baseCost: { money: 40_000_000 }, costGrowth: 2.2, bonus: 0.25, maxLevel: 10 },
   },
 ];
 

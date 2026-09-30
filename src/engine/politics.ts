@@ -1,5 +1,7 @@
 import type { GameConfig } from '../config';
 import { demote } from './career';
+import { addChronicle } from './chronicle';
+import { modifiers } from './modifiers';
 import { drawRandom } from './rng';
 import {
   approvalBase,
@@ -106,13 +108,15 @@ export function tickPolitics(
 
   // Beziehungen kehren langsam zum Startwert zurück
   const relations = { ...run.relations };
+  const relationsDrift = modifiers(run, cfg).relationsDrift * scaledMinutes;
   for (const id of foreignPartners(run)) {
-    if (run.relations[id] === undefined) continue;
-    relations[id] = approach(
+    if (run.relations[id] === undefined && relationsDrift === 0) continue;
+    const drifted = approach(
       relation(run, id, cfg),
       state.startRelations[id] ?? 0,
       cfg.foreignRules.relationDriftPerMinute * scaledMinutes,
     );
+    relations[id] = Math.min(100, Math.max(-100, drifted + relationsDrift));
   }
 
   // Fairness: zwischen 90 % und einem Sturz liegen mindestens unrestGraceSeconds.
@@ -163,6 +167,7 @@ export function tickPolitics(
         cfg.balancing.elections.lossStages,
         cfg,
       );
+      next = addChronicle(next, 'resigned', { stage: next.stage }, cfg);
       return { game: { ...result, run: next }, signal: 'resigned' };
     }
     return { game: result, signal: 'revolution' };

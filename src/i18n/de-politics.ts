@@ -265,6 +265,11 @@ export const politicsTexts = {
       veteran: { name: 'Dauerbrenner', text: 'Fünf Amtsjahre weiterregiert.' },
       retiree: { name: 'Memoiren', text: 'In den Ruhestand gegangen.' },
       eventVeteran: { name: 'Entscheider', text: '50 Entscheidungen getroffen.' },
+      industrialist: { name: 'Industriekapitän', text: 'Ein Gebäude voll ausgebaut.' },
+      lawmaker: { name: 'Gesetzgeber', text: 'Zehn Beschlüsse in einem Durchlauf gefasst.' },
+      fullCabinet: { name: 'Volles Haus', text: 'Fünf Berater am Tisch.' },
+      rivalDefeated: { name: 'Konkurrenzlos', text: 'Den Rivalen ausgeschaltet.' },
+      bigEmployer: { name: 'Jobmotor', text: '100 Mitarbeiter beschäftigt.' },
     } satisfies Record<AchievementId, { name: string; text: string }>,
   },
 
@@ -307,6 +312,22 @@ export const politicsTexts = {
     firstEvent: {
       title: 'Entscheidungen',
       text: 'Oben rechts wartet eine Entscheidung. Wische die Karte nach rechts für Ja oder nach links für Nein. Du kannst dir Zeit lassen, höchstens drei Karten warten.',
+    },
+    productionChain: {
+      title: 'Deine Produktionskette',
+      text: 'Im Werk entstehen Waren. Auf dem Markt verkaufst du sie für Geld. Stelle in beiden Gebäuden Leute ein, dann läuft die Kette von allein. Fehlt Nachschub, stockt der Markt – dann brauchst du mehr Leute im Werk.',
+    },
+    partySession: {
+      title: 'Politik im Parteibüro',
+      text: 'Im Parteibüro liegen Vorlagen auf dem Tisch. Hol dir Berater dazu, hör dir ihre Meinung an und fasse Beschlüsse. Manche wirken sofort, manche erst später – und nicht immer so, wie du hoffst.',
+    },
+    rivalAppears: {
+      title: 'Ein Rivale',
+      text: 'Jemand will dir den Weg nach oben streitig machen. Je stärker dein Rivale, desto schlechter deine Wahlchancen. Im Parteibüro kannst du dich wehren.',
+    },
+    strike: {
+      title: 'Streik!',
+      text: 'Deine Belegschaft ist unzufrieden und legt die Arbeit nieder. Senke die Unruhe oder fasse Beschlüsse, die den Leuten helfen – dann geht es weiter.',
     },
     autocraticTurn: {
       title: 'Ein anderer Weg',

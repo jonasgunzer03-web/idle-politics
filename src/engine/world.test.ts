@@ -55,9 +55,12 @@ describe('Bewegung durch die Welt', () => {
     expect(runOf(enterBuilding(outside, cfg)).world.inside).toBe(true);
     const between = playingGame({ world: { posX: 300, target: null, inside: false } });
     expect(enterBuilding(between, cfg)).toBe(between);
-    // Marktplatz erst ab Stufe 2 betretbar, aber erreichbar
-    const market = playingGame({ world: { posX: x('market'), target: null, inside: false } });
-    expect(enterBuilding(market, cfg)).toBe(market);
+    // Botschaft erst ab Stufe 8 betretbar, auf Stufe 7 aber schon erreichbar
+    const embassy = playingGame({
+      stage: 7,
+      world: { posX: x('embassy'), target: null, inside: false },
+    });
+    expect(enterBuilding(embassy, cfg)).toBe(embassy);
   });
 
   it('Hinausgehen und Stehenbleiben', () => {

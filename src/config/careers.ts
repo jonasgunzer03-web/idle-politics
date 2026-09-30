@@ -27,17 +27,17 @@ export interface CareerStageDef {
  */
 export const stageRequirements: StageRequirement[] = [
   // Werte mit scripts/calibrate.ts auf die Zielzeiten eingestellt
-  { money: 280, influence: 68, followers: 0, loyalty: 0 }, // → 2
-  { money: 3_900, influence: 740, followers: 390, loyalty: 0 }, // → 3
-  { money: 10_000, influence: 1_600, followers: 1_000, loyalty: 20 }, // → 4
-  { money: 76_000, influence: 9_700, followers: 6_400, loyalty: 25 }, // → 5
-  { money: 520_000, influence: 66_000, followers: 41_000, loyalty: 30 }, // → 6
-  { money: 1_800_000, influence: 220_000, followers: 100_000, loyalty: 35 }, // → 7
-  { money: 3_700_000, influence: 400_000, followers: 230_000, loyalty: 40 }, // → 8
-  { money: 8_400_000, influence: 970_000, followers: 560_000, loyalty: 45 }, // → 9
-  { money: 22_000_000, influence: 2_400_000, followers: 1_200_000, loyalty: 50 }, // → 10
-  { money: 45_000_000, influence: 4_900_000, followers: 2_700_000, loyalty: 55 }, // → 11
-  { money: 85_000_000, influence: 8_800_000, followers: 5_000_000, loyalty: 60 }, // → 12
+  { money: 280, influence: 70, followers: 0, loyalty: 0 }, // → 2
+  { money: 3_600, influence: 690, followers: 360, loyalty: 0 }, // → 3
+  { money: 8_900, influence: 1_500, followers: 890, loyalty: 20 }, // → 4
+  { money: 71_000, influence: 9_300, followers: 6_000, loyalty: 25 }, // → 5
+  { money: 610_000, influence: 76_000, followers: 49_000, loyalty: 30 }, // → 6
+  { money: 2_100_000, influence: 260_000, followers: 110_000, loyalty: 35 }, // → 7
+  { money: 5_300_000, influence: 570_000, followers: 330_000, loyalty: 40 }, // → 8
+  { money: 12_000_000, influence: 1_300_000, followers: 750_000, loyalty: 45 }, // → 9
+  { money: 65_000_000, influence: 7_100_000, followers: 3_200_000, loyalty: 50 }, // → 10
+  { money: 130_000_000, influence: 16_000_000, followers: 8_500_000, loyalty: 55 }, // → 11
+  { money: 250_000_000, influence: 25_000_000, followers: 15_000_000, loyalty: 60 }, // → 12
 ];
 
 /**
