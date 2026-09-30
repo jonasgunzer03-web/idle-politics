@@ -17,6 +17,8 @@ interface BuildingProps {
   partyColor: string;
   /** Autokratisch: Propaganda statt Werbung. */
   autocratic: boolean;
+  /** Ausbaustufe des Gebäudes (1–5). */
+  level?: number;
 }
 
 function Windows({

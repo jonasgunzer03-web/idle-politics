@@ -316,7 +316,7 @@ describe('Migration v2 → v3 (Produktionsketten, Parteibüro)', () => {
       'rival',
       'chronicle',
     ]) {
-      delete run[key];
+      Reflect.deleteProperty(run, key);
     }
     const stats = run.stats as Record<string, unknown>;
     delete stats.lawsPassed;

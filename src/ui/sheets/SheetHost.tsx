@@ -1,7 +1,9 @@
 import { useGame } from '../../store';
 import { AutocracySheet } from './AutocracySheet';
 import { CareerSheet } from './CareerSheet';
+import { ChronicleSheet } from './ChronicleSheet';
 import { EventsSheet } from './EventsSheet';
+import { PolicySheet } from './PolicySheet';
 import { EditorSheet, EmigrationSheet } from './ProfileSheets';
 import { CountrySheet, GroupSheet, RegionSheet } from './RelationSheets';
 
@@ -27,5 +29,9 @@ export function SheetHost() {
       return <EmigrationSheet />;
     case 'editor':
       return <EditorSheet />;
+    case 'chronicle':
+      return <ChronicleSheet />;
+    case 'policy':
+      return <PolicySheet key={sheet.id} id={sheet.id} />;
   }
 }

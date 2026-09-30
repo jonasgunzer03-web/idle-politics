@@ -117,3 +117,51 @@
   padding-left: 18px;
   font-size: 0.85rem;
 }
+
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  margin-top: 6px;
+}
+
+.goods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.goodCell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 6px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.goodName {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.goodCell .muted {
+  grid-column: 1 / -1;
+}
+
+.goodBar {
+  grid-column: 1 / -1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.goodFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 300ms var(--ease);
+}

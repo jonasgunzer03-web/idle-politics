@@ -35,6 +35,19 @@
   --res-loyalty: #8a5a14;
   --res-diplomacy: #12848a;
 
+  /* Warenfarben */
+  --goods-wares: #8d5a2b;
+  --goods-contacts: #c77700;
+  --goods-flyers: #c2336b;
+  --goods-files: #4b5a70;
+
+  /* Farben der Parteiflügel */
+  --faction-economic: #1f5fa8;
+  --faction-social: #c0392b;
+  --faction-security: #3e4a33;
+  --faction-liberty: #c9a227;
+  --faction-populist: #7b3fa0;
+
   --radius: 14px;
   --radius-sm: 10px;
   --tap: 44px;
@@ -66,6 +79,11 @@
     --res-followers: #6fa8e8;
     --res-loyalty: #d9a650;
     --res-diplomacy: #4fc4ca;
+    --goods-wares: #d19a66;
+    --goods-contacts: #f0a63a;
+    --goods-flyers: #ec6fa0;
+    --goods-files: #9aabc4;
+    --faction-security: #7d9366;
   }
 }
 

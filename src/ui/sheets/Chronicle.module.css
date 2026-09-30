@@ -1,0 +1,90 @@
+.paper {
+  background: #f6f0e1;
+  color: #22211d;
+  border-radius: 4px;
+  padding: 14px 14px 10px;
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 10%),
+    0 10px 24px rgb(0 0 0 / 14%);
+  font-family: var(--font-serif);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.masthead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 3px double #22211d;
+  padding-bottom: 6px;
+}
+
+.paperName {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
+
+.edition {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #5a564c;
+}
+
+.lead {
+  border-bottom: 1px solid #22211d;
+  padding-bottom: 8px;
+}
+
+.leadHeadline {
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.dateline {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: #5a564c;
+  margin-top: 4px;
+}
+
+.columns {
+  column-count: 2;
+  column-gap: 14px;
+  column-rule: 1px solid #cfc6b2;
+}
+
+.item {
+  break-inside: avoid;
+  font-size: 0.84rem;
+  line-height: 1.25;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e0d7c3;
+}
+
+.itemYear {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8a8373;
+}
+
+.empty {
+  font-style: italic;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.footer {
+  font-family: var(--font-sans);
+  font-size: 0.64rem;
+  text-align: center;
+  color: #8a8373;
+}

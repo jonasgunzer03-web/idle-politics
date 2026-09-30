@@ -1,0 +1,509 @@
+/* Parteibüro: Beratertisch, Tagesordnung, Beschlüsse, Rivale, Sitzung. */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subTitle {
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.small {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.faction {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.warn {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--bad);
+}
+
+.good {
+  color: var(--good);
+}
+
+.bad {
+  color: var(--bad);
+}
+
+/* --- Beratertisch --- */
+
+.table {
+  position: relative;
+  padding: 6px 0 4px;
+}
+
+.tableTop {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 44%;
+  height: 34%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 35%, #a9774e, #6b4526 70%, #4e321b);
+  box-shadow:
+    inset 0 -6px 10px rgb(0 0 0 / 30%),
+    0 6px 14px rgb(0 0 0 / 22%);
+}
+
+.seats {
+  position: relative;
+  display: flex;
+  justify-content: space-evenly;
+  gap: 4px;
+}
+
+.seat {
+  width: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 2px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+.seat[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--state-secondary) 25%, transparent);
+}
+
+.seatBust {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--faction, var(--border));
+}
+
+.emptySeat {
+  height: 84px;
+  justify-content: center;
+  border: 2px dashed var(--border);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.seatName {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--surface);
+  padding: 0 5px;
+  border-radius: 6px;
+}
+
+.loyalty {
+  width: 46px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.loyaltyFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: var(--good);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.candidate {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.candidateBust {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.candidateText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.smallButton {
+  min-height: var(--tap);
+  min-width: 84px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--state-secondary);
+  color: #1c1f24;
+  font-weight: 800;
+  font-size: 0.74rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.smallButton:disabled {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.ghostButton {
+  align-self: flex-start;
+  min-height: var(--tap);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+}
+
+.iconButton {
+  width: var(--tap);
+  height: var(--tap);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+}
+
+/* --- Tagesordnung --- */
+
+.proposals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proposal {
+  text-align: left;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #fbf6ea, #f1e7d0);
+  color: #2b2f36;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 2px 0 rgb(0 0 0 / 8%);
+  position: relative;
+}
+
+.proposal .small {
+  color: #5b6069;
+}
+
+@media (prefers-color-scheme: dark) {
+  .proposal {
+    background: linear-gradient(135deg, #2e2a22, #242019);
+    color: var(--text);
+  }
+
+  .proposal .small {
+    color: var(--text-muted);
+  }
+}
+
+.area {
+  align-self: flex-start;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--state-secondary);
+}
+
+.discuss {
+  align-self: flex-end;
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.law {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.lawText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* --- Rivale --- */
+
+.rivalHead {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.rivalBust {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px #5b2a86;
+}
+
+.quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.strength {
+  height: 9px;
+  margin-top: 4px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.strengthFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: linear-gradient(90deg, #8f5ab8, #5b2a86);
+  transition: transform 300ms var(--ease);
+}
+
+/* --- Sitzung (Fenster) --- */
+
+.sessionRoom {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: linear-gradient(#efe6d3, #dccdb0);
+  padding: 12px 8px 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sessionRoom {
+    background: linear-gradient(#3a3226, #2a241b);
+  }
+}
+
+.speeches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.speech {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  animation: speechIn 380ms var(--ease) both;
+}
+
+.speech[data-side='right'] {
+  flex-direction: row-reverse;
+}
+
+@keyframes speechIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speech {
+    animation: none;
+  }
+}
+
+.speaker {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bubble {
+  position: relative;
+  max-width: 78%;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bubble[data-stance='for'] {
+  border-left: 4px solid var(--good);
+}
+
+.bubble[data-stance='against'] {
+  border-left: 4px solid var(--bad);
+}
+
+.bubble[data-stance='neutral'] {
+  border-left: 4px solid var(--border);
+}
+
+.voteBar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.voteFor {
+  background: var(--good);
+}
+
+.voteAgainst {
+  background: var(--bad);
+}
+
+.voteNeutral {
+  background: var(--border);
+}
+
+.effects {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.effect {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.effect::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--good);
+  flex-shrink: 0;
+}
+
+.effect[data-good='false']::before {
+  background: var(--bad);
+}
+
+.warning {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--warn) 16%, var(--surface));
+  font-size: 0.82rem;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.citizens {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.citizen {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.76rem;
+  font-style: italic;
+}
+
+.decide {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  padding-top: 6px;
+  background: var(--surface);
+}

@@ -12,7 +12,7 @@ import { Skyline, StreetArt } from '../../art/world/Street';
 import { defaultConfig } from '../../config';
 import { partyColors } from '../../config/appearance';
 import { careerVenue } from '../../config/careers';
-import { actionProgress } from '../../engine/economy';
+import { staffInBuilding } from '../../engine/production';
 import { LOCATION_IDS, type LocationId } from '../../engine/ids';
 import { worldLimitX } from '../../engine/rules';
 import { findLocation } from '../../engine/unlocks';
@@ -52,11 +52,7 @@ export function WorldView() {
         profession: run.profession,
         unrest: run.unrest,
         limit: worldLimitX(run, cfg),
-        staffHere: here
-          ? cfg.world.actions
-              .filter((a) => a.location === here)
-              .reduce((sum, a) => sum + actionProgress(run, a.id).staff, 0)
-          : 0,
+        staffHere: here ? staffInBuilding(run, here, cfg) : 0,
       };
     }),
   );

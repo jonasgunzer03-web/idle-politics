@@ -1,22 +1,27 @@
 import { useState } from 'react';
-import { Bike, Car, Footprints, Lock, UserPlus } from 'lucide-react';
+import { Bike, Car, Factory, Footprints, Lock } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { defaultConfig } from '../../config';
 import {
-  actionProgress,
   canAfford,
   vehicleCost,
   vehicleIndex,
   type BuyMode,
 } from '../../engine/economy';
-import { VEHICLE_IDS, type GeneratorId, type ResourceId } from '../../engine/ids';
+import { formatNumber } from '../../engine/format';
+import { GOOD_IDS, VEHICLE_IDS, type GeneratorId, type ResourceId } from '../../engine/ids';
+import { storageCapacity, totalStaff } from '../../engine/production';
 import { isResourceUnlocked, travelSpeed } from '../../engine/rules';
 import { isGeneratorAvailable } from '../../engine/unlocks';
 import { de, fill } from '../../i18n/de';
 import { gameStore, useGame } from '../../store';
 import { GeneratorRow } from '../components/GeneratorRow';
 import { ResourceIcon } from '../components/ResourceIcon';
-import { actionName, formatCost } from '../gameText';
+import { formatCost } from '../gameText';
+import { GoodIcon } from '../industry/icons';
+import { ProductionNetwork } from '../industry/ProductionNetwork';
+import { MoraleBar } from '../industry/TeamTab';
+import { goodName } from '../peopleText';
 import styles from './InvestTab.module.css';
 
 const cfg = defaultConfig;
@@ -140,40 +145,65 @@ function Vehicles() {
   );
 }
 
-function StaffOverview() {
-  const list = useGame((s) => {
+function GoodsOverview() {
+  const text = useGame((s) => {
     const run = s.game.run;
     if (!run) return '';
-    return cfg.world.actions
-      .map((a) => ({ id: a.id, staff: actionProgress(run, a.id).staff }))
-      .filter((a) => a.staff > 0)
-      .map((a) => `${a.id}:${a.staff}`)
-      .join('|');
+    return GOOD_IDS.map((g) => `${Math.floor(run.goods[g])}:${Math.floor(storageCapacity(run, g, cfg))}`).join(',') + `|${run.profession}`;
   });
-  const office = useGame((s) => s.game.run?.profession === 'office');
+  const [list = '', profession = 'skilled'] = text.split('|');
+  const office = profession === 'office';
   return (
-    <section className={styles.group}>
-      <h2 className={styles.groupTitle}>
-        <UserPlus size={18} aria-hidden="true" />
-        {de.invest.staffTitle}
-      </h2>
-      <p className={styles.muted}>{de.invest.staffText}</p>
-      {list && (
-        <ul className={styles.staffList}>
-          {list.split('|').map((entry) => {
-            const [id = 'work', count = '0'] = entry.split(':');
-            return (
-              <li key={id} className="num">
-                {fill(de.invest.staffEntry, {
-                  action: actionName(id as Parameters<typeof actionName>[0], office),
-                  count,
-                })}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
+    <div className={styles.goods}>
+      {list.split(',').map((entry, i) => {
+        const good = GOOD_IDS[i];
+        if (!good) return null;
+        const [amount = 0, max = 1] = entry.split(':').map(Number);
+        return (
+          <div key={good} className={styles.goodCell}>
+            <GoodIcon good={good} size={18} />
+            <span className={styles.goodName}>{goodName(good, office)}</span>
+            <span className={`${styles.muted} num`}>
+              {formatNumber(amount)} / {formatNumber(max)}
+            </span>
+            <span className={styles.goodBar}>
+              <span
+                className={styles.goodFill}
+                style={{
+                  transform: `scaleX(${Math.min(1, amount / Math.max(1, max))})`,
+                  background: `var(--goods-${good})`,
+                }}
+              />
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Economy() {
+  const staff = useGame((s) => (s.game.run ? totalStaff(s.game.run) : 0));
+  return (
+    <>
+      <section className={styles.group}>
+        <h2 className={styles.groupTitle}>
+          <Factory size={18} aria-hidden="true" />
+          {de.industry.economy.network}
+        </h2>
+        <p className={styles.muted}>{de.industry.economy.networkHint}</p>
+        <ProductionNetwork />
+        <p className={`${styles.muted} num`}>{fill(de.industry.economy.staffTotal, { count: staff })}</p>
+      </section>
+      <section className={styles.group}>
+        <h2 className={styles.groupTitle}>{de.industry.economy.moraleCard}</h2>
+        <MoraleBar />
+      </section>
+      <section className={styles.group}>
+        <h2 className={styles.groupTitle}>{de.industry.economy.goods}</h2>
+        <GoodsOverview />
+      </section>
+    </>
   );
 }
 
@@ -201,11 +231,13 @@ export function InvestTab() {
           ))}
         </div>
       </div>
+      <Economy />
       <Vehicles />
+      <h2 className={styles.sectionTitle}>{de.industry.economy.investments}</h2>
+      <p className={styles.muted}>{de.industry.economy.investmentsHint}</p>
       {GROUPS.map((resource) => (
         <Group key={resource} resource={resource} mode={mode} />
       ))}
-      <StaffOverview />
     </div>
   );
 }

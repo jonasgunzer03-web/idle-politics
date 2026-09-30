@@ -3,6 +3,24 @@ import type { GoodId, LocationId, MachineId, TraitId } from '../engine/ids';
 // Texte zum Aufbau-System: Waren, Ausbaustufen, Maschinen, Belegschaft, Wirtschafts-Tab.
 
 export const industryTexts = {
+  /** Namen für Mitarbeiter, Berater und Rivalen (frei erfunden, bunt gemischt). */
+  people: {
+    first: [
+      'Anna', 'Ben', 'Clara', 'David', 'Elif', 'Finn', 'Greta', 'Hannes', 'Ida', 'Jakob',
+      'Karla', 'Luca', 'Mia', 'Noah', 'Olga', 'Paul', 'Rosa', 'Samir', 'Tilda', 'Ugo',
+      'Vera', 'Wim', 'Yara', 'Zoe', 'Aleks', 'Bettina', 'Cem', 'Dora', 'Erik', 'Fatma',
+      'Gustav', 'Hedi', 'Igor', 'Jule', 'Kemal', 'Lotte', 'Malte', 'Nele', 'Otto', 'Pia',
+      'Quirin', 'Ronja', 'Sven', 'Tamara', 'Ulla', 'Viktor', 'Wanda', 'Xaver',
+    ],
+    last: [
+      'Adler', 'Bauer', 'Czerny', 'Dietz', 'Eberhardt', 'Fink', 'Graf', 'Hoffmann', 'Iversen',
+      'Jansen', 'Kowalski', 'Lange', 'Möller', 'Nowak', 'Olsen', 'Petersen', 'Quast',
+      'Richter', 'Schulz', 'Thiel', 'Ulrich', 'Voigt', 'Winter', 'Yilmaz', 'Zimmer',
+      'Arslan', 'Brückner', 'Claasen', 'Dahl', 'Engel', 'Falk', 'Gerber', 'Hahn', 'Imhof',
+      'Jäger', 'Krause', 'Lorenz', 'Marx', 'Neumann', 'Ortmann', 'Popescu', 'Roth',
+    ],
+  },
+
   goods: {
     wares: { name: 'Waren', office: 'Aufträge' },
     contacts: { name: 'Kontakte', office: 'Kontakte' },
@@ -136,7 +154,7 @@ export const industryTexts = {
   },
 
   ui: {
-    tabs: { production: 'Produktion', build: 'Ausbau', team: 'Team' },
+    tabs: { production: 'Produktion', build: 'Ausbau', team: 'Team', politics: 'Politik' },
     lineIn: 'braucht',
     lineOut: 'liefert',
     blocked: 'Stockt – es fehlen {good}',
@@ -148,6 +166,7 @@ export const industryTexts = {
     perCycle: 'je Durchgang',
     capacity: 'Plätze {used} von {max}',
     full: 'Gebäude voll – ausbauen!',
+    seats: 'Platz für {max} Mitarbeiter',
     level: 'Ausbaustufe {level} von {max}',
     levelName: 'Stufe {level}: {name}',
     upgrade: 'Ausbauen',
@@ -184,6 +203,7 @@ export const industryTexts = {
     walk: 'Hingehen',
     locked: 'Ab Stufe {stage}',
     bottleneck: 'Engpass: {good}',
+    bottleneckShort: 'stockt',
     ok: 'läuft',
     none: 'ruht',
     moraleCard: 'Arbeiterstimmung',

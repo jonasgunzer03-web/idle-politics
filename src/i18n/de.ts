@@ -269,7 +269,7 @@ export const de = {
   },
 
   invest: {
-    title: 'Investieren',
+    title: 'Wirtschaft',
     buyMode: 'Kaufmenge',
     modes: { one: '×1', ten: '×10', max: 'Max' },
     owned: 'Besitz: {count}',

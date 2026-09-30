@@ -6,6 +6,7 @@ import type {
   SkillId,
 } from '../engine/ids';
 import type { PolicyArea } from '../config/party';
+import type { LineTag } from '../engine/ids';
 
 // Texte zur Politik im Parteibüro: Flügel, Berater, Gesetze, Rivale, Stadtchronik.
 
@@ -309,6 +310,37 @@ export const partyTexts = {
       consequences: { title: string; text: string }[];
     }
   >,
+
+  /** Beschriftung der Wirkungen. {value} mit Vorzeichen. */
+  effectLabels: {
+    resource: '{value} % {resource}',
+    lineSpeed: '{value} % Tempo {tag}',
+    lineSpeedAll: '{value} % Tempo aller Betriebe',
+    approvalBase: 'Zustimmung dauerhaft {value}',
+    unrestTarget: 'Unruhe dauerhaft {value}',
+    moraleTarget: 'Arbeiterstimmung {value}',
+    electionBonus: 'Wahlchance {value}',
+    loyaltyDrift: 'Loyalität des Apparats {value}/Min.',
+    rivalTarget: 'Rivale {value}',
+    coupRisk: 'Putschgefahr {value} %',
+    relationsDrift: 'Beziehungen {value}/Min.',
+    approval: 'Zustimmung {value}',
+    unrest: 'Unruhe {value}',
+    loyalty: 'Loyalität {value}',
+    morale: 'Stimmung {value}',
+    rival: 'Rivale {value}',
+    relationsAll: 'Beziehungen zu allen Staaten {value}',
+    group: '{group} {value}',
+  },
+  tags: {
+    industry: 'Industrie',
+    trade: 'Handel',
+    party: 'Partei',
+    media: 'Medien',
+    finance: 'Finanzen',
+    state: 'Verwaltung',
+    diplomacy: 'Diplomatie',
+  } satisfies Record<LineTag, string>,
 
   session: {
     title: 'Parteisitzung',

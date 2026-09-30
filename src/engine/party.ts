@@ -334,8 +334,9 @@ export function revokePolicy(game: GameState, id: PolicyId, cfg: GameConfig): Ga
   }
   const cost = revokeCost(run, id, cfg);
   if (!canAfford(run.resources, cost)) return game;
-  const laws = { ...run.laws };
-  delete laws[id];
+  const laws: RunState['laws'] = Object.fromEntries(
+    Object.entries(run.laws).filter(([key]) => key !== id),
+  );
   let next: RunState = {
     ...run,
     resources: pay(run.resources, cost),
