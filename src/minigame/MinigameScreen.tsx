@@ -173,6 +173,12 @@ export default function MinigameScreen({ location }: { location: LocationId }) {
       if (paramsAge > 0.25) {
         paramsAge = 0;
         params = readParams();
+        // Zustand als Attribute für automatische Tests (Position, Last, Geldhaufen)
+        wrap.dataset.px = sim.player.pos.x.toFixed(2);
+        wrap.dataset.pz = sim.player.pos.z.toFixed(2);
+        wrap.dataset.carry = String(sim.player.carry);
+        wrap.dataset.cash = String(sim.cash);
+        wrap.dataset.counter = String(sim.counter);
       }
       const p = params;
       if (sim.helpers.length !== p.helpers) sim = setHelpers(sim, layout, p.helpers);

@@ -284,26 +284,51 @@ test('Minispiel „Selbst anpacken“ öffnen, laufen, verdienen und schließen'
   await expect(page.getByTestId('minigame')).toBeVisible();
   const stage = page.getByRole('application');
   await expect(stage.locator('canvas')).toBeVisible();
-  // Joystick: zur Maschine, zur Theke, zur Kasse
+  // Joystick: zur Maschine, zur Theke, zur Kasse. Gesteuert wird nach der gemeldeten
+  // Position, damit der Test auch auf langsamen Rechnern (Software-Grafik) klappt.
   const box = await stage.boundingBox();
   if (!box) throw new Error('Spielfläche nicht sichtbar');
   const cx = box.x + box.width / 2;
   const cy = box.y + box.height / 2;
-  const drag = async (dx: number, dy: number, ms: number) => {
-    await page.mouse.move(cx, cy);
-    await page.mouse.down();
-    await page.mouse.move(cx + dx, cy + dy, { steps: 3 });
-    await page.waitForTimeout(ms);
-    await page.mouse.up();
+  const state = async () =>
+    stage.evaluate((el) => {
+      const d = (el as HTMLElement).dataset;
+      return {
+        x: Number(d.px ?? 0),
+        z: Number(d.pz ?? 0),
+        carry: Number(d.carry ?? 0),
+        counter: Number(d.counter ?? 0),
+      };
+    });
+  const walkTo = async (tx: number, tz: number, reach = 0.6) => {
+    for (let i = 0; i < 60; i++) {
+      const s = await state();
+      const dx = tx - s.x;
+      const dz = tz - s.z;
+      const d = Math.hypot(dx, dz);
+      if (d < reach) return;
+      await page.mouse.move(cx, cy);
+      await page.mouse.down();
+      await page.mouse.move(cx + (dx / d) * 50, cy + (dz / d) * 50, { steps: 2 });
+      await page.waitForTimeout(Math.min(600, 150 + d * 120));
+      await page.mouse.up();
+    }
   };
   const before = await page.getByTestId('resource-money-amount').first().textContent();
-  await drag(-30, -56, 1500);
-  await page.waitForTimeout(1200);
-  await drag(56, 20, 1600);
-  await page.waitForTimeout(6000);
-  await drag(-20, 50, 600);
+  await walkTo(-3.4, -3.6);
+  await expect.poll(async () => (await state()).carry, { timeout: 15_000 }).toBeGreaterThan(0);
+  await page.waitForTimeout(800);
+  await walkTo(2.5, -1.6, 0.4);
+  await expect.poll(async () => (await state()).carry, { timeout: 15_000 }).toBe(0);
+  // Kunden kaufen; danach das Geld an der Kasse einsammeln
+  await expect
+    .poll(async () => stage.evaluate((el) => Number((el as HTMLElement).dataset.cash ?? 0)), {
+      timeout: 30_000,
+    })
+    .toBeGreaterThan(0);
+  await walkTo(1.6, 0.9, 0.5);
   await expect(page.getByTestId('resource-money-amount').first()).not.toHaveText(before ?? '', {
-    timeout: 8000,
+    timeout: 15_000,
   });
   await page.getByTestId('minigame-close').click();
   await expect(page.getByTestId('minigame')).toBeHidden();
