@@ -1,36 +1,34 @@
 import { Factory, Landmark, Tractor, Wheat, type LucideIcon } from 'lucide-react';
 import { Flag } from '../../art/flag/Flag';
+import { flagFor } from '../../art/flag/flags';
+import { COUNTRY_SHAPES } from '../../art/map/geography';
+import { MAP_H, MAP_W, WorldMap, provinceCenters, type MapPartner } from '../../art/map/WorldMap';
 import { defaultConfig } from '../../config';
 import { REGION_IDS, type ForeignId, type RegionId } from '../../engine/ids';
 import { foreignPartners, isWorldUnlocked, relation } from '../../engine/rules';
 import { de } from '../../i18n/de';
 import { gameStore, useGame } from '../../store';
-import { flagFor } from '../../art/flag/flags';
 import { LockedTab } from './LockedTab';
 import styles from './WorldTab.module.css';
 
 const cfg = defaultConfig;
-const W = 360;
-const H = 380;
-const HOME = { x: W / 2, y: H / 2 + 10 };
 
-const REGION_POS: Record<RegionId, { dx: number; dy: number; icon: LucideIcon }> = {
-  north: { dx: 0, dy: -58, icon: Landmark },
-  east: { dx: 58, dy: 0, icon: Factory },
-  south: { dx: 0, dy: 58, icon: Wheat },
-  west: { dx: -58, dy: 0, icon: Tractor },
+const REGION_ICONS: Record<RegionId, LucideIcon> = {
+  north: Landmark,
+  east: Factory,
+  south: Wheat,
+  west: Tractor,
 };
 
-/** Farbe einer Beziehung: rot (−100) über grau zu grün (+100). */
-function relationColor(value: number): string {
-  if (value >= 25) return 'var(--good)';
-  if (value <= -25) return 'var(--bad)';
-  return 'var(--text-muted)';
+function tone(value: number): 'good' | 'bad' | 'neutral' {
+  if (value >= 25) return 'good';
+  if (value <= -25) return 'bad';
+  return 'neutral';
 }
 
 /**
- * Welt-Karte (Infografik, keine echte Geografie): das eigene Land mit vier Regionen in der
- * Mitte, die anderen Staaten als Kreise darum. Linienfarbe = Beziehung.
+ * Weltkarte: ein erfundener Kontinent. Das eigene Land mit vier Provinzen (antippen =
+ * Wirtschaftsprojekte), die Nachbarn mit Flagge (antippen = Außenpolitik).
  */
 export function WorldTab() {
   const key = useGame((s) => {
@@ -52,126 +50,87 @@ export function WorldTab() {
   if (!key) return <LockedTab title={de.foreign.title} text={de.foreign.lockedText} />;
 
   const [stateId = 'rhenania', partnerStr = '', projectStr = ''] = key.split('#');
-  const own = stateId as keyof typeof cfg.states;
-  const partners = partnerStr.split('|').map((e, i, arr) => {
+  const own = stateId as ForeignId & keyof typeof cfg.states;
+  const partners: MapPartner[] = partnerStr.split('|').map((e) => {
     const [id = 'valmora', rel = '0', trade = '0', alliance = '0'] = e.split(':');
-    const angle = (i / arr.length) * Math.PI * 2 - Math.PI / 2 + 0.3;
     return {
       id: id as ForeignId,
       relation: Number(rel),
       trade: trade === '1',
       alliance: alliance === '1',
-      x: HOME.x + Math.cos(angle) * 140,
-      y: HOME.y + Math.sin(angle) * 140,
     };
   });
-  const levels = projectStr.split(',').map(Number);
+  const sums = projectStr.split(',').map(Number);
+  const levels = Object.fromEntries(
+    REGION_IDS.map((r, i) => [r, Math.min(3, Math.ceil((sums[i] ?? 0) / 3))]),
+  ) as Record<RegionId, number>;
+  const centers = provinceCenters(own);
   const store = gameStore.getState();
+  const pct = (x: number, y: number) => ({
+    left: `${(x / MAP_W) * 100}%`,
+    top: `${(y / MAP_H) * 100}%`,
+  });
+  const [ox, oy] = COUNTRY_SHAPES[own].center;
 
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>{de.foreign.title}</h1>
       <div className={styles.map}>
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className={styles.svg}
-          role="img"
-          aria-label={de.foreign.title}
-        >
-          {partners.map((p) => (
-            <line
-              key={p.id}
-              x1={HOME.x}
-              y1={HOME.y}
-              x2={p.x}
-              y2={p.y}
-              stroke={relationColor(p.relation)}
-              strokeWidth={p.alliance ? 6 : p.trade ? 4 : 2}
-              strokeDasharray={p.relation <= -25 ? '6 5' : undefined}
-              opacity={0.8}
-            />
-          ))}
-          <circle cx={HOME.x} cy={HOME.y} r={92} className={styles.home} />
-          {REGION_IDS.map((r, i) => {
-            const pos = REGION_POS[r];
-            return (
-              <g key={r}>
-                <circle
-                  cx={HOME.x + pos.dx}
-                  cy={HOME.y + pos.dy}
-                  r={28}
-                  className={styles.region}
-                  data-level={Math.min(3, Math.ceil((levels[i] ?? 0) / 3))}
-                />
-                <text
-                  x={HOME.x + pos.dx}
-                  y={HOME.y + pos.dy + 40}
-                  textAnchor="middle"
-                  className={styles.label}
-                >
-                  {de.foreign.regions[own][r]}
-                </text>
-              </g>
-            );
-          })}
-          {partners.map((p) => (
-            <g key={`n-${p.id}`}>
-              <circle cx={p.x} cy={p.y} r={30} className={styles.country} />
-              <text x={p.x} y={p.y + 44} textAnchor="middle" className={styles.label}>
-                {de.foreign.countries[p.id]}
-              </text>
-              <text
-                x={p.x}
-                y={p.y + 56}
-                textAnchor="middle"
-                className={styles.rel}
-                fill={relationColor(p.relation)}
-              >
-                {p.relation > 0 ? `+${p.relation}` : p.relation}
-              </text>
-            </g>
-          ))}
-        </svg>
-        <div
-          className={styles.homeFlag}
-          style={{ left: `${(HOME.x / W) * 100}%`, top: `${(HOME.y / H) * 100}%` }}
-        >
-          <Flag flag={cfg.states[own].flag} width={40} />
+        <WorldMap own={own} partners={partners} levels={levels} />
+        <div className={styles.capital} style={pct(ox, oy)}>
+          <Flag flag={cfg.states[own].flag} width={26} />
         </div>
         {REGION_IDS.map((r) => {
-          const pos = REGION_POS[r];
-          const Icon = pos.icon;
+          const Icon = REGION_ICONS[r];
+          // Etwas nach außen gerückt, damit Hauptstadt und Knöpfe sich nicht verdecken
+          const x = ox + (centers[r][0] - ox) * 1.4;
+          const y = oy + (centers[r][1] - oy) * 1.4;
           return (
             <button
               key={r}
               type="button"
               className={styles.hitRegion}
-              style={{
-                left: `${((HOME.x + pos.dx) / W) * 100}%`,
-                top: `${((HOME.y + pos.dy) / H) * 100}%`,
-              }}
+              data-level={levels[r]}
+              style={pct(x, y)}
               onClick={() => store.openSheet({ kind: 'region', id: r })}
               aria-label={de.foreign.regions[own][r]}
               data-testid={`region-${r}`}
             >
-              <Icon size={20} aria-hidden="true" />
+              <span className={styles.regionDot}>
+                <Icon size={16} strokeWidth={2.6} aria-hidden="true" />
+              </span>
             </button>
           );
         })}
-        {partners.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            className={styles.hitCountry}
-            style={{ left: `${(p.x / W) * 100}%`, top: `${(p.y / H) * 100}%` }}
-            onClick={() => store.openSheet({ kind: 'country', id: p.id })}
-            aria-label={`${de.foreign.countries[p.id]}, ${p.relation}`}
-            data-testid={`country-${p.id}`}
-          >
-            <Flag flag={flagFor(p.id)} width={36} />
-          </button>
-        ))}
+        {partners.map((p) => {
+          const [x, y] = COUNTRY_SHAPES[p.id].center;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              className={styles.hitCountry}
+              style={pct(x, y)}
+              onClick={() => store.openSheet({ kind: 'country', id: p.id })}
+              aria-label={`${de.foreign.countries[p.id]}, ${p.relation}`}
+              data-testid={`country-${p.id}`}
+            >
+              <span className={styles.pin}>
+                <Flag flag={flagFor(p.id)} width={30} />
+              </span>
+              <span className={styles.countryName}>{de.foreign.countries[p.id]}</span>
+              <span className={`${styles.rel} game-num`} data-tone={tone(p.relation)}>
+                {p.relation > 0 ? `+${p.relation}` : p.relation}
+              </span>
+            </button>
+          );
+        })}
       </div>
+      <ul className={styles.legend}>
+        <li data-kind="good">{de.foreign.mapLegend.friend}</li>
+        <li data-kind="bad">{de.foreign.mapLegend.enemy}</li>
+        <li data-kind="trade">{de.foreign.mapLegend.trade}</li>
+        <li data-kind="alliance">{de.foreign.mapLegend.alliance}</li>
+      </ul>
     </div>
   );
 }

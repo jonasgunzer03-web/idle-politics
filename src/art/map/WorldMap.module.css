@@ -1,0 +1,41 @@
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 24px;
+}
+
+.country {
+  opacity: 0.95;
+}
+
+/* Eigenes Land: weiße Grenze pulsiert sanft */
+.ownBorder {
+  animation: glow 2.4s ease-in-out infinite;
+}
+
+.bob {
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}

@@ -144,6 +144,12 @@ export const worldTexts = {
 
   foreign: {
     title: 'Welt',
+    mapLegend: {
+      friend: 'Freund',
+      enemy: 'Feind',
+      trade: 'Handel',
+      alliance: 'Bündnis',
+    },
     lockedText:
       'Ab Stufe 8 öffnet sich die Landkarte: Regionen mit wirtschaftlichen Möglichkeiten und die Beziehungen zu anderen Staaten.',
     regionsTitle: 'Regionen',
