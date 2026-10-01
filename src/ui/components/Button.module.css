@@ -1,53 +1,96 @@
+/* Gummi-Knöpfe: kräftige Farbe, dunklere Unterkante, sinken beim Drücken ein */
 .button {
-  min-height: var(--tap);
+  --btn-bg: var(--go);
+  --btn-edge: var(--go-edge);
+  --btn-text: #ffffff;
+  min-height: calc(var(--tap) + 4px);
   min-width: var(--tap);
-  padding: 0 16px;
+  padding: 0 18px;
   border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+  border: none;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  box-shadow:
+    0 4px 0 var(--btn-edge),
+    inset 0 -2px 0 rgb(0 0 0 / 8%),
+    inset 0 2px 0 rgb(255 255 255 / 30%);
+  font-family: var(--font-display);
   font-weight: 600;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-bottom: 4px;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 12%);
   transition:
-    transform 120ms var(--ease),
+    transform 90ms var(--ease),
+    box-shadow 90ms var(--ease),
     opacity var(--dur) var(--ease);
 }
 
 .button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 var(--btn-edge),
+    inset 0 -2px 0 rgb(0 0 0 / 8%),
+    inset 0 2px 0 rgb(255 255 255 / 30%);
 }
 
 .button:disabled {
-  opacity: 0.45;
+  --btn-bg: #c9d5e2;
+  --btn-edge: #a8b7c8;
+  --btn-text: #f5f8fb;
+  text-shadow: none;
 }
 
 .primary {
-  background: var(--state-primary);
-  color: var(--state-on-primary);
-}
-
-@media (prefers-color-scheme: dark) {
-  .primary {
-    background: var(--state-secondary);
-    color: #1c1f24;
-  }
+  --btn-bg: var(--go);
+  --btn-edge: var(--go-edge);
 }
 
 .secondary {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
+  --btn-bg: var(--surface);
+  --btn-edge: var(--edge);
+  --btn-text: var(--text);
+  text-shadow: none;
+}
+
+.secondary:disabled {
+  --btn-bg: var(--surface-2);
+  --btn-edge: var(--edge);
+  --btn-text: var(--text-muted);
+  opacity: 0.7;
 }
 
 .ghost {
-  background: transparent;
-  color: var(--text);
+  --btn-bg: transparent;
+  --btn-edge: transparent;
+  --btn-text: var(--text);
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.ghost:active:not(:disabled) {
+  box-shadow: none;
+}
+
+.gold {
+  --btn-bg: var(--gold);
+  --btn-edge: var(--gold-edge);
+  --btn-text: #5a3a00;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 40%);
+}
+
+.sky {
+  --btn-bg: var(--sky);
+  --btn-edge: var(--sky-edge);
 }
 
 .danger {
-  background: var(--bad);
-  color: var(--on-signal);
+  --btn-bg: var(--bad);
+  --btn-edge: #c22a3c;
 }
 
 .block {

@@ -26,7 +26,7 @@
 }
 
 .link {
-  stroke: var(--state-secondary);
+  stroke: var(--accent-2);
   stroke-linecap: round;
 }
 
@@ -38,7 +38,7 @@
 
 .center {
   fill: var(--surface);
-  stroke: var(--state-secondary);
+  stroke: var(--accent-2);
   stroke-width: 3;
 }
 
@@ -54,7 +54,7 @@
 }
 
 .fill[data-tier='1'] {
-  fill: var(--state-secondary);
+  fill: var(--accent-2);
   opacity: 0.85;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .hit:focus-visible {
-  outline: 3px solid var(--state-secondary);
+  outline: 3px solid var(--accent-2);
 }
 
 .legend {

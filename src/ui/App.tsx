@@ -1,7 +1,8 @@
-import { useState, type CSSProperties } from 'react';
+import { lazy, Suspense, useState, type CSSProperties } from 'react';
 import { defaultConfig } from '../config';
 import { DebugMenu } from '../debug/DebugMenu';
 import { groupsFor, isWorldUnlocked } from '../engine/rules';
+import { de } from '../i18n/de';
 import { useGame } from '../store';
 import { useGameLoop } from '../store/useGameLoop';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -26,6 +27,19 @@ import { WorldTab } from './tabs/WorldTab';
 import styles from './App.module.css';
 
 const cfg = defaultConfig;
+
+// Minispiele mit three.js erst beim ersten Öffnen laden
+const MinigameScreen = lazy(() => import('../minigame/MinigameScreen'));
+
+function MinigameHost() {
+  const location = useGame((s) => s.minigame);
+  if (!location) return null;
+  return (
+    <Suspense fallback={<div className={styles.minigameLoading}>{de.minigame.loading}</div>}>
+      <MinigameScreen location={location} />
+    </Suspense>
+  );
+}
 
 function TabContent({ tab }: { tab: TabId }) {
   switch (tab) {
@@ -68,6 +82,7 @@ function Playing() {
       <OverlayHost />
       <SheetHost />
       <UnrestBorder />
+      <MinigameHost />
     </>
   );
 }

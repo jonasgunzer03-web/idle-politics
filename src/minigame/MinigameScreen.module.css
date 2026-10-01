@@ -1,0 +1,235 @@
+/* Vollbild-Minispiel: Szene füllt alles, Anzeigen schweben darüber */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: #9dd8ff;
+  animation: zoom-in 380ms var(--bounce);
+}
+
+.top {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  padding: calc(8px + var(--safe-top)) calc(12px + var(--safe-right)) 10px
+    calc(12px + var(--safe-left));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(180deg, rgb(30 90 160 / 55%), transparent);
+  pointer-events: none;
+}
+
+.top > * {
+  pointer-events: auto;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 1.35rem;
+  text-shadow:
+    0 2px 0 rgb(20 50 100 / 45%),
+    0 0 12px rgb(20 50 100 / 30%);
+}
+
+.close {
+  min-height: var(--tap);
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--bad);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 0 #c22a3c;
+}
+
+.close:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c22a3c;
+}
+
+.stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(26px + var(--safe-bottom));
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 94%);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 rgb(20 50 100 / 20%);
+  pointer-events: none;
+  animation: pop-in 300ms var(--bounce);
+}
+
+.max {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: #ff5466;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 0 #c22a3c;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+.floater {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 1.5rem;
+  white-space: nowrap;
+  text-shadow:
+    0 2px 0 #1d8f4a,
+    0 0 8px rgb(0 0 0 / 25%);
+  -webkit-text-stroke: 1px #1d8f4a;
+  pointer-events: none;
+  animation: float-up 1.4s var(--ease) forwards;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  padding: 12px 22px;
+  border-radius: 18px;
+  background: var(--go);
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.3rem;
+  white-space: nowrap;
+  box-shadow: 0 5px 0 var(--go-edge);
+  pointer-events: none;
+  animation: toast-in 360ms var(--bounce);
+}
+
+.toast[data-good='false'] {
+  background: var(--warn);
+  box-shadow: 0 5px 0 #c97a10;
+}
+
+.failed {
+  position: absolute;
+  inset: 40% 24px auto;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+}
+
+.joyBase {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 28%);
+  border: 4px solid rgb(255 255 255 / 70%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.joyKnob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 0 rgb(20 50 100 / 25%);
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: translate(-50%, 0) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -80%) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -260%) scale(1);
+    opacity: 0;
+  }
+}

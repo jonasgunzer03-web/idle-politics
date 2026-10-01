@@ -29,7 +29,7 @@ import {
 // werden daraus abgeleitet. Jede Änderung hier erfordert eine neue saveVersion und eine
 // Migration in save/migrations.ts.
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 // z.number() lehnt in zod 4 NaN und Infinity bereits ab.
 const finiteNonNeg = z.number().min(0);
@@ -201,6 +201,8 @@ export const runSchema = z.object({
     lawsPassed: count,
     upgrades: count,
     defections: count,
+    /** Im Minispiel eingesammelte Verkäufe. */
+    minigameSales: count,
   }),
 });
 

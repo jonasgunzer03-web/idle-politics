@@ -24,7 +24,8 @@
   padding: 0 24px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 600;
+  box-shadow: 0 3px 0 var(--accent-edge);
 }

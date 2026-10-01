@@ -24,6 +24,7 @@ import {
   type LegacyNodeDef,
 } from './legacy';
 import { industry, type IndustryConfig } from './industry';
+import { minigames, type MinigameConfig } from './minigames';
 import { party, type PartyConfig } from './party';
 import { states, type StateDef } from './states';
 import { world, type WorldConfig } from './world';
@@ -50,6 +51,7 @@ export interface GameConfig {
   achievements: AchievementDef[];
   industry: IndustryConfig;
   party: PartyConfig;
+  minigames: MinigameConfig;
 }
 
 export const defaultConfig: GameConfig = {
@@ -71,6 +73,7 @@ export const defaultConfig: GameConfig = {
   achievements,
   industry,
   party,
+  minigames,
 };
 
 /** Kopie der Konfiguration mit anderem Tempo-Faktor (für Tests und Simulation). */

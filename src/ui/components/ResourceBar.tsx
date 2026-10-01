@@ -18,12 +18,17 @@ const ResourceChip = memo(function ResourceChip({ resource }: { resource: Resour
     resource === 'money' && s.game.run ? cfg.states[s.game.run.stateId].currency : '',
   );
   return (
-    <div className={styles.chip} data-testid={`resource-${resource}`}>
-      <ResourceIcon resource={resource} size={16} />
-      <span className={styles.label}>{de.resources[resource]}</span>
-      <span className={`${styles.amount} num`} data-testid={`resource-${resource}-amount`}>
+    <div
+      className={styles.chip}
+      data-testid={`resource-${resource}`}
+      aria-label={de.resources[resource]}
+    >
+      <span className={styles.icon}>
+        <ResourceIcon resource={resource} size={30} />
+      </span>
+      <span className={`${styles.amount} game-num`} data-testid={`resource-${resource}-amount`}>
         {formatNumber(amount)}
-        {currency && ` ${currency}`}
+        {currency && <small className={styles.currency}> {currency}</small>}
       </span>
       {rate > 0 && (
         <span className={`${styles.rate} num`}>

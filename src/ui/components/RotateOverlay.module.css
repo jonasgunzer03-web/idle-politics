@@ -13,10 +13,11 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: var(--state-primary);
-    color: var(--state-on-primary);
+    background: var(--accent);
+    color: #ffffff;
     text-align: center;
     padding: 24px;
+    box-shadow: 0 3px 0 var(--accent-edge);
   }
 }
 

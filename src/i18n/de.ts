@@ -4,6 +4,7 @@
 import type { GeneratorId, ProfessionId, ResourceId, StateId } from '../engine/ids';
 import { eventTexts } from './de-events';
 import { industryTexts } from './de-industry';
+import { minigameTexts } from './de-minigames';
 import { partyTexts } from './de-party';
 import { politicsTexts } from './de-politics';
 import { worldTexts } from './de-world';
@@ -441,6 +442,7 @@ export const de = {
   ...worldTexts,
   ...politicsTexts,
   industry: industryTexts,
+  minigame: minigameTexts,
   party: partyTexts,
   events: eventTexts,
 

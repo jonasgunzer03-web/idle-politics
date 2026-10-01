@@ -55,7 +55,7 @@
 .card {
   border-radius: var(--radius);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   box-shadow: var(--shadow);
   padding: 12px;
   display: flex;
@@ -162,12 +162,8 @@
   min-height: 72px;
   border-radius: var(--radius-sm);
   border: none;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--state-primary) 85%, #fff),
-    var(--state-primary)
-  );
-  color: var(--state-on-primary);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 85%, #fff), var(--accent));
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -175,17 +171,6 @@
   gap: 2px;
   box-shadow: inset 0 -3px 0 rgb(0 0 0 / 22%);
   transition: transform 90ms var(--ease);
-}
-
-@media (prefers-color-scheme: dark) {
-  .tap {
-    background: linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--state-secondary) 80%, #fff),
-      var(--state-secondary)
-    );
-    color: #1c1f24;
-  }
 }
 
 .tap:active {
@@ -210,7 +195,7 @@
 .hire {
   min-height: 72px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface-2);
   color: var(--text);
   display: flex;
@@ -259,12 +244,12 @@
   height: 7px;
   border-radius: 4px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
 }
 
 .pip[data-on='true'] {
-  background: var(--state-secondary);
-  border-color: var(--state-secondary);
+  background: var(--accent-2);
+  border-color: var(--accent-2);
 }
 
 .levelHero {
@@ -292,7 +277,7 @@
   min-height: var(--tap);
   border-radius: var(--radius-sm);
   border: none;
-  background: var(--state-secondary);
+  background: var(--accent-2);
   color: #1c1f24;
   font-weight: 800;
   font-size: 0.82rem;
@@ -321,11 +306,12 @@
 .machine {
   border-radius: var(--radius);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .machineIcon {
@@ -334,7 +320,7 @@
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--state-secondary) 22%, var(--surface));
+  background: color-mix(in srgb, var(--accent-2) 22%, var(--surface));
   color: var(--text);
 }
 
@@ -407,13 +393,14 @@
   padding: 8px;
   border-radius: var(--radius-sm);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   min-width: 0;
+  box-shadow: var(--shadow-sm);
 }
 
 .person[data-core='true'] {
-  border-color: color-mix(in srgb, var(--state-secondary) 70%, var(--border));
-  background: color-mix(in srgb, var(--state-secondary) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent-2) 70%, var(--border));
+  background: color-mix(in srgb, var(--accent-2) 8%, var(--surface));
 }
 
 .avatar {

@@ -189,9 +189,18 @@ export function migrateV2toV3(old: Record<string, unknown>): Record<string, unkn
   return { ...old, saveVersion: 3, run };
 }
 
+/** Version 3 → Version 4 (Minispiele): Zähler für Minispiel-Verkäufe. */
+export function migrateV3toV4(old: Record<string, unknown>): Record<string, unknown> {
+  const oldRun = isRecord(old.run) ? old.run : null;
+  if (!oldRun) return { ...old, saveVersion: 4 };
+  const stats = isRecord(oldRun.stats) ? oldRun.stats : {};
+  return { ...old, saveVersion: 4, run: { ...oldRun, stats: { ...stats, minigameSales: 0 } } };
+}
+
 export const migrations: Record<number, Migration> = {
   1: migrateV1toV2,
   2: migrateV2toV3,
+  3: migrateV3toV4,
 };
 
 export type MigrationResult =

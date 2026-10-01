@@ -2,7 +2,7 @@
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
+  background: linear-gradient(180deg, var(--bg-top) 0, var(--bg) 280px);
 }
 
 .splash {
@@ -10,15 +10,22 @@
   background: var(--bg);
 }
 
+/* Kopfzeile: Himmel mit Ressourcen-Pillen, unten eine weiche Welle */
 .header {
+  position: relative;
+  z-index: 3;
   flex-shrink: 0;
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background:
+    radial-gradient(120% 90% at 85% -20%, rgb(255 255 255 / 45%), transparent 60%),
+    linear-gradient(180deg, #3fa9ff 0%, #66c1ff 100%);
+  color: #ffffff;
   padding: calc(8px + var(--safe-top)) calc(12px + var(--safe-right)) 10px
     calc(12px + var(--safe-left));
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-shadow: 0 4px 0 rgb(31 127 214 / 35%);
+  border-radius: 0 0 22px 22px;
 }
 
 .brand {
@@ -61,6 +68,22 @@
 
 /* Autokratischer Pfad: entsättigte, dunklere Kopfzeile mit rotem Akzent */
 .app[data-path='autocratic'] .header {
-  filter: saturate(0.6) brightness(0.85);
-  box-shadow: inset 0 -3px 0 #b3261e;
+  background:
+    radial-gradient(120% 90% at 85% -20%, rgb(255 255 255 / 25%), transparent 60%),
+    linear-gradient(180deg, #c8323f 0%, #e0525a 100%);
+  box-shadow: 0 4px 0 rgb(120 20 30 / 40%);
+}
+
+.minigameLoading {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: #9dd8ff;
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-shadow: 0 2px 0 rgb(20 50 100 / 40%);
 }

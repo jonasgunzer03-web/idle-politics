@@ -138,6 +138,7 @@ function freshRun(
       lawsPassed: 0,
       upgrades: 0,
       defections: 0,
+      minigameSales: 0,
     },
   };
   const withEntry = addChronicle(base, 'runStart', { state: stateId }, cfg);

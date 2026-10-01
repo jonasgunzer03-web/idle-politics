@@ -45,9 +45,10 @@
   min-height: 48px;
   padding: 0 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   margin-top: -8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
@@ -72,7 +73,7 @@
 
 .swatch[aria-checked='true'] {
   border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--state-secondary);
+  box-shadow: 0 0 0 3px var(--accent-2);
 }
 
 .chips {
@@ -84,17 +85,19 @@
 .chip {
   min-height: var(--tap);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   font-size: 0.78rem;
   font-weight: 500;
   padding: 0 4px;
+  box-shadow: var(--shadow-sm);
 }
 
 .chip[aria-checked='true'] {
-  background: var(--state-primary);
-  color: var(--state-on-primary);
-  border-color: var(--state-primary);
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .symbols {
@@ -106,10 +109,11 @@
 .symbol {
   min-height: var(--tap);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   display: grid;
   place-items: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .symbol[aria-checked='true'] {

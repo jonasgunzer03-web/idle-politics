@@ -9,7 +9,7 @@
 .card {
   border-radius: var(--radius);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   box-shadow: var(--shadow);
   padding: 12px;
   display: flex;
@@ -111,7 +111,7 @@
 }
 
 .seat[aria-pressed='true'] {
-  background: color-mix(in srgb, var(--state-secondary) 25%, transparent);
+  background: color-mix(in srgb, var(--accent-2) 25%, transparent);
 }
 
 .seatBust {
@@ -193,7 +193,7 @@
   min-width: 84px;
   border-radius: var(--radius-sm);
   border: none;
-  background: var(--state-secondary);
+  background: var(--accent-2);
   color: #1c1f24;
   font-weight: 800;
   font-size: 0.74rem;
@@ -215,7 +215,7 @@
   align-self: flex-start;
   min-height: var(--tap);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   color: var(--text);
   font-weight: 700;
@@ -224,6 +224,7 @@
   align-items: center;
   gap: 6px;
   padding: 0 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .iconButton {
@@ -247,7 +248,7 @@
 .proposal {
   text-align: left;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: linear-gradient(135deg, #fbf6ea, #f1e7d0);
   color: #2b2f36;
   padding: 10px 12px;
@@ -262,24 +263,13 @@
   color: #5b6069;
 }
 
-@media (prefers-color-scheme: dark) {
-  .proposal {
-    background: linear-gradient(135deg, #2e2a22, #242019);
-    color: var(--text);
-  }
-
-  .proposal .small {
-    color: var(--text-muted);
-  }
-}
-
 .area {
   align-self: flex-start;
   font-size: 0.66rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--state-secondary);
+  color: var(--accent-2);
 }
 
 .discuss {
@@ -354,12 +344,6 @@
   overflow: hidden;
   background: linear-gradient(#efe6d3, #dccdb0);
   padding: 12px 8px 8px;
-}
-
-@media (prefers-color-scheme: dark) {
-  .sessionRoom {
-    background: linear-gradient(#3a3226, #2a241b);
-  }
 }
 
 .speeches {

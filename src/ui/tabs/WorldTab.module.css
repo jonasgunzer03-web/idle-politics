@@ -26,8 +26,8 @@
 }
 
 .home {
-  fill: color-mix(in srgb, var(--state-primary) 14%, var(--surface));
-  stroke: var(--state-secondary);
+  fill: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  stroke: var(--accent-2);
   stroke-width: 2;
 }
 
@@ -38,15 +38,15 @@
 }
 
 .region[data-level='1'] {
-  fill: color-mix(in srgb, var(--state-secondary) 30%, var(--surface));
+  fill: color-mix(in srgb, var(--accent-2) 30%, var(--surface));
 }
 
 .region[data-level='2'] {
-  fill: color-mix(in srgb, var(--state-secondary) 60%, var(--surface));
+  fill: color-mix(in srgb, var(--accent-2) 60%, var(--surface));
 }
 
 .region[data-level='3'] {
-  fill: var(--state-secondary);
+  fill: var(--accent-2);
 }
 
 .country {
@@ -91,5 +91,5 @@
 
 .hitRegion:focus-visible,
 .hitCountry:focus-visible {
-  outline: 3px solid var(--state-secondary);
+  outline: 3px solid var(--accent-2);
 }

@@ -1,16 +1,23 @@
+/* Tab-Leiste wie in Handyspielen: weiße Leiste, aktiver Tab hebt sich als bunte Plakette ab */
 .bar {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding-bottom: var(--safe-bottom);
-  padding-left: var(--safe-left);
-  padding-right: var(--safe-right);
+  border-radius: 22px 22px 0 0;
+  box-shadow:
+    0 -4px 0 var(--edge),
+    0 -8px 24px rgb(36 48 74 / 10%);
+  padding: 4px calc(4px + var(--safe-right)) calc(2px + var(--safe-bottom))
+    calc(4px + var(--safe-left));
   flex-shrink: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .tab {
-  min-height: 54px;
+  --tab-color: var(--sky);
+  --tab-edge: var(--sky-edge);
+  min-height: 58px;
   border: none;
   background: transparent;
   display: flex;
@@ -18,43 +25,73 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  color: var(--text-muted);
-  padding: 6px 0 4px;
-  transition: color var(--dur) var(--ease);
+  color: #9aa8bf;
+  padding: 4px 0;
+}
+
+.tab[data-tab='career'] {
+  --tab-color: #ff8a2a;
+  --tab-edge: #d4661a;
+}
+
+.tab[data-tab='network'] {
+  --tab-color: #9a62f5;
+  --tab-edge: #7140c8;
+}
+
+.tab[data-tab='invest'] {
+  --tab-color: var(--go);
+  --tab-edge: var(--go-edge);
+}
+
+.tab[data-tab='world'] {
+  --tab-color: #19bfcb;
+  --tab-edge: #0f8d97;
+}
+
+.tab[data-tab='profile'] {
+  --tab-color: var(--sky);
+  --tab-edge: var(--sky-edge);
+}
+
+.iconWrap {
+  position: relative;
+  width: 44px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  transition:
+    transform 220ms var(--bounce),
+    background-color var(--dur) var(--ease);
 }
 
 .tab[aria-current='page'] {
   color: var(--text);
 }
 
-.tab[aria-current='page'] .iconWrap::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -5px;
-  width: 18px;
-  height: 3px;
-  margin-left: -9px;
-  border-radius: 2px;
-  background: var(--state-secondary);
-}
-
-.iconWrap {
-  position: relative;
-  display: grid;
-  place-items: center;
+.tab[aria-current='page'] .iconWrap {
+  background: var(--tab-color);
+  color: #ffffff;
+  box-shadow:
+    0 3px 0 var(--tab-edge),
+    inset 0 2px 0 rgb(255 255 255 / 30%);
+  transform: translateY(-4px) scale(1.08);
 }
 
 .lock {
   position: absolute;
-  right: -8px;
+  right: -2px;
   top: -4px;
   background: var(--surface);
+  color: var(--text-muted);
   border-radius: 50%;
+  padding: 1px;
 }
 
 .label {
-  font-size: 0.68rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.01em;
 }

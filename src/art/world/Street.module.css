@@ -98,12 +98,6 @@
   animation: sweep 6s ease-in-out infinite alternate;
 }
 
-@media (prefers-color-scheme: dark) {
-  .fog {
-    fill: rgb(18 20 24 / 70%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .street :global(.smoke),
   .street :global(.sweep),

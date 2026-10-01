@@ -45,7 +45,7 @@
 }
 
 .hit:focus-visible {
-  outline: 3px solid var(--state-secondary);
+  outline: 3px solid var(--accent-2);
   outline-offset: -3px;
 }
 

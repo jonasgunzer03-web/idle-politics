@@ -4,10 +4,11 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
   padding: calc(24px + var(--safe-top)) calc(24px + var(--safe-right))
     calc(24px + var(--safe-bottom)) calc(24px + var(--safe-left));
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .titleInner {
@@ -44,7 +45,7 @@
 }
 
 .titleFooter button {
-  background: var(--state-secondary);
+  background: var(--accent-2);
   color: #1c1f24;
   min-height: 52px;
   font-size: 1.05rem;
@@ -70,8 +71,9 @@
   gap: 4px;
   padding: calc(8px + var(--safe-top)) calc(16px + var(--safe-right)) 8px
     calc(4px + var(--safe-left));
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .back {
@@ -154,9 +156,10 @@
   min-height: 48px;
   padding: 0 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   margin-top: -8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .error {
@@ -182,7 +185,7 @@
 
 .swatch[aria-checked='true'] {
   border-color: var(--text);
-  box-shadow: 0 0 0 3px var(--state-secondary);
+  box-shadow: 0 0 0 3px var(--accent-2);
 }
 
 .chips {
@@ -194,17 +197,19 @@
 .chip {
   min-height: var(--tap);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   background: var(--surface);
   font-size: 0.8rem;
   font-weight: 500;
   padding: 0 4px;
+  box-shadow: var(--shadow-sm);
 }
 
 .chip[aria-checked='true'] {
-  background: var(--state-primary);
-  color: var(--state-on-primary);
-  border-color: var(--state-primary);
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 /* ---------- Karten (Staat, Beruf) ---------- */
@@ -230,9 +235,9 @@
 }
 
 .card[aria-checked='true'] {
-  border-color: var(--card-accent, var(--state-primary));
+  border-color: var(--card-accent, var(--accent));
   box-shadow:
-    0 0 0 2px var(--state-secondary),
+    0 0 0 2px var(--accent-2),
     var(--shadow);
 }
 

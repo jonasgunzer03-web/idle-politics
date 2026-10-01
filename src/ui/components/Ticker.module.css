@@ -8,11 +8,11 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 26px;
+  height: 28px;
   padding: 0 calc(10px + var(--safe-right)) 0 calc(10px + var(--safe-left));
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  font-size: 0.75rem;
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
   flex-shrink: 0;
   overflow: hidden;
 }

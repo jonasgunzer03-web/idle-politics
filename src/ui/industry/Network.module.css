@@ -15,11 +15,11 @@
   background:
     radial-gradient(
       circle at 20% 15%,
-      color-mix(in srgb, var(--state-secondary) 10%, transparent),
+      color-mix(in srgb, var(--accent-2) 10%, transparent),
       transparent 60%
     ),
     var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -103,12 +103,13 @@
   height: 20px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
   font-size: 0.66rem;
   font-weight: 800;
   display: grid;
   place-items: center;
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .nodeLabel {

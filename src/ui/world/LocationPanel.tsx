@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { DoorClosed, DoorOpen, Factory, Landmark, Lock, Square, Users, Wrench } from 'lucide-react';
+import {
+  DoorClosed,
+  DoorOpen,
+  Factory,
+  Gamepad2,
+  Landmark,
+  Lock,
+  Square,
+  Users,
+  Wrench,
+} from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { defaultConfig } from '../../config';
 import type { LocationId } from '../../engine/ids';
@@ -159,6 +169,22 @@ function Inside({ location, name }: { location: LocationId; name: string }) {
           {de.ui.leave}
         </Button>
       </div>
+      <button
+        type="button"
+        className={styles.play}
+        onClick={() => {
+          gameStore.getState().openMinigame(location);
+        }}
+        data-testid="play-minigame"
+      >
+        <span className={styles.playIcon}>
+          <Gamepad2 size={26} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+        <span className={styles.playText}>
+          <strong>{de.minigame.play}</strong>
+          <small>{fill(de.minigame.playSub, { title: de.minigame.titles[location] })}</small>
+        </span>
+      </button>
       <div className={tabStyles.tabs} role="tablist">
         {tabs.map((t) => (
           <button

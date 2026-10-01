@@ -41,6 +41,7 @@ import {
   type CounterOutcome,
 } from '../engine/party';
 import { resolveEvent } from '../engine/events';
+import { canPlayMinigame, minigameOffers, minigameSell, type PadKind } from '../engine/minigame';
 import { foreignAction } from '../engine/foreign';
 import {
   beginNewRunSetup,
@@ -73,6 +74,7 @@ import type {
   ProfessionId,
   ProjectId,
   RegionId,
+  ResourceMap,
   RivalCounterId,
   StateId,
   VehicleId,
@@ -122,6 +124,8 @@ export interface GameStoreState {
   storageStatus: StorageStatus;
   hydrated: boolean;
   debug: boolean;
+  /** Offenes Minispiel (Ort) oder null. */
+  minigame: LocationId | null;
 
   hydrate: (now: number) => void;
   advanceTo: (now: number) => void;
@@ -144,6 +148,12 @@ export interface GameStoreState {
   revokePolicy: (id: PolicyId) => void;
   rivalCounter: (id: RivalCounterId) => CounterOutcome | null;
   buyVehicle: (id: VehicleId) => void;
+  openMinigame: (location: LocationId) => boolean;
+  closeMinigame: () => void;
+  /** Eingesammelte Geldbündel gutschreiben; liefert den Gewinn. */
+  minigameSell: (location: LocationId, count: number) => Partial<ResourceMap>;
+  /** Ausbau-Feld im Minispiel auslösen; true = gekauft. */
+  minigamePad: (location: LocationId, kind: PadKind) => boolean;
   walkTo: (id: LocationId) => void;
   stopWalking: () => void;
   enter: () => void;
@@ -234,6 +244,7 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         overlays: enqueue(state.overlays, [...extra, ...hints]),
         toasts: checked.unlocked.length > 0 ? [...state.toasts, ...checked.unlocked] : state.toasts,
         sheet,
+        minigame: checked.game.phase === 'playing' ? state.minigame : null,
       };
     };
 
@@ -279,6 +290,7 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
       storageStatus: 'ok',
       hydrated: false,
       debug: deps.debug,
+      minigame: null,
 
       hydrate: (now) => {
         if (get().hydrated) return;
@@ -410,6 +422,42 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
       },
       buyVehicle: (id) => {
         apply((g) => buyVehicle(g, id, cfg));
+      },
+      openMinigame: (location) => {
+        const state = get();
+        if (!canPlayMinigame(state.game, location, cfg)) return false;
+        set({ minigame: location, sheet: null });
+        return true;
+      },
+      closeMinigame: () => {
+        if (get().minigame !== null) set({ minigame: null });
+      },
+      minigameSell: (location, count) => {
+        let gained: Partial<ResourceMap> = {};
+        set((state) => {
+          const result = minigameSell(state.game, location, count, cfg);
+          gained = result.gained;
+          return result.game === state.game ? state : commit(state, result.game);
+        });
+        return gained;
+      },
+      minigamePad: (location, kind) => {
+        let bought = false;
+        set((state) => {
+          const run = state.game.run;
+          if (!run) return state;
+          const offer = minigameOffers(run, location, cfg).find((o) => o.kind === kind);
+          if (!offer?.cost || !offer.affordable) return state;
+          let next = state.game;
+          if (kind === 'hire' && offer.target)
+            next = hireStaff(next, offer.target as ActionId, cfg);
+          if (kind === 'upgrade') next = upgradeBuilding(next, location, cfg);
+          if (kind === 'machine' && offer.target)
+            next = buyMachine(next, offer.target as MachineId, cfg);
+          bought = next !== state.game;
+          return bought ? commit(state, next) : state;
+        });
+        return bought;
       },
       walkTo: (id) => {
         apply((g) => walkTo(g, id, cfg));

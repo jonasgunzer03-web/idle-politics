@@ -36,6 +36,7 @@ export function TabBar({ active, onSelect, locked }: Props) {
             key={id}
             type="button"
             className={styles.tab}
+            data-tab={id}
             aria-current={active === id ? 'page' : undefined}
             onClick={() => {
               onSelect(id);
@@ -43,7 +44,7 @@ export function TabBar({ active, onSelect, locked }: Props) {
             data-testid={`tab-${id}`}
           >
             <span className={styles.iconWrap}>
-              <Icon size={22} aria-hidden="true" />
+              <Icon size={24} strokeWidth={2.4} aria-hidden="true" />
               {isLocked && <Lock className={styles.lock} size={12} aria-hidden="true" />}
             </span>
             <span className={styles.label}>{de.tabs[id]}</span>

@@ -277,7 +277,7 @@ describe('Migration v1 → v2 (Spielstand aus Phase 1)', () => {
     const game = parseGame(v1);
     expect(game).not.toBeNull();
     if (!game?.run) return;
-    expect(game.saveVersion).toBe(3);
+    expect(game.saveVersion).toBe(4);
     expect(game.character?.accessories).toEqual([]);
     expect(game.run.resources).toEqual({ money: 123.4, influence: 56, followers: 7, diplomacy: 0 });
     expect(game.run.generators).toEqual({ overtime: 3, regularsTable: 1 });
@@ -322,13 +322,14 @@ describe('Migration v2 → v3 (Produktionsketten, Parteibüro)', () => {
     delete stats.lawsPassed;
     delete stats.upgrades;
     delete stats.defections;
+    delete stats.minigameSales;
     run.actions = { work: { staff: 12, training: 6 }, network: { staff: 0, training: 3 } };
     return { ...game, saveVersion: 2, run };
   }
 
   it('Mitarbeiter bleiben, das Gebäude wächst mit, Schulungen werden Maschinen', () => {
     const game = parseGame(v2Save());
-    expect(game?.saveVersion).toBe(3);
+    expect(game?.saveVersion).toBe(4);
     const run = game?.run;
     if (!run) throw new Error('run');
     expect(run.actions.work?.staff).toBe(12);
@@ -342,5 +343,28 @@ describe('Migration v2 → v3 (Produktionsketten, Parteibüro)', () => {
     expect(run.rival.status).toBe('active');
     expect(run.laws).toEqual({});
     expect(run.stats.lawsPassed).toBe(0);
+    expect(run.stats.minigameSales).toBe(0);
+  });
+});
+
+describe('Migration v3 → v4 (Minispiele)', () => {
+  it('ergänzt den Zähler für Minispiel-Verkäufe und behält alles andere', () => {
+    const game = JSON.parse(JSON.stringify(playingGame({ stage: 6 }))) as Record<string, unknown>;
+    const run = game.run as Record<string, unknown>;
+    const stats = run.stats as Record<string, unknown>;
+    delete stats.minigameSales;
+    stats.taps = 77;
+    const parsed = parseGame({ ...game, saveVersion: 3, run });
+    expect(parsed?.saveVersion).toBe(4);
+    expect(parsed?.run?.stats.minigameSales).toBe(0);
+    expect(parsed?.run?.stats.taps).toBe(77);
+    expect(parsed?.run?.stage).toBe(6);
+  });
+
+  it('kommt ohne laufenden Durchlauf aus', () => {
+    const game = JSON.parse(JSON.stringify(playingGame())) as Record<string, unknown>;
+    const parsed = parseGame({ ...game, saveVersion: 3, run: null, phase: 'setup' });
+    expect(parsed?.saveVersion).toBe(4);
+    expect(parsed?.run).toBeNull();
   });
 });

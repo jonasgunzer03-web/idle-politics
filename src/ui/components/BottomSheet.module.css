@@ -10,7 +10,7 @@
 .backdrop {
   position: absolute;
   inset: 0;
-  background: rgb(0 0 0 / 45%);
+  background: rgb(20 36 70 / 50%);
   animation: fade-in var(--dur) var(--ease);
 }
 
@@ -20,18 +20,19 @@
   display: flex;
   flex-direction: column;
   background: var(--surface);
-  border-radius: 20px 20px 0 0;
+  border-radius: 28px 28px 0 0;
+  border-top: 4px solid #ffffff;
   padding: 8px 16px calc(16px + var(--safe-bottom));
   padding-left: calc(16px + var(--safe-left));
   padding-right: calc(16px + var(--safe-right));
   box-shadow: 0 -8px 24px rgb(0 0 0 / 20%);
-  animation: slide-up 260ms var(--ease);
+  animation: slide-up 320ms var(--bounce);
   outline: none;
 }
 
 .handle {
-  width: 40px;
-  height: 5px;
+  width: 48px;
+  height: 6px;
   border-radius: 3px;
   background: var(--border);
   margin: 0 auto 8px;
@@ -46,18 +47,20 @@
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
 }
 
 .close {
   width: var(--tap);
   height: var(--tap);
   border: none;
-  background: transparent;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  box-shadow: 0 3px 0 var(--edge);
   display: grid;
   place-items: center;
   border-radius: 50%;
-  margin-right: -8px;
+  margin-right: -2px;
 }
 
 .body {

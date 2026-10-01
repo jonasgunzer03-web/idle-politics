@@ -6,7 +6,8 @@
   padding: 10px 12px;
   border-radius: var(--radius);
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 .locked {
@@ -34,13 +35,14 @@
   height: 20px;
   padding: 0 5px;
   border-radius: 10px;
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
   font-size: 0.7rem;
   font-weight: 700;
   display: grid;
   place-items: center;
   border: 2px solid var(--surface);
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .info {
@@ -78,8 +80,8 @@
   padding: 6px 10px;
   border-radius: var(--radius-sm);
   border: none;
-  background: var(--state-primary);
-  color: var(--state-on-primary);
+  background: var(--accent);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,13 +90,7 @@
   transition:
     transform 120ms var(--ease),
     opacity var(--dur) var(--ease);
-}
-
-@media (prefers-color-scheme: dark) {
-  .buy {
-    background: var(--state-secondary);
-    color: #1c1f24;
-  }
+  box-shadow: 0 3px 0 var(--accent-edge);
 }
 
 .buy:active:not(:disabled) {
