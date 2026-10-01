@@ -136,7 +136,7 @@ export interface GameStoreState {
   closeSheet: () => void;
 
   beginRun: (setup: RunSetup, now: number) => void;
-  perform: (action: ActionId) => Omit<PerformResult, 'game'>;
+  perform: (action: ActionId, combo?: number) => Omit<PerformResult, 'game'>;
   buy: (id: GeneratorId, mode: BuyMode) => number;
   hire: (action: ActionId) => void;
   upgradeBuilding: (location: LocationId) => void;
@@ -366,11 +366,11 @@ export function createGameStore(deps: GameStoreDeps): StoreApi<GameStoreState> {
         get().save(now);
       },
 
-      perform: (action) => {
+      perform: (action, combo = 1) => {
         // Rückgabe über eine lokale Variable, weil `set` selbst nichts zurückgibt
         let outcome: Omit<PerformResult, 'game'> = { gained: {}, goods: {}, blockedBy: null };
         set((state) => {
-          const { game, ...rest } = performAction(state.game, action, cfg);
+          const { game, ...rest } = performAction(state.game, action, cfg, combo);
           outcome = rest;
           return game === state.game ? state : commit(state, game);
         });

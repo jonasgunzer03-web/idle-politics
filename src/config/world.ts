@@ -280,8 +280,8 @@ export const world: WorldConfig = {
   vehicles,
   startLocation,
   dayCycleSeconds: 480,
-  // Alle 6 Minuten neues Wetter: 20 % bewölkt, 18 % Regen (in Borealis Schnee)
-  weather: { changeMinutes: 6, cloudy: 0.2, rain: 0.18, snowStates: ['borealis'] },
+  // Alle 6 Minuten neues Wetter: 15 % bewölkt, 8 % Regen (in Borealis Schnee) – meist Sonne
+  weather: { changeMinutes: 6, cloudy: 0.15, rain: 0.08, snowStates: ['borealis'] },
 };
 
 /** Hilfstyp für Ertragslisten. */

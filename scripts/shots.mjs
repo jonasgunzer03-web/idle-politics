@@ -8,7 +8,7 @@ const browser = await webkit.launch();
 const S = 'window.__idlePolitics.getState()';
 
 async function fresh() {
-  const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+  const ctx = await browser.newContext({ ...devices['iPhone 13'], reducedMotion: 'reduce' });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
   page.on('console', (m) => {
@@ -61,7 +61,17 @@ for (const scene of scenes) {
     `${S}.debugSetStage(${scene === 'world' ? 9 : 6}); ${S}.debugAddResources(1e9);`,
   );
   await closeDialogs(page);
-  if (scene === 'career') {
+  if (scene === 'production') {
+    await page.evaluate(`${S}.debugSetStage(1)`);
+    await closeDialogs(page);
+    await page.locator('main').evaluate((m) => (m.scrollTop = 520));
+    for (let i = 0; i < 14; i++) {
+      await closeDialogs(page);
+      await page.getByTestId('tap-work').click({ timeout: 3000 });
+    }
+    await page.waitForTimeout(150);
+    await page.screenshot({ path: `${out}/${scene}.png` });
+  } else if (scene === 'career') {
     await page.screenshot({ path: `${out}/${scene}.png` });
   } else if (scene === 'vote' || scene === 'party') {
     await goInside(page, scene === 'vote' ? 'townHall' : 'partyOffice');

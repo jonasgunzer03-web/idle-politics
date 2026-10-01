@@ -1,8 +1,9 @@
-import { memo, type MouseEvent } from 'react';
-import { ArrowRight, Hand, Lock, UserPlus } from 'lucide-react';
+import { memo, useEffect, useRef, useState, type MouseEvent } from 'react';
+import { ArrowRight, Flame, Hand, Lock, UserPlus } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { defaultConfig } from '../../config';
 import type { ActionDef } from '../../config/world';
+import { comboAfterTap, comboValue, NO_COMBO, type Combo } from '../../engine/combo';
 import { canAfford, hasRoom, hireCost } from '../../engine/economy';
 import { formatNumber } from '../../engine/format';
 import type { GoodId, LocationId, ResourceId } from '../../engine/ids';
@@ -67,9 +68,12 @@ function amountText(k: FlowKey, v: number, stateId: Parameters<typeof formatReso
 const LineCard = memo(function LineCard({
   action,
   onFull,
+  onTapCombo,
 }: {
   action: ActionDef;
   onFull: () => void;
+  /** Meldet einen Tipp an die Kombo und liefert den Faktor für diesen Tipp. */
+  onTapCombo: () => number;
 }) {
   const inKeys = keysOf(action.inputs);
   const outKeys = keysOf(action.outputs);
@@ -115,7 +119,8 @@ const LineCard = memo(function LineCard({
   const outAmounts = view.outAmounts.split('|');
 
   const onTap = (e: MouseEvent<HTMLButtonElement>) => {
-    const result = gameStore.getState().perform(action.id);
+    const combo = onTapCombo();
+    const result = gameStore.getState().perform(action.id, combo);
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX || rect.left + rect.width / 2;
     const y = e.clientY || rect.top + rect.height / 2;
@@ -138,10 +143,12 @@ const LineCard = memo(function LineCard({
       if (v) parts.push(`+${amountText(k, v, gameStore.getState().game.run?.stateId ?? null)}`);
     }
     if (parts.length === 0) return;
+    const comboText =
+      combo >= 1.5 ? ` ×${combo.toLocaleString('de-DE', { maximumFractionDigits: 1 })}` : '';
     spawnFloatingNumber({
       x,
       y,
-      text: parts.join(' · '),
+      text: parts.join(' · ') + comboText,
       color: first ? (isResourceKey(first) ? `var(--res-${first})` : `var(--goods-${first})`) : '',
     });
   };
@@ -211,8 +218,49 @@ const LineCard = memo(function LineCard({
   );
 });
 
+const COMBO_MAX = cfg.balancing.tapCombo.max;
+
+/** Flammen-Anzeige der Tipp-Kombo; klingt sichtbar ab. */
+function ComboMeter({ combo }: { combo: { current: Combo } }) {
+  const [value, setValue] = useState(1);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const v = Math.round(comboValue(combo.current, Date.now(), cfg) * 10) / 10;
+      setValue((old) => (old === v ? old : v));
+    }, 120);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [combo]);
+  const ratio = (value - 1) / (COMBO_MAX - 1);
+  return (
+    <div className={styles.combo} data-hot={value >= 2 ? 'true' : 'false'} data-testid="combo">
+      <Flame
+        size={20}
+        strokeWidth={2.6}
+        aria-hidden="true"
+        className={styles.comboFlame}
+        style={{ transform: `scale(${1 + ratio * 0.5})` }}
+      />
+      <div className={styles.comboTrack}>
+        <div className={styles.comboFill} style={{ transform: `scaleX(${ratio})` }} />
+      </div>
+      <span className={`${styles.comboValue} game-num`}>
+        ×{value.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+      </span>
+    </div>
+  );
+}
+
 /** Reiter „Produktion“: alle Linien im Gebäude. */
 export function ProductionTab({ location, onFull }: { location: LocationId; onFull: () => void }) {
+  // Tipp-Kombo für alle Linien dieses Gebäudes (nur in der Oberfläche, nicht gespeichert)
+  const combo = useRef<Combo>(NO_COMBO);
+  const onTapCombo = () => {
+    const now = Date.now();
+    combo.current = comboAfterTap(combo.current, now, cfg);
+    return comboValue(combo.current, now, cfg);
+  };
   const capacity = useGame((s) => {
     const run = s.game.run;
     return run
@@ -229,8 +277,9 @@ export function ProductionTab({ location, onFull }: { location: LocationId; onFu
           {fill(de.industry.ui.capacity, { used: used ?? 0, max: max ?? 0 })}
         </p>
       )}
+      {list.length > 0 && <ComboMeter combo={combo} />}
       {list.map((a) => (
-        <LineCard key={a.id} action={a} onFull={onFull} />
+        <LineCard key={a.id} action={a} onFull={onFull} onTapCombo={onTapCombo} />
       ))}
     </div>
   );

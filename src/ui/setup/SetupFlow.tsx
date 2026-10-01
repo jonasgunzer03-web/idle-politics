@@ -12,6 +12,7 @@ import { gameStore } from '../../store';
 import { Button } from '../components/Button';
 import { CharacterEditor } from '../components/CharacterEditor';
 import { randomCharacter } from '../characterDefaults';
+import { TitleScene } from './TitleScene';
 import styles from './SetupFlow.module.css';
 
 type Step = 'title' | 'character' | 'state' | 'profession';
@@ -58,13 +59,17 @@ function StepFrame({
 function TitleScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className={styles.title} data-testid="title-screen">
+      <TitleScene />
       <div className={styles.titleInner}>
         <img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" className={styles.emblem} />
-        <h1 className={styles.titleHeading}>{de.appName}</h1>
+        <h1 className={styles.titleHeading}>
+          <span className={styles.titleSmall}>Idle</span>
+          <span className={styles.titleBig}>Politics</span>
+        </h1>
         <p className={styles.subtitle}>{de.title.subtitle}</p>
       </div>
       <div className={styles.titleFooter}>
-        <Button block onClick={onStart} data-testid="new-game">
+        <Button block variant="gold" onClick={onStart} data-testid="new-game">
           {de.title.newGame}
         </Button>
         <p className={styles.disclaimer}>{de.title.disclaimer}</p>

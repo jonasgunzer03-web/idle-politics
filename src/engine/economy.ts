@@ -242,8 +242,16 @@ export interface PerformResult {
   blockedBy: GoodId | ResourceId | null;
 }
 
-/** Einen Durchgang der Linie von Hand ausführen. Nur im passenden Gebäude. */
-export function performAction(game: GameState, id: ActionId, cfg: GameConfig): PerformResult {
+/**
+ * Einen Durchgang der Linie von Hand ausführen. Nur im passenden Gebäude.
+ * `combo` (Tipp-Kombo, 1 … max) vervielfacht die Währungs-Erträge dieses Tipps.
+ */
+export function performAction(
+  game: GameState,
+  id: ActionId,
+  cfg: GameConfig,
+  combo = 1,
+): PerformResult {
   const run = game.run;
   const action = findAction(id, cfg);
   const none: PerformResult = { game, gained: {}, goods: {}, blockedBy: null };
@@ -264,14 +272,15 @@ export function performAction(game: GameState, id: ActionId, cfg: GameConfig): P
   const gained: Partial<ResourceMap> = {};
   const madeGoods: Partial<GoodMap> = {};
   const earned = { ...run.earned };
+  const boost = Math.min(cfg.balancing.tapCombo.max, Math.max(1, combo));
   for (const [key, amount] of Object.entries(cycleOutputs(game, action, cfg)) as [
     GoodId | ResourceId,
     number,
   ][]) {
     if (isResourceKey(key)) {
-      resources[key] += amount;
-      earned[key] += amount;
-      gained[key] = amount;
+      resources[key] += amount * boost;
+      earned[key] += amount * boost;
+      gained[key] = amount * boost;
     } else {
       const cap = storageCapacity(run, key, cfg);
       const room = Math.max(0, cap - goods[key]);

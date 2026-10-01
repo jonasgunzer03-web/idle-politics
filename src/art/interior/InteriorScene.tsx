@@ -47,9 +47,9 @@ interface RoomDef {
 
 const ROOMS: Record<LocationId, RoomDef> = {
   workplace: {
-    wall: '#b9a58f',
-    wainscot: '#8f7d69',
-    floor: '#7d7a74',
+    wall: '#f6c37a',
+    wainscot: '#d98f45',
+    floor: '#9fb0c4',
     floorKind: 'concrete',
     outfit: 'overall',
     stations: [
@@ -66,9 +66,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 0,
   },
   pub: {
-    wall: '#7a5236',
-    wainscot: '#5a3b24',
-    floor: '#4a3526',
+    wall: '#d0614a',
+    wainscot: '#7a2f22',
+    floor: '#b0703f',
     floorKind: 'planks',
     outfit: 'apron',
     stations: [
@@ -83,9 +83,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 3,
   },
   market: {
-    wall: '#d6e6ef',
-    wainscot: '#b7b2a7',
-    floor: '#b7b2a7',
+    wall: '#c4ebff',
+    wainscot: '#ffb84d',
+    floor: '#eadcb4',
     floorKind: 'tiles',
     outfit: 'apron',
     stations: [
@@ -101,9 +101,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 3,
   },
   partyOffice: {
-    wall: '#efe6d6',
-    wainscot: '#c9b797',
-    floor: '#8b6b4a',
+    wall: '#fff1d6',
+    wainscot: '#ea4c89',
+    floor: '#c98a4b',
     floorKind: 'planks',
     outfit: 'shirt',
     stations: [
@@ -116,9 +116,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 0,
   },
   townHall: {
-    wall: '#e6dcc6',
-    wainscot: '#8f5a3c',
-    floor: '#8f5a3c',
+    wall: '#fff0c9',
+    wainscot: '#c9a24a',
+    floor: '#c49460',
     floorKind: 'stone',
     outfit: 'blazer',
     stations: [
@@ -133,9 +133,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 2,
   },
   newspaper: {
-    wall: '#d6d0c2',
-    wainscot: '#6f675c',
-    floor: '#6f675c',
+    wall: '#d3e4f8',
+    wainscot: '#3f6fb0',
+    floor: '#9aabc4',
     floorKind: 'concrete',
     outfit: 'shirt',
     stations: [
@@ -150,9 +150,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 0,
   },
   bank: {
-    wall: '#ece4d2',
-    wainscot: '#b9a98f',
-    floor: '#d8cdb4',
+    wall: '#d9f2e6',
+    wainscot: '#2f8a6a',
+    floor: '#eadfc6',
     floorKind: 'stone',
     outfit: 'suit',
     stations: [
@@ -167,9 +167,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 2,
   },
   parliament: {
-    wall: '#233f63',
-    wainscot: '#6b4a32',
-    floor: '#6b4a32',
+    wall: '#eaf0fd',
+    wainscot: '#3f6fb0',
+    floor: '#4f7fd6',
     floorKind: 'carpet',
     outfit: 'suit',
     stations: [
@@ -186,9 +186,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 0,
   },
   ministry: {
-    wall: '#dccfb8',
-    wainscot: '#6b4a32',
-    floor: '#6b4a32',
+    wall: '#e8eff9',
+    wainscot: '#5a7fb0',
+    floor: '#bfcbdc',
     floorKind: 'planks',
     outfit: 'suit',
     stations: [
@@ -203,9 +203,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 0,
   },
   embassy: {
-    wall: '#f2ece0',
-    wainscot: '#b9a98f',
-    floor: '#cbbd9f',
+    wall: '#fff7e8',
+    wainscot: '#d9a21b',
+    floor: '#d8b98a',
     floorKind: 'stone',
     outfit: 'suit',
     stations: [
@@ -220,9 +220,9 @@ const ROOMS: Record<LocationId, RoomDef> = {
     guests: 3,
   },
   palace: {
-    wall: '#7a1f2b',
-    wainscot: '#4e1219',
-    floor: '#c9a227',
+    wall: '#fff3dc',
+    wainscot: '#c9a227',
+    floor: '#c0333d',
     floorKind: 'carpet',
     outfit: 'suit',
     stations: [

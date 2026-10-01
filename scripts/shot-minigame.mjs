@@ -4,7 +4,7 @@ import { webkit, devices } from '@playwright/test';
 const out = process.argv[2] ?? '/tmp';
 const location = process.argv[3] ?? 'workplace';
 const browser = await webkit.launch();
-const ctx = await browser.newContext({ ...devices['iPhone 13'] });
+const ctx = await browser.newContext({ ...devices['iPhone 13'], reducedMotion: 'reduce' });
 const page = await ctx.newPage();
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
 page.on('console', (m) => {

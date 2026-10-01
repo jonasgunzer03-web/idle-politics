@@ -62,9 +62,13 @@ test('Kompletter Ablauf: anlegen, arbeiten, kaufen, neu laden', async ({ page })
   // Nach fünf Schichten erklärt ein Hinweis die Produktionskette
   for (let i = 0; i < 5; i++) await tap.click();
   await closeDialogs(page);
-  // 0,315 € Lohn je Schicht: nach 32 Schichten werden 10 € angezeigt
+  // 0,315 € Lohn je Schicht, schnelles Tippen gibt Kombo-Bonus: nach 32 Schichten ≥ 10 €
   for (let i = 0; i < 27; i++) await tap.click();
-  await expect(page.getByTestId('resource-money-amount')).toHaveText('10 €');
+  await expect(page.getByTestId('combo')).not.toContainText('×1,0');
+  const money = await page.getByTestId('resource-money-amount').textContent();
+  expect(Number((money ?? '0').replace(/[^\d,]/g, '').replace(',', '.'))).toBeGreaterThanOrEqual(
+    10,
+  );
 
   // Kaufen im Investieren-Tab
   await page.getByTestId('tab-invest').click();
@@ -268,4 +272,69 @@ test('PWA: Manifest und Offline-Cache', async ({ page }) => {
   expect(cached.some((u) => /\/assets\/.+\.js$/.test(u))).toBe(true);
   expect(cached.some((u) => u.endsWith('.woff2'))).toBe(true);
   expect(cached).toContain('/icons/icon-192.png');
+});
+
+test('Minispiel „Selbst anpacken“ öffnen, laufen, verdienen und schließen', async ({ page }) => {
+  const problems = collectConsoleProblems(page);
+  await page.goto('./?debug=1');
+  await completeSetup(page);
+  await closeDialogs(page);
+  await page.getByTestId('play-minigame').click();
+  await expect(page.getByTestId('minigame')).toBeVisible();
+  const stage = page.getByRole('application');
+  await expect(stage.locator('canvas')).toBeVisible();
+  // Joystick: zur Maschine, zur Theke, zur Kasse
+  const box = await stage.boundingBox();
+  if (!box) throw new Error('Spielfläche nicht sichtbar');
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  const drag = async (dx: number, dy: number, ms: number) => {
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    await page.mouse.move(cx + dx, cy + dy, { steps: 3 });
+    await page.waitForTimeout(ms);
+    await page.mouse.up();
+  };
+  const before = await page.getByTestId('resource-money-amount').first().textContent();
+  await drag(-30, -56, 1500);
+  await page.waitForTimeout(1200);
+  await drag(56, 20, 1600);
+  await page.waitForTimeout(6000);
+  await drag(-20, 50, 600);
+  await expect(page.getByTestId('resource-money-amount').first()).not.toHaveText(before ?? '', {
+    timeout: 8000,
+  });
+  await page.getByTestId('minigame-close').click();
+  await expect(page.getByTestId('minigame')).toBeHidden();
+  expect(problems).toEqual([]);
+});
+
+test('Gesetz per Wisch-Karte im Rathaus beschließen', async ({ page }) => {
+  await page.goto('./?debug=1');
+  await completeSetup(page);
+  await debug(
+    page,
+    '(() => { const s = window.__idlePolitics.getState(); s.debugSetStage(5); s.debugAddResources(1e9); })()',
+  );
+  await closeDialogs(page);
+  await page.getByTestId('leave').click();
+  await page.getByTestId('dest-townHall').click();
+  await expect(page.getByTestId('location-outside')).toContainText('Rathaus', { timeout: 10_000 });
+  await page.getByTestId('enter').click();
+  await closeDialogs(page);
+  const card = page.getByTestId('law-card');
+  await expect(card).toBeVisible();
+  const policy = await card.getAttribute('data-policy');
+  await card.scrollIntoViewIfNeeded();
+  const box = await card.boundingBox();
+  if (!box) throw new Error('Karte nicht sichtbar');
+  const x = box.x + box.width / 2;
+  const y = box.y + 60;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 80, y, { steps: 5 });
+  await page.mouse.move(x + 220, y, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.locator(`[data-testid="law-card"][data-policy="${policy}"]`)).toHaveCount(0);
+  await expect(page.getByTestId('laws')).not.toContainText('Noch nichts beschlossen');
 });

@@ -58,6 +58,13 @@ export interface Balancing {
   costGrowth: number;
   /** Tipp-Erträge wachsen pro Stufe um diesen Faktor. */
   tapStageGrowth: number;
+  /** Tipp-Kombo: schnelles Tippen erhöht den Ertrag je Tipp. */
+  tapCombo: {
+    perTap: number;
+    max: number;
+    holdSeconds: number;
+    decayPerSecond: number;
+  };
   professions: Record<ProfessionId, ResourceMap>;
   resourceUnlockStage: ResourceMap;
   /** Ab welcher Stufe der Balken „Loyalität des Apparats“ sichtbar ist. */
@@ -132,6 +139,17 @@ export const balancing: Balancing = {
 
   /** Tätigkeiten an Orten bringen pro Stufe so viel mehr (2,1 = ×2,1 je Stufe). */
   tapStageGrowth: 2.1,
+
+  tapCombo: {
+    // Jeder Tipp erhöht den Kombo-Faktor um 0,08 (12 schnelle Tipps ≈ ×2) …
+    perTap: 0.08,
+    // … bis höchstens ×3.
+    max: 3,
+    // So lange (Sekunden) bleibt die Kombo nach dem letzten Tipp voll stehen …
+    holdSeconds: 0.8,
+    // … danach sinkt sie um so viel pro Sekunde zurück Richtung ×1.
+    decayPerSecond: 1.5,
+  },
 
   /** Multiplikatoren je Beruf auf alle Erträge der jeweiligen Ressource. */
   professions: {

@@ -2,7 +2,7 @@
   position: absolute;
   inset: 0;
   container-type: size;
-  background: linear-gradient(#6fb3e0 0%, #a9d4ef 45%, #f1efe4 85%);
+  background: linear-gradient(#3fa9ff 0%, #8fd3ff 50%, #e4f6ff 88%);
   overflow: hidden;
 }
 
@@ -17,11 +17,11 @@
 }
 
 .duskLayer {
-  background: linear-gradient(#4a5a8f 0%, #e0777a 45%, #ffc27a 80%);
+  background: linear-gradient(#5a5fc4 0%, #ff7a8a 45%, #ffc65c 80%);
 }
 
 .nightLayer {
-  background: linear-gradient(#050b1c 0%, #0f2044 55%, #2a3a5c 90%);
+  background: linear-gradient(#1b2a6b 0%, #2d4196 55%, #5468b8 90%);
 }
 
 .stars {

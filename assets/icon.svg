@@ -1,16 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- App-Icon „Idle Politics“: Rednerpult mit aufsteigenden Balken. Inhalt liegt in der
-       sicheren Zone (80 %), damit das Icon auch als maskierbares Icon funktioniert. -->
-  <rect width="512" height="512" fill="#2b2f36"/>
-  <circle cx="256" cy="256" r="200" fill="#343941"/>
+  <!-- App-Icon „Idle Politics“ (Spiel-Look): Himmel, Rednerpult mit aufsteigenden Balken,
+       goldener Stern. Inhalt in der sicheren Zone (80 %) für maskierbare Icons. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3aa6ff"/>
+      <stop offset="1" stop-color="#7fd0ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="256" cy="250" r="196" fill="#ffffff" fill-opacity="0.18"/>
+  <!-- Wolken -->
+  <ellipse cx="120" cy="150" rx="46" ry="22" fill="#ffffff" fill-opacity="0.9"/>
+  <ellipse cx="150" cy="138" rx="34" ry="24" fill="#ffffff" fill-opacity="0.9"/>
+  <ellipse cx="398" cy="196" rx="40" ry="18" fill="#ffffff" fill-opacity="0.9"/>
   <!-- aufsteigende Balken -->
-  <rect x="150" y="238" width="44" height="62" rx="6" fill="#8d7424"/>
-  <rect x="210" y="196" width="44" height="104" rx="6" fill="#ad8f25"/>
-  <rect x="270" y="150" width="44" height="150" rx="6" fill="#c9a227"/>
-  <!-- Stern über dem höchsten Balken -->
-  <path d="M292 104 l8.2 16.6 18.3 2.7 -13.2 12.9 3.1 18.2 -16.4 -8.6 -16.4 8.6 3.1 -18.2 -13.2 -12.9 18.3 -2.7z" fill="#e9e4d8"/>
+  <rect x="150" y="226" width="50" height="86" rx="12" fill="#2fbf55"/>
+  <rect x="150" y="300" width="50" height="12" fill="#23963f"/>
+  <rect x="214" y="180" width="50" height="132" rx="12" fill="#ffc533"/>
+  <rect x="214" y="300" width="50" height="12" fill="#d9961a"/>
+  <rect x="278" y="128" width="50" height="184" rx="12" fill="#ff5466"/>
+  <rect x="278" y="300" width="50" height="12" fill="#c22a3c"/>
+  <!-- Stern -->
+  <path d="M303 62 l13 26.4 29.1 4.2 -21 20.5 5 29 -26.1 -13.7 -26.1 13.7 5 -29 -21 -20.5 29.1 -4.2z" fill="#ffd23f" stroke="#d9961a" stroke-width="6" stroke-linejoin="round"/>
   <!-- Rednerpult -->
-  <path d="M132 312 h248 l-14 34 h-220z" fill="#e9e4d8"/>
-  <path d="M184 346 h144 l-12 86 h-120z" fill="#d6d0c1"/>
-  <rect x="236" y="364" width="40" height="40" rx="20" fill="#c9a227"/>
+  <path d="M120 314 h272 a10 10 0 0 1 9 14 l-12 26 h-266 l-12 -26 a10 10 0 0 1 9 -14z" fill="#ffffff"/>
+  <path d="M168 354 h176 l-14 88 a12 12 0 0 1 -12 10 h-124 a12 12 0 0 1 -12 -10z" fill="#ffffff"/>
+  <path d="M168 354 h176 l-3 18 h-170z" fill="#d3e2f1"/>
+  <circle cx="256" cy="404" r="26" fill="#ffc533" stroke="#d9961a" stroke-width="6"/>
 </svg>

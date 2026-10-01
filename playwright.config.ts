@@ -11,6 +11,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}/`,
     trace: 'retain-on-failure',
+    // Ohne Dauer-Animationen (sonst warten Klicks auf „stabile“ Knöpfe)
+    reducedMotion: 'reduce',
   },
   projects: [{ name: 'iphone-webkit', use: { ...devices['iPhone 13'] } }],
   webServer: {
