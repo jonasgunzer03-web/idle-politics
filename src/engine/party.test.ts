@@ -54,6 +54,15 @@ describe('Beschlüsse im Parteibüro', () => {
       agenda: { items: ['businessFriendly'], refreshAt: 1e12 },
     });
     expect(enactBlock(runOf(away), 'businessFriendly', cfg)).toBe('away');
+    // Im Rathaus wird ebenfalls abgestimmt (Wisch-Karten)
+    const townHall = playingGame({
+      stage: 5,
+      resources: rich,
+      agenda: { items: ['businessFriendly'], refreshAt: 1e12 },
+      world: { posX: 1220, target: null, inside: true },
+    });
+    expect(enactBlock(runOf(townHall), 'businessFriendly', cfg)).toBeNull();
+    expect(runOf(rejectPolicy(townHall, 'businessFriendly', cfg)).agenda.items).toEqual([]);
     const notListed = inOffice({ agenda: { items: [], refreshAt: 1e12 } });
     expect(enactPolicy(notListed, 'businessFriendly', cfg)).toBe(notListed);
   });

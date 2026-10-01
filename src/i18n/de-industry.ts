@@ -267,7 +267,13 @@ export const industryTexts = {
   },
 
   ui: {
-    tabs: { production: 'Produktion', build: 'Ausbau', team: 'Team', politics: 'Politik' },
+    tabs: {
+      production: 'Produktion',
+      build: 'Ausbau',
+      team: 'Team',
+      politics: 'Politik',
+      vote: 'Abstimmen',
+    },
     lineIn: 'braucht',
     lineOut: 'liefert',
     blocked: 'Stockt – es fehlen {good}',

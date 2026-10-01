@@ -210,3 +210,9 @@
     transform: rotate(-6deg);
   }
 }
+
+.voteTab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

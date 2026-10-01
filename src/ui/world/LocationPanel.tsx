@@ -8,6 +8,7 @@ import {
   Lock,
   Square,
   Users,
+  Vote,
   Wrench,
 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
@@ -23,7 +24,8 @@ import { BuildTab } from '../industry/BuildTab';
 import { ProductionTab } from '../industry/ProductionTab';
 import { TeamTab } from '../industry/TeamTab';
 import tabStyles from '../industry/Industry.module.css';
-import { PoliticsTab } from '../party/PoliticsTab';
+import { LawDeck } from '../party/LawDeck';
+import { Laws, PoliticsTab } from '../party/PoliticsTab';
 import { locationName } from '../gameText';
 import { levelName } from '../peopleText';
 import styles from './LocationPanel.module.css';
@@ -115,12 +117,14 @@ export function LocationPanel() {
   return <Inside key={view.here} location={view.here} name={name} />;
 }
 
-type TabKey = 'production' | 'build' | 'team' | 'politics';
+type TabKey = 'production' | 'build' | 'team' | 'politics' | 'vote';
 
 /** Drinnen: Reiter Produktion, Ausbau, Team (im Parteibüro zusätzlich Politik). */
 function Inside({ location, name }: { location: LocationId; name: string }) {
   const party = location === 'partyOffice';
-  const [tab, setTab] = useState<TabKey>(party ? 'politics' : 'production');
+  // Im Rathaus und im Parlament wird zusätzlich abgestimmt (Wisch-Karten)
+  const voting = location === 'townHall' || location === 'parliament';
+  const [tab, setTab] = useState<TabKey>(party ? 'politics' : voting ? 'vote' : 'production');
   const info = useGame(
     useShallow((s) => {
       const run = s.game.run;
@@ -138,6 +142,16 @@ function Inside({ location, name }: { location: LocationId; name: string }) {
             key: 'politics' as const,
             label: de.industry.ui.tabs.politics,
             icon: Landmark,
+            badge: info.agenda,
+          },
+        ]
+      : []),
+    ...(voting
+      ? [
+          {
+            key: 'vote' as const,
+            label: de.industry.ui.tabs.vote,
+            icon: Vote,
             badge: info.agenda,
           },
         ]
@@ -215,6 +229,12 @@ function Inside({ location, name }: { location: LocationId; name: string }) {
       {tab === 'build' && <BuildTab location={location} />}
       {tab === 'team' && <TeamTab location={location} />}
       {tab === 'politics' && <PoliticsTab />}
+      {tab === 'vote' && (
+        <div className={styles.voteTab}>
+          <LawDeck />
+          <Laws />
+        </div>
+      )}
     </section>
   );
 }

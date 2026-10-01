@@ -1,4 +1,4 @@
-import { Gavel, Scale, Swords, UserMinus, UserPlus, X } from 'lucide-react';
+import { Swords, UserMinus, UserPlus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Bust } from '../../art/people/Bust';
 import { defaultConfig } from '../../config';
@@ -23,6 +23,7 @@ import { de, fill } from '../../i18n/de';
 import { gameStore, useGame } from '../../store';
 import { formatCost } from '../gameText';
 import { nameFromSeed, policyName, rivalParty, shortDuration } from '../peopleText';
+import { LawDeck } from './LawDeck';
 import styles from './Party.module.css';
 
 const cfg = defaultConfig;
@@ -201,64 +202,8 @@ function AdvisorDetail({ index, onClose }: { index: number; onClose: () => void 
   );
 }
 
-/** Tagesordnung: drei Vorlagen, jede öffnet die Beratung. */
-function Agenda() {
-  const key = useGame((s) => {
-    const run = s.game.run;
-    if (!run) return '';
-    return `${run.agenda.items.join(',')}|${Math.round((run.agenda.refreshAt - run.playMs) / 10_000)}`;
-  });
-  const run = gameStore.getState().game.run;
-  if (!run || !key) return null;
-  return (
-    <section className={styles.card} data-testid="agenda">
-      <div className={styles.head}>
-        <h3 className={styles.title}>
-          <Gavel size={18} aria-hidden="true" /> {de.party.session.agenda}
-        </h3>
-        <span className={styles.small}>
-          {fill(de.party.session.agendaNext, {
-            time: shortDuration(run.agenda.refreshAt - run.playMs),
-          })}
-        </span>
-      </div>
-      {run.agenda.items.length === 0 && (
-        <p className={styles.small}>
-          {fill(de.party.session.agendaEmpty, {
-            time: shortDuration(run.agenda.refreshAt - run.playMs),
-          })}
-        </p>
-      )}
-      <div className={styles.proposals}>
-        {run.agenda.items.map((id) => {
-          const def = findPolicy(id, cfg);
-          if (!def) return null;
-          return (
-            <button
-              key={id}
-              type="button"
-              className={styles.proposal}
-              onClick={() => {
-                gameStore.getState().openSheet({ kind: 'policy', id });
-              }}
-              data-testid={`proposal-${id}`}
-            >
-              <span className={styles.area}>{de.party.areas[def.area]}</span>
-              <span className={styles.name}>{policyName(id)}</span>
-              <span className={styles.small}>{de.party.policies[id].text}</span>
-              <span className={styles.discuss}>
-                <Scale size={15} aria-hidden="true" /> {de.party.session.discuss}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 /** Geltende Beschlüsse mit Spätfolgen und „Aufheben“. */
-function Laws() {
+export function Laws() {
   const key = useGame((s) => {
     const run = s.game.run;
     if (!run) return '';
@@ -446,7 +391,7 @@ export function RivalCard() {
 export function PoliticsTab() {
   return (
     <div className={styles.stack}>
-      <Agenda />
+      <LawDeck />
       <AdvisorTable />
       <Laws />
       <RivalCard />

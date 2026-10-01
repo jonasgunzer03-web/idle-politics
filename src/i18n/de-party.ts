@@ -363,7 +363,7 @@ export const partyTexts = {
     loyaltyUp: 'Befürworter werden treuer, Gegner verlieren Vertrauen.',
     cost: 'Kosten',
     blocks: {
-      away: 'Nur im Parteibüro',
+      away: 'Nur im Parteibüro, Rathaus oder Parlament',
       agenda: 'Nicht auf der Tagesordnung',
       slots: 'Alle Plätze belegt – erst ein Gesetz aufheben',
       conflict: 'Widerspricht: {law}',
@@ -373,6 +373,19 @@ export const partyTexts = {
     citizens: 'Stimmen von der Straße',
     goToOffice: 'Zum Parteibüro',
     openSession: 'Sitzung eröffnen',
+  },
+
+  lawDeck: {
+    title: 'Abstimmung',
+    hint: 'Nach rechts wischen = zustimmen, nach links = ablehnen',
+    left: 'noch {count}',
+    empty: 'Alles abgestimmt! Neue Vorlagen in {time}.',
+    yes: 'DAFÜR',
+    no: 'DAGEGEN',
+    for: 'dafür',
+    against: 'dagegen',
+    debate: 'Beraten',
+    warning: '{faction} warnt: {title}',
   },
 
   advisors: {
@@ -387,7 +400,7 @@ export const partyTexts = {
     loyalty: 'Loyalität {value} %',
     disloyal: 'Unzufrieden – könnte überlaufen!',
     blocks: {
-      away: 'Nur im Parteibüro',
+      away: 'Nur im Parteibüro, Rathaus oder Parlament',
       seats: 'Alle Plätze belegt',
       money: 'Zu wenig Einfluss',
       missing: 'Nicht verfügbar',
@@ -434,7 +447,7 @@ export const partyTexts = {
       path: 'Nur auf autokratischem Weg',
       strength: 'Er ist noch zu stark',
       cooldown: 'Wieder möglich in {time}',
-      away: 'Nur im Parteibüro',
+      away: 'Nur im Parteibüro, Rathaus oder Parlament',
       money: 'Zu wenig Mittel',
     },
     success: 'Das hat gesessen!',

@@ -1,77 +1,106 @@
 .stage {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   padding: 6px 0 4px;
 }
 
+/* Entscheidungskarte im Spiel-Look: farbiges Band oben, Text darunter */
 .card {
   position: relative;
-  min-height: 230px;
-  padding: 26px 18px 18px;
-  border-radius: 18px;
+  min-height: 250px;
+  border-radius: 24px;
   background: var(--surface);
-  border: 2px solid var(--border);
-  box-shadow: 0 10px 28px rgb(0 0 0 / 18%);
+  box-shadow:
+    0 5px 0 var(--edge),
+    0 14px 30px rgb(36 48 74 / 16%);
+  overflow: hidden;
   touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
   cursor: grab;
-  /* Zurückschnellen, wenn nicht weit genug gewischt wurde */
-  transition: transform 200ms var(--ease);
+  /* Zurückschnellen bzw. Rausfliegen */
+  transition: transform 230ms var(--ease);
+  animation: deal 340ms var(--bounce);
+  display: flex;
+  flex-direction: column;
+}
+
+.band {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 16px 12px;
+  background:
+    radial-gradient(circle at 80% 20%, rgb(255 255 255 / 35%), transparent 55%),
+    linear-gradient(180deg, #ffb52e, #ff8a2a);
+  color: #ffffff;
+}
+
+.speaker {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 15%);
+}
+
+.body {
+  padding: 14px 18px 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.speaker {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
 .title {
-  font-size: 1.3rem;
+  font-size: 1.35rem;
+  line-height: 1.15;
 }
 
 .text {
   font-size: 1rem;
   line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .stamp {
   position: absolute;
-  top: 10px;
+  top: 22px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 0.85rem;
+  max-width: 60%;
+  padding: 5px 12px;
+  border: 4px solid currentcolor;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 94%);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
   pointer-events: none;
 }
 
 .stampYes {
-  right: 12px;
+  left: 14px;
   color: var(--good);
-  border: 2px solid var(--good);
+  transform: rotate(-10deg);
 }
 
 .stampNo {
-  left: 12px;
+  right: 14px;
   color: var(--bad);
-  border: 2px solid var(--bad);
+  transform: rotate(10deg);
 }
 
 .affects {
   display: inline-flex;
   gap: 3px;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .hint {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
 }
 
@@ -83,4 +112,15 @@
 
 .dragging {
   transition: none;
+  cursor: grabbing;
+}
+
+@keyframes deal {
+  from {
+    transform: translateY(30px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

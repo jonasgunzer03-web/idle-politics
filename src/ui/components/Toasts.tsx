@@ -22,7 +22,7 @@ export function Toasts() {
   const text = de.achievements.list[current];
   return (
     <div className={styles.toast} role="status" key={current} data-testid="achievement-toast">
-      <Trophy size={20} aria-hidden="true" className={styles.icon} />
+      <Trophy size={24} strokeWidth={2.6} aria-hidden="true" className={styles.icon} />
       <div>
         <p className={styles.kicker}>{de.achievements.unlocked}</p>
         <p className={styles.name}>{text.name}</p>

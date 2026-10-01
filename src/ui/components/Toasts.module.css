@@ -1,52 +1,67 @@
+/* Erfolg freigeschaltet: goldenes Banner, oben unter der Kopfzeile, ploppt herein */
 .toast {
   position: fixed;
   left: 50%;
-  /* Unten über der Tab-Leiste, damit Ressourcen sichtbar bleiben */
-  bottom: calc(70px + var(--safe-bottom));
+  top: calc(12px + var(--safe-top));
   z-index: 70;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
+  gap: 12px;
+  padding: 8px 18px 8px 8px;
   border-radius: 999px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 22%);
+  background: linear-gradient(180deg, #ffd85a, #ffbf2e);
+  color: #5a3a00;
+  box-shadow:
+    0 5px 0 var(--gold-edge),
+    0 12px 26px rgb(36 48 74 / 25%);
   pointer-events: none;
-  animation: toast-in 3.2s ease both;
+  animation: toast-in 3.2s var(--ease) both;
   max-width: calc(100vw - 32px);
 }
 
 .icon {
-  color: var(--accent-2);
   flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #f0a91a;
+  box-shadow: 0 3px 0 rgb(180 110 0 / 35%);
 }
 
 .kicker {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .name {
-  font-weight: 700;
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.1;
 }
 
 @keyframes toast-in {
   0% {
     opacity: 0;
-    transform: translate(-50%, 20px);
+    transform: translate(-50%, -30px) scale(0.8);
   }
-  10%,
+  8% {
+    opacity: 1;
+    transform: translate(-50%, 4px) scale(1.04);
+  }
+  12%,
   85% {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, 0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, 20px);
+    transform: translate(-50%, -30px) scale(0.9);
   }
 }

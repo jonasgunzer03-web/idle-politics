@@ -39,6 +39,14 @@ export function isInSession(run: RunState, cfg: GameConfig): boolean {
   return run.world.inside && currentLocation(run, cfg) === SESSION_LOCATION;
 }
 
+/** Hier wird über Gesetze abgestimmt (Wisch-Karten): Parteibüro, Rathaus, Parlament. */
+export const VOTE_LOCATIONS = ['partyOffice', 'townHall', 'parliament'] as const;
+
+export function canVoteHere(run: RunState, cfg: GameConfig): boolean {
+  const here = currentLocation(run, cfg);
+  return run.world.inside && here !== null && (VOTE_LOCATIONS as readonly string[]).includes(here);
+}
+
 function stageIndex(run: RunState): number {
   return Math.min(MAX_STAGE, Math.max(1, run.stage)) - 1;
 }
@@ -272,7 +280,7 @@ export function enactBlock(run: RunState, id: PolicyId, cfg: GameConfig): EnactB
   if (!run.agenda.items.includes(id)) return 'agenda';
   if (conflictingLaws(run, def).length > 0) return 'conflict';
   if (activeLaws(run).length >= lawSlots(run, cfg)) return 'slots';
-  if (!isInSession(run, cfg)) return 'away';
+  if (!canVoteHere(run, cfg)) return 'away';
   if (!canAfford(run.resources, policyCost(run, def, cfg))) return 'money';
   return null;
 }
@@ -312,7 +320,7 @@ export function rejectPolicy(game: GameState, id: PolicyId, cfg: GameConfig): Ga
   const run = game.run;
   const def = findPolicy(id, cfg);
   if (game.phase !== 'playing' || !run || !def || !run.agenda.items.includes(id)) return game;
-  if (!isInSession(run, cfg)) return game;
+  if (!canVoteHere(run, cfg)) return game;
   return {
     ...game,
     run: {
@@ -338,7 +346,7 @@ export function revokeCost(run: RunState, id: PolicyId, cfg: GameConfig): Partia
 export function revokePolicy(game: GameState, id: PolicyId, cfg: GameConfig): GameState {
   const run = game.run;
   const def = findPolicy(id, cfg);
-  if (game.phase !== 'playing' || !run || !def || !run.laws[id] || !isInSession(run, cfg)) {
+  if (game.phase !== 'playing' || !run || !def || !run.laws[id] || !canVoteHere(run, cfg)) {
     return game;
   }
   const cost = revokeCost(run, id, cfg);
