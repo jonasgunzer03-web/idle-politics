@@ -22,6 +22,7 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 ## Arbeitsweise
 
 - Alle Phasen aus `docs/SPEC.md` sind umgesetzt, dazu die begehbare Welt (28.09.2026) und die XXL-Erweiterung (30.09.2026, Bauplan `docs/XXL-PLAN.md`): Produktionsketten mit Engpässen, Ausbaustufen, Maschinen, benannte Mitarbeiter, Stimmung/Streik, Parteibüro mit Beratern und Gesetzen samt Spätfolgen, Rivale, Stadtchronik, neue Grafik mit Tag/Nacht, Wetter, Verkehr und belebten Innenräumen.
+- Mega-Umbau (01.10.2026, Bauplan `docs/MEGA-PLAN.md`): Spiel-Design (Fredoka/Nunito, Gummi-Knöpfe, nur heller Modus), 3D-Minispiele „Selbst anpacken“ an allen Orten (three.js, `src/minigame/`), Abstimmen per Wisch-Karte (auch Rathaus/Parlament), eigene Weltkarte, Tipp-Kombo, neuer Titelbildschirm und App-Icon. Spielstand Version 4.
 - Neue Arbeit weiterhin in überschaubaren Schritten. Nach jeder Phase stoppen und liefern: was fertig
   ist, Testanleitung fürs iPhone, bekannte Einschränkungen, 2–3 Sätze zu Architekturentscheidungen.
   Dann auf OK warten.
@@ -71,6 +72,9 @@ Der Auftraggeber programmiert nicht selbst: Erklärungen auf Deutsch, ohne Fachj
 - CSS-Animation auf `opacity` überschreibt ein `opacity`-Attribut im SVG. Durchsichtige Ebenen mit Tag/Nacht-Klasse (`night`, `dusk`) immer in eine eigene `<g>` legen.
 - Tag und Nacht nie über CSS-Animationen mit Verzögerung steuern (neu eingehängte Elemente laufen sonst aus dem Takt), sondern über die CSS-Variablen `--day/--dusk/--night` (siehe `art/world/dayCycle.ts`).
 - In SVG-Attributen keine CSS-Variablen für `fill`; stattdessen `style={{ fill: … }}`.
+- three.js: `PCFSoftShadowMap` gibt es nicht mehr (Konsolenwarnung) – `PCFShadowMap` nehmen. 3D-Code nur in `src/minigame/`, das Bündel wird per `lazy()` nachgeladen.
+- Dauer-Animationen (z. B. pulsierende Knöpfe) machen Playwright-Klicks „instabil“. Tests laufen daher mit `reducedMotion: 'reduce'`.
+- Der Claude-Browser liefert bei ausgeblendetem Bereich alte Screenshots (`document.hidden`). Für Optik-Prüfungen `node scripts/shots.mjs <ordner> <szene>` bzw. `scripts/shot-minigame.mjs` nutzen (headless WebKit, Dev-Server auf 5188).
 - Die Grafik zeichnet mit dem `Painter` (`art/world/paint.tsx`): Tag-Ebene, Licht-Ebene (nachts) und Effekte getrennt. Neue Gebäudeteile dort anlegen, nicht als eigene Komponenten.
 
 ## Veröffentlichung

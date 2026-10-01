@@ -55,6 +55,10 @@ Cartoon-Design) · **Idle bleibt Kern, Minispiele als Bonus** · **Daumen-Joysti
 - Tipp-Kombo: schnelles Tippen füllt eine Flamme, bis ×3 Ertrag.
 - Minispiele als aktiver Turbo, Wisch-Karten als schnelle Entscheidungen.
 
+## Stand
+
+Alle Punkte umgesetzt (Commits „Mega 1“ bis „Mega 4“). `npm run check` grün.
+
 ## Reihenfolge
 
 1. Design-System + Kopfzeile + Tab-Leiste + Knöpfe/Karten/Fenster

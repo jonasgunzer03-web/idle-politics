@@ -74,7 +74,8 @@ test('Kompletter Ablauf: anlegen, arbeiten, kaufen, neu laden', async ({ page })
   await page.getByTestId('tab-invest').click();
   await page.getByTestId('buy-overtime').click();
   await expect(page.getByTestId('generator-overtime-owned')).toHaveText('1');
-  await expect(page.getByTestId('buy-overtime')).toBeDisabled();
+  // Der nächste Kauf ist teurer (10 € → 12 €)
+  await expect(page.getByTestId('buy-overtime')).toHaveAttribute('aria-label', /12 €/);
   await expectNoHorizontalScroll(page);
 
   // Neu laden: Spielstand ist noch da

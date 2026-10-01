@@ -140,15 +140,26 @@ Alle Texte (Namen, Titel, Karten, Hinweise) stehen in `src/i18n/`.
 | `interior/InteriorScene.tsx`, `interior/machines.tsx` | **Innenräume**: Raum mit Tiefe und Fenstern, Einrichtung je Ausbaustufe, 22 animierte Maschinen, Belegschaft bei der Arbeit, Beratertisch        |
 | `people/Bust.tsx`, `people/Worker.tsx`                | Porträts (Mitarbeiter, Berater, Rivale, Bürger) und Ganzkörper-Figuren mit Bewegungen                                                            |
 | `flag/`                                               | Flaggen aus der Beschreibung in `states.ts`                                                                                                      |
+| `map/`                                                | **Weltkarte**: erfundener Kontinent (`geography.ts`, per Skript erzeugt), Provinzen des eigenen Landes (`provinces.ts`), Karte (`WorldMap.tsx`)  |
+
+### `src/minigame/` – 3D-Minispiele „Selbst anpacken“ (three.js, nachgeladen)
+
+| Datei                    | Aufgabe                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `sim.ts`                 | Ablauf ohne Grafik (getestet): Laufen, Quelle, Tragen, Theke, Kunden, Geld, Helfer, Ausbau-Felder, Hinweis-Pfeil      |
+| `layout.ts`, `themes.ts` | gemeinsamer Grundriss; Aussehen je Ort (Boden, Wände, Ware, Maschine, Theke, Deko, Kleidung)                          |
+| `three/`                 | 3D-Baukasten (`kit.ts`), Figuren, Stapel-Ware, Räume/Maschinen/Theken, Beschriftungen, die Szene mit Kamera und Licht |
+| `MinigameScreen.tsx`     | Vollbild mit Daumen-Joystick, Anzeigen, schwebenden Gewinnen; meldet Verkäufe und Ausbau-Käufe an den Store           |
 
 ### Weitere
 
-| Ordner                 | Aufgabe                                                              |
-| ---------------------- | -------------------------------------------------------------------- |
-| `scripts/simulate.ts`  | **Balancing-Simulation** (Bericht, schlägt bei Problemen fehl)       |
-| `scripts/calibrate.ts` | stellt die Aufstiegsanforderungen automatisch auf die Zielzeiten ein |
-| `scripts/sim-core.ts`  | der Bot, den beide nutzen                                            |
-| `tests/smoke.spec.ts`  | Playwright-Smoke-Test im iPhone-13-Profil                            |
+| Ordner                                           | Aufgabe                                                                    |
+| ------------------------------------------------ | -------------------------------------------------------------------------- |
+| `scripts/simulate.ts`                            | **Balancing-Simulation** (Bericht, schlägt bei Problemen fehl)             |
+| `scripts/calibrate.ts`                           | stellt die Aufstiegsanforderungen automatisch auf die Zielzeiten ein       |
+| `scripts/sim-core.ts`                            | der Bot, den beide nutzen                                                  |
+| `scripts/shots.mjs`, `scripts/shot-minigame.mjs` | Screenshots im iPhone-Profil (braucht `npm run dev`), zum Prüfen der Optik |
+| `tests/smoke.spec.ts`                            | Playwright-Smoke-Test im iPhone-13-Profil                                  |
 
 ## Wie die Teile zusammenspielen
 
@@ -185,6 +196,24 @@ sind. Alle Wirkungen werden daraus jedes Mal neu berechnet (`modifiers.ts`). Wir
 aufgehoben, enden deshalb auch seine eingetretenen Spätfolgen. Spätfolgen, Berater und Rivale
 laufen nur im aktiven Spiel, nie offline.
 
+### Minispiele
+
+Die Bewegung läuft komplett in `src/minigame/sim.ts` (reine Funktionen), die 3D-Szene zeichnet
+nur nach. Was ein Verkauf bringt, rechnet die Engine (`engine/minigame.ts`): ein Vielfaches eines
+Durchgangs der Linien des Gebäudes plus ein paar Sekunden laufender Ertrag. Ausbau-Felder kaufen
+über die üblichen Engine-Funktionen (Mitarbeiter, Ausbaustufe, Maschine). three.js steckt in einem
+eigenen Bündel, das erst beim ersten Öffnen geladen wird (offline trotzdem im Cache).
+
+### Abstimmen per Wisch-Karte
+
+Gesetzesvorlagen (Parteibüro, Rathaus, Parlament) und Ereignis-Fragen sind Kartenstapel mit
+gemeinsamer Geste (`ui/components/useSwipe.ts`): rechts = ja, links = nein, Karte fliegt raus.
+
+### Tipp-Kombo
+
+Schnelle Tipps erhöhen einen Faktor bis ×3 (`engine/combo.ts`, Werte in `balancing.ts`). Die
+Oberfläche merkt sich die Kombo nur im Speicher und gibt den Faktor an `performAction` mit.
+
 ### Tag und Nacht
 
 Rein optisch. Die Weltansicht rechnet alle zwei Sekunden aus der Uhrzeit, wie hell es ist, und
@@ -211,11 +240,12 @@ Zustimmung/Unruhe/Loyalität, Ereignis, Sturz, Staat wechseln, Zurücksetzen. De
 
 ## Tests
 
-- **Unit-Tests** (231): Formeln, Welt, Zeit/Offline, Produktionskette mit Engpässen und Lager,
+- **Unit-Tests** (263, u. a. Minispiel-Ablauf, Verkäufe, Kombo, Provinzen der Weltkarte): Formeln, Welt, Zeit/Offline, Produktionskette mit Engpässen und Lager,
   Ausbau, Maschinen, Stimmung und Streik, Beschlüsse, Spätfolgen, Berater, Rivale, Karriere,
   Wahlen, Politik mit Frist und Putsch, Ereignisse, Allianzen, Außenpolitik, Lebenszyklus,
   Speichern, Migrationen, Backup, Zahlenformat, Store, Startablauf, Anzeige-Helfer.
 - **Simulation** (in `npm run check` als schneller Lauf): Der Bot stellt ein, baut aus, kauft
   Maschinen, holt Berater und fasst Beschlüsse.
-- **Smoke-Test** (9 Fälle, WebKit iPhone 13), darunter ein kompletter Durchgang durch
-  Produktionskette, Ausbau, Team, Beschluss und Chronik.
+- **Smoke-Test** (11 Fälle, WebKit iPhone 13), darunter ein kompletter Durchgang durch
+  Produktionskette, Ausbau, Team, Beschluss und Chronik, das 3D-Minispiel mit Joystick und
+  eine Abstimmung per Wisch-Karte im Rathaus. Läuft mit `reducedMotion: 'reduce'`.
