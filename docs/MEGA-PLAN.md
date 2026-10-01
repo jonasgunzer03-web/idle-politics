@@ -51,7 +51,7 @@ Cartoon-Design) · **Idle bleibt Kern, Minispiele als Bonus** · **Daumen-Joysti
 
 ## E. Spieldynamik ohne neue Komplexität
 
-- Immer sichtbares Ziel: Fortschrittsbalken zum nächsten Aufstieg in der Kopfzeile.
+- Klares Ziel: Karriere-Karte mit dicken Fortschrittsbalken und pulsierendem Aufstiegs-Knopf (keine zusätzliche Leiste in der schon vollen Kopfzeile).
 - Tipp-Kombo: schnelles Tippen füllt eine Flamme, bis ×3 Ertrag.
 - Minispiele als aktiver Turbo, Wisch-Karten als schnelle Entscheidungen.
 
