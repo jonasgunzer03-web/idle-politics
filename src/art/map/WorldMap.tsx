@@ -1,15 +1,13 @@
 import { memo } from 'react';
 import { FOREIGN_IDS, REGION_IDS, type ForeignId, type RegionId } from '../../engine/ids';
 import { COAST, COUNTRY_SHAPES, type Pt } from './geography';
-import { centroid, province, toPath } from './provinces';
+import { MAP_H, MAP_W, type MapPartner } from './mapLayout';
+import { province, toPath } from './provinces';
 import styles from './WorldMap.module.css';
 
 // Die Weltkarte als Spielbrett: Meer, ein erfundener Kontinent mit sechs Ländern, Berge,
 // Wälder, ein Fluss, Inseln. Das eigene Land ist in vier Provinzen geteilt, die mit dem
 // Ausbau satter werden. Beziehungen färben die Grenzen, Handel zieht goldene Routen.
-
-export const MAP_W = 360;
-export const MAP_H = 420;
 
 /** Grundfarbe je Land auf der Karte. */
 const LAND: Record<ForeignId, string> = {
@@ -27,26 +25,11 @@ function provinceFill(base: string, level: number): string {
   return `color-mix(in srgb, ${base} ${100 - mix}%, #3a7d2c)`;
 }
 
-export interface MapPartner {
-  id: ForeignId;
-  relation: number;
-  trade: boolean;
-  alliance: boolean;
-}
-
 interface Props {
   own: ForeignId;
   partners: MapPartner[];
   /** Ausbaustufe je Provinz (0 = nichts gebaut, 3 = viel gebaut). */
   levels: Record<RegionId, number>;
-}
-
-/** Positionen der Provinz-Mittelpunkte (für Knöpfe). */
-export function provinceCenters(own: ForeignId): Record<RegionId, Pt> {
-  const shape = COUNTRY_SHAPES[own];
-  const result = {} as Record<RegionId, Pt>;
-  for (const r of REGION_IDS) result[r] = centroid(province(shape.points, shape.center, r));
-  return result;
 }
 
 function Mountains({ at }: { at: Pt[] }) {

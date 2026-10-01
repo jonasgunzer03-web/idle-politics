@@ -2,7 +2,8 @@ import { Factory, Landmark, Tractor, Wheat, type LucideIcon } from 'lucide-react
 import { Flag } from '../../art/flag/Flag';
 import { flagFor } from '../../art/flag/flags';
 import { COUNTRY_SHAPES } from '../../art/map/geography';
-import { MAP_H, MAP_W, WorldMap, provinceCenters, type MapPartner } from '../../art/map/WorldMap';
+import { MAP_H, MAP_W, provinceCenters, type MapPartner } from '../../art/map/mapLayout';
+import { WorldMap } from '../../art/map/WorldMap';
 import { defaultConfig } from '../../config';
 import { REGION_IDS, type ForeignId, type RegionId } from '../../engine/ids';
 import { foreignPartners, isWorldUnlocked, relation } from '../../engine/rules';
